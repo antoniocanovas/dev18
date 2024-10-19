@@ -85,7 +85,7 @@ class AccountMoveLine(models.Model):
             record['discount_amount'] = type * (record.price_unit * record.quantity - record.price_subtotal)
     discount_amount = fields.Monetary("Total discount", store=True, compute="_get_total_shoes_discount")
 
-
+"""
     seller_commission = fields.Monetary(
         string="Seller Commission",
         compute="_compute_account_move_line_seller_commission",
@@ -97,7 +97,7 @@ class AccountMoveLine(models.Model):
         compute="_compute_account_move_line_manager_commission",
         store=True,
     )
-
+""""""
     @api.depends('move_id.payment_state')
     def _compute_account_move_line_seller_commission(self):
         for record in self:
@@ -121,7 +121,7 @@ class AccountMoveLine(models.Model):
 
             record.seller_commission = sign * amount
 
-
+"""
 """    @api.depends('move_id.payment_state')
     def _compute_account_move_line_manager_commission(self):
                  for record in self:
