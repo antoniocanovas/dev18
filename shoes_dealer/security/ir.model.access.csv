@@ -4,8 +4,6 @@ access_set_template_admin, Set template admin,model_set_template,sales_team.grou
 access_set_template_line_user, Set template line users,model_set_template_line,base.group_user,1,0,0,0
 access_set_template_line_admin, Set template line admin,model_set_template_line,sales_team.group_sale_manager,1,1,1,1
 access_product_material, Product Material admin,model_product_material,base.group_user,1,1,1,1
-access_shoes_sale_report, Margin reports admin,model_shoes_sale_report,account.group_account_manager,1,1,1,1
-access_shoes_sale_report_line, Margin report lines admin,model_shoes_sale_report_line,account.group_account_manager,1,1,1,1
 access_product_report_wizard, Product report wizard admin,model_product_report_wizard,account.group_account_manager,1,1,1,1
 access_shoes_pair_weight_admin, Shoes pair weight admin,model_shoes_pair_weight,stock.group_stock_manager,1,1,1,1
 access_shoes_hs_code_admin, Shoes hs code admin,model_shoes_hs_code,stock.group_stock_manager,1,1,1,1
