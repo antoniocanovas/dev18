@@ -6,11 +6,11 @@ from odoo.exceptions import UserError, ValidationError
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-""" Hay que refactorizar comisiones:
-   referrer_id = fields.Many2one(
-        "res.partner", related="order_id.referrer_id", store=True
-    )
-"""
+    """ Hay que refactorizar comisiones:
+       referrer_id = fields.Many2one(
+            "res.partner", related="order_id.referrer_id", store=True
+        )
+    """
     purchase_line_id = fields.Many2one("purchase.order.line", string="Purchase line")
 
     # Comercialmente en cada pedido quieren saber cuántos pares se han vendido:
