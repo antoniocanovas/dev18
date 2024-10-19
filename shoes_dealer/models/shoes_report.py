@@ -25,7 +25,7 @@ class ShoesSaleReport(models.Model):
         [
             ("customer", "Customer"),
             ("saleorder", "Sale order"),
-            ("referrer", "Referrer"),
+#            ("referrer", "Referrer"),
             ("color", "Color"),
             ("model", "Model"),
             ("state", "Country State"),
@@ -39,7 +39,7 @@ class ShoesSaleReport(models.Model):
         string="Manufacturer",
         relation="shoesreport_manufacturer_rel",
     )
-
+""" Hay que refactorizar comisiones:
     referrer_ids = fields.Many2many(
         comodel_name="res.partner",
         string="Referrers",
@@ -47,6 +47,7 @@ class ShoesSaleReport(models.Model):
         domain=[("commission_plan_id", "!=", False)],
         context={"active_test": True},
     )
+"""
     partner_ids = fields.Many2many(
         comodel_name="res.partner",
         string="Customers",
@@ -93,10 +94,12 @@ class ShoesSaleReport(models.Model):
                         continue
                     if (record.to_date) and (order.date_order.date() > record.to_date):
                         continue
+"""                 Hay que refactorizar comisiones:       
                     if (record.referrer_ids.ids) and (
                         order.referrer_id.id not in record.referrer_ids.ids
                     ):
                         continue
+"""
                     if (record.partner_ids.ids) and (
                         order.partner_id.id not in record.partner_ids.ids
                     ):
@@ -138,10 +141,12 @@ class ShoesSaleReport(models.Model):
                         sol.order_id.date_order.date() > record.to_date
                     ):
                         continue
+""" Hay que refactorizar comisiones:
                     if (record.referrer_ids.ids) and (
                         sol.referrer_id.id not in record.referrer_ids.ids
                     ):
                         continue
+"""
                     if (record.partner_ids.ids) and (
                         sol.order_partner_id.id not in record.partner_ids.ids
                     ):
