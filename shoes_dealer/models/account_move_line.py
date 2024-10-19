@@ -42,8 +42,7 @@ class AccountMoveLine(models.Model):
             # Chequeo de si es factura de cliente o abono:
             if record.move_type == 'out_invoice': type = 1
             else: type = -1
-            record['shoes_margin'] = type * (record.price_subtotal - record.cost_price
-                                             - record.seller_commission - record.manager_commission)
+            record['shoes_margin'] = type * (record.price_subtotal - record.cost_price)
 
     shoes_margin = fields.Monetary('Margin', store=True, compute='_get_shoes_margin')
 
