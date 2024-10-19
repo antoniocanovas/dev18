@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Partner commissions customization : -->
+    <record id="res_partner_manager_commissions_inh_form" model="ir.ui.view">
+        <field name="name">res.partner.manager.commissions.inh.form</field>
+        <field name="model">res.partner</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="partner_commission.view_crm_partner_assign_form_inherit_partner_commission"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='commission_plan_id']" position="after">
+                <field name="manager_id"/>
+                <field name="manager_commission_plan_id"
+                       domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+            </xpath>
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="referrer_id"/>
+            </xpath>
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+
+
+
+
+
+</odoo>
+

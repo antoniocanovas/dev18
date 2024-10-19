@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_company_product_attribute_auto_bom_inh_form" model="ir.ui.view">
+        <field name="name">res.company.product.attribute.auto.bom</field>
+        <field name="model">res.company</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_info']" position="after">
+                <page string="Shoes dealer" name="shoes_dealer">
+                    <group>
+                        <field name="bom_attribute_id" domain="[('create_variant','!=','no_variant')]" required="1"/>
+                        <field name="size_attribute_id" domain="[('create_variant','!=','no_variant')]" required="1"/>
+                        <field name="color_attribute_id" domain="[('create_variant','!=','no_variant')]" required="1"/>
+                        <field name="single_prefix" required="1"/>
+                        <field name="single_sale"/>
+                        <field name="shoes_pair_weight_std"/>
+                        <field name="shoes_hs_code_std"/>
+                        <field name="single_purchase"/>
+                        <field name="exwork_currency_id"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

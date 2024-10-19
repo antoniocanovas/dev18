@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="shoes_dealer_sale_order_inh_tree" model="ir.ui.view">
+        <field name="name">sale.order.saleorder.inh.tree</field>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field name="pairs_count" optional="show" sum="Total pairs"/>
+            </field>
+        </field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="model">sale.order</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+        <field name="type">list</field>
+    </record>
+
+    <record id="shoes_dealer_sale_order_inh_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.saleorder.inh.form</field>
+        <field name="model">sale.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="show_hide_top_sales"
+                        icon="fa-delicious" class="oe_stat_button"
+                        type="object" string="Top sales">
+                </button>
+                <button name="create_purchase_lines_for_custom_products"
+                        icon="fa-shopping-cart" class="oe_stat_button"
+                        type="object" string="Customs purchase"
+                        invisible="state in ['sale','cancel']">
+                </button>
+            </xpath>
+            <field name="partner_id" position="before">
+                <field name="shoes_campaign_id" options="{'no_quick_create':1, 'no_create_edit':1}"/>
+            </field>
+            <field name="note" position="before">
+                <field name="pairs_count"/>
+                <field name="top_sales" invisible="1"/>
+            </field>
+            <xpath expr="//page/field[@name='order_line']/list/field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('sale_ok','=',True),('shoes_campaign_id','=',shoes_campaign_id)]</attribute>
+            </xpath>
+            <xpath expr="//page/field[@name='order_line']/list/field[@name='product_id']" position="before">
+                <field name="product_saleko_id" force_save="1" widget="sol_product_many2one" optional="hide"
+                       readonly="not product_updatable"
+                       context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty,
+                       'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id,
+                       'default_lst_price': price_unit, 'default_description_sale': name}"
+                       options="{'no_open': True, }"
+                       domain="[('sale_ok', '=', False), '|', ('company_id', '=', False),
+                       ('company_id', '=', parent.company_id)]"
+                />
+            </xpath>
+            <xpath expr="//page/field[@name='order_line']/list/field[@name='price_unit']" position="after">
+                <field name="pairs_count" optional="show"/>
+                <field name="special_pair_price" optional="show"/>
+                <field name="pair_price"/>
+                <field name="shoes_campaign_id" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//sheet" position="after">
+                <div invisible="not top_sales">
+                    <field name="campaign_top_ids">
+                      <kanban default_order="pairs_sold desc" limit="10">
+                        <field name="name"/>
+                        <field name="pairs_sold"/>
+                        <templates>
+                            <t t-name="kanban-box">
+                              <div class="oe_kanban_global_click">
+                                  <field name="image_128" widget="image" class="oe_avatar" options="{&quot;zoom&quot;: true, &quot;preview_image&quot;: &quot;avatar_128&quot;}"/>
+                                  <div class="oe_kanban_details">
+                                      <strong class="o_kanban_record_title">
+                                          <field name="name"/>
+                                      </strong>
+                                      <t t-if="record.default_code.value">[<field name="default_code"/>]</t>
+                                      <div name="product_lst_price" class="mt-1">
+                                          Price: <field name="product_tmpl_single_list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                                      </div>
+                                  </div>
+                              </div>
+                            </t>
+                        </templates>
+                      </kanban>
+                    </field>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

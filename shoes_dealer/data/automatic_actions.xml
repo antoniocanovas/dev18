@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    # BASE AUTOMATION al borrar atributos de productos:
+    <record id="shoes_dealer_sync_assortment_pair_attributes_aa" model="base.automation">
+        <field name="name">=> Auto Sync shoes attributes from assortment to pairs</field>
+        <field name="model_id" ref="product.model_product_template_attribute_value"/>
+        <field name="trigger">on_unlink</field>
+    </record>
+    # SERVER ACTION para el automatismo borrar atributos de productos:
+    <record id="shoes_dealer_sync_assortment_pair_attributes_as" model="ir.actions.server">
+        <field name="name">=> AS Sync shoes attributes from assortment to pairs</field>
+        <field name="model_id" ref="product.model_product_template_attribute_value"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record._unlink_unused_attributes_from_assortment_to_pairs()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_sync_assortment_pair_attributes_aa"/>
+    </record>
+
+
+
+    # BASE AUTOMATION actualizar precios de coste en variantes:
+    <record id="shoes_dealer_update_standard_price_aa" model="base.automation">
+        <field name="name">=> Auto Update cost prices</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="trigger">on_write</field>
+        <field name="trigger_field_ids" eval="[(6,0, [ref('shoes_dealer.field_product_template__shoes_campaign_id'),
+                                                    ref('shoes_dealer.field_product_template__exwork'),
+                                                    ref('shoes_dealer.field_product_template__exwork_single'),
+                                                    ref('product.field_product_template__product_variant_ids'),
+                                                    ref('partner_product_attribute_value.field_product_template__manufacturer_id')])]"
+        />
+    </record>
+    # SERVER ACTION para el automatismo actualizar precios de coste en variantes:
+    <record id="shoes_dealer_update_standard_price_as" model="ir.actions.server">
+        <field name="name">=> AS Update cost prices</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record.update_standard_price_on_variants()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_update_standard_price_aa"/>
+    </record>
+
+
+
+    # BASE AUTOMATION crear ASSORTMENT.PAIR para surtidos desde SML:
+    <record id="shoes_dealer_create_assortment_pair_aa" model="base.automation">
+        <field name="name">=> Create Assortment Pairs</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="trigger">on_write</field>
+        <field name="trigger_field_ids" eval="[(6,0, [ref('stock.field_stock_move_line__state')])]"/>
+
+    </record>
+    # SERVER ACTION para el automatismo actualizar precios de coste en variantes:
+    <record id="shoes_dealer_create_assortment_pair_as" model="ir.actions.server">
+        <field name="name">=> AS Create Assortment Pairs</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record._create_assortment_pair()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_create_assortment_pair_aa"/>
+    </record>
+
+
+        <!-- DELETE NULL ASSORTMENT.PAIR DAILY -->
+        <record id="shoes_dealer_data_delete_assortment_pair_ir_cron" model="ir.cron">
+            <field name="name">=> Delete null assortment.pair</field>
+            <field name="model_id" ref="model_assortment_pair"/>
+            <field name="state">code</field>
+            <field name="code">model._delete_null_assortment_pair()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+        </record>
+
+</odoo>

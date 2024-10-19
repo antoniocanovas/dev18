@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    # VISTA list DEL MENÚ DE ACCOUNT.MOVE.LINE PARA INFORME DE MÁRGENES POR FACTURACIÓN DE SHOES.DEALER:
+    <record id="invoice_shoes_dealer_report_line_tree" model="ir.ui.view">
+        <field name="name">invoice.shoes.dealer.report.line.tree</field>
+        <field name="arch" type="xml">
+
+            <list string="Journal Items" create="false">
+                <field name="move_type" optional="show"/>
+                <field name="shoes_campaign_id" optional="show"/>
+                <field name="date" readonly="1" optional="hide"/>
+                <field name="partner_id" optional="hide" readonly="move_type != 'entry'"/>
+                <field name="debit" sum="Total Debit" readonly="1" optional="hide"/>
+                <field name="credit" sum="Total Credit" readonly="1" optional="hide"/>
+                <field name="quantity" optional="show"/>
+                <field name="product_id" readonly="1" optional="show"/>
+                <field name="price_unit" optional="show"/>
+                <field name="discount" optional="show"/>
+                <field name="cost_price" optional="show" sum="Cost"/>
+                <field name="price_subtotal" optional="show" sum="Invoiced"/>
+
+                <field name="pairs_count" optional="show" sum="Pairs"/>
+                <field name="pair_price" optional="show"/>
+                <field name="pair_price_sale" optional="show"/>
+
+                <field name="seller_commission" optional="show"/>
+                <field name="manager_commission" optional="show"/>
+
+                <field name="shoes_pair_margin" optional="show"/>
+                <field name="discount_amount" optional="show" sum="Discount"/>
+                <field name="shoes_margin" optional="show" sum="Margin"/>
+
+                <field name="parent_state" invisible="1"/>
+                <field name="account_type" invisible="1"/>
+                <field name="statement_line_id" invisible="1"/>
+                <field name="company_currency_id" invisible="1"/>
+                <field name="is_same_currency" invisible="1"/>
+                <field name="is_account_reconcile" invisible="1"/>
+                <field name="sequence" invisible="1"/>
+                <field name="currency_id" readonly="1" groups="base.group_multi_currency" optional="hide" string="Currency" invisible="is_same_currency"/>
+            </list>
+
+        </field>
+        <field name="inherit_id" eval="False"/>
+        <field name="model">account.move.line</field>
+        <field name="mode">primary</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+        <field name="type">list</field>
+    </record>
+
+
+    # VISTA SEARCH, CON PARÁMETROS ESPECÍFICOS DE SHOES.DEALER:
+    <record id="invoice_shoes_dealer_report_line_search" model="ir.ui.view">
+        <field name="name">invoice.shoes.dealer.report.line.search</field>
+        <field name="arch" type="xml">
+            <search string="Search Journal Items">
+                <field name="shoes_campaign_id"/>
+                <field name="name" string="Journal Item" filter_domain="[                         '|', '|', '|',                         ('name', 'ilike', self), ('ref', 'ilike', self), ('account_id', 'ilike', self), ('partner_id', 'ilike', self)]"/>
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="invoice_date"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="To Check" name="to_check" domain="[('move_id.to_check', '=', True)]"/>
+                <separator/>
+                <filter string="Sales" name="sales" domain="[('move_type', '=', 'out_invoice')]"/>
+                <filter string="Refund" name="refund" domain="[('move_type', '=', 'out_refund')]"/>
+                <separator/>
+                <filter string="Date" name="date" date="date"/>
+                <filter string="Invoice Date" name="invoice_date" date="invoice_date"/>
+                <separator/>
+                <filter string="Analytic Accounts" name="analytic_accounts" domain="[('analytic_distribution', 'in', context.get('analytic_ids'))]" invisible="1"/>
+                <group expand="0" string="Group By">
+                    <filter string="Shoes campaign" name="group_by_shoes_campaign" domain="[]" context="{'group_by': 'shoes_campaign_id'}"/>
+                    <filter string="Partner" name="group_by_partner" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Date" name="groupby_date" domain="[]" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+        <field name="inherit_id" eval="False"/>
+        <field name="model">account.move.line</field>
+        <field name="mode">primary</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+        <field name="type">search</field>
+    </record>
+
+
+    # ACCIÓN DE VENTANA PARA INFORME DE MÁRGENES POR FACTURACIÓN DE SHOES.DEALER:
+    <record id="invoice_shoes_dealer_report_line_action_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="domain">[('shoes_model_id','!=',False),('parent_state','in',['posted']),('move_type','in',['out_invoice','out_refund'])]</field>
+        <field name="filter" eval="False"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes margin report</field>
+        <field name="res_model">account.move.line</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="usage" eval="False"/>
+        <field name="view_id" eval="False"/>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="invoice_shoes_dealer_report_line_search"/>
+        <field name="view_ids"
+               eval="[(5, 0, 0),
+               (0, 0, {'view_mode': 'list', 'view_id': ref('invoice_shoes_dealer_report_line_tree')}),
+               ]"/>
+    </record>
+
+
+
+    # MENÚ DEL INFORME DE MÁRGENES DESDE FACTURACIÓN:
+    <record id="invoice_shoes_dealer_report_line_menu" model="ir.ui.menu">
+        <field name="action" ref="invoice_shoes_dealer_report_line_action_window"/>
+        <field name="active" eval="True"/>
+        <field name="name">Shoes margin report</field>
+        <field name="parent_id" ref="account_reports.account_reports_partners_reports_menu"/>
+        <field name="sequence">100</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+
+
+</odoo>

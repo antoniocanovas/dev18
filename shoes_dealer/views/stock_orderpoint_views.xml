@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="pnt_warehouse_orderpoint_search" model="ir.ui.view">
+        <field name="name">pnt.warehouse.orderpoint.search</field>
+        <field name="arch" type="xml">
+            <filter name="product" position="after">
+                <filter string="Product brand" name="pnt_product_brand_id" domain="[]" context="{'group_by': 'pnt_product_brand_id'}"/>
+                <filter string="Campaign" name="pnt_shoes_campaign_id" domain="[]" context="{'group_by': 'pnt_shoes_campaign_id'}"/>
+                <filter string="Is assortment" name="pnt_assortment_filter" domain="[]" context="{'group_by': 'pnt_assortment_filter'}"/>
+
+            </filter>
+        </field>
+        <field name="inherit_id" ref="stock.warehouse_orderpoint_search"/>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+    </record>
+
+    <record id="pnt_view_warehouse_orderpoint_tree_inh" model="ir.ui.view">
+        <field name="name">pnt.view.warehouse.orderpoint.tree.editable.inh</field>
+        <field name="arch" type="xml">
+            <field name="product_id" position="after">
+                <field name="pnt_product_brand_id" optional="show"/>
+                <field name="pnt_shoes_campaign_id" optional="show"/>
+                <field name="pnt_is_assortment" optional="hide"/>
+            </field>
+            <field name="product_id" position="before">
+
+                <field name="pnt_product_image" widget="image" class="oe_avatar" optional="hide"/>
+            </field>
+        </field>
+        <field name="inherit_id" ref="stock.view_warehouse_orderpoint_tree_editable"/>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+        <field name="type">list</field>
+    </record>
+
+    <record id="pnt_product_product_stock_tree_inh" model="ir.ui.view">
+        <field name="name">pnt.product.product.stock.tree.inh</field>
+        <field name="arch" type="xml">
+            <field name="display_name" position="after">
+                <field name="pnt_total_reserved_plus_sold"/>
+                <field name="purchased_product_qty"/>
+                 <field name="pnt_stock_avaliable"/>
+            </field>
+            <field name="display_name" position="before">
+                <field name="image_128" string="Photo" widget="image" class="oe_avatar"/>
+            </field>
+             <xpath expr="//field[@name='free_qty']" position="attributes">
+                <attribute name='optional'>hide</attribute>
+            </xpath>
+        </field>
+        <field name="inherit_id" ref="stock.product_product_stock_tree"/>
+        <field name="model">product.product</field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

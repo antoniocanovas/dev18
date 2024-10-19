@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- ACCIONES DE VENTANA: -->
+    <record id="shoes_shape_act_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes shapes</field>
+        <field name="res_model">shoes.shape</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- SHAPE INVENTORY CONFIG MENU: -->
+    <record id="shoes_shape_menu" model="ir.ui.menu">
+        <field name="action" ref="shoes_shape_act_window"/>
+        <field name="active" eval="True"/>
+        <field name="name">Shoes shapes</field>
+        <field name="parent_id" ref="shoes_dealer.inventory_shoes_dealer_menu"/>
+        <field name="sequence">110</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <!-- FORM VIEW: -->
+    <record id="shoes_shape_default_form" model="ir.ui.view">
+        <field name="name">shoes.shape.default.form</field>
+        <field name="model">shoes.shape</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1>
+                        <field name="name" placeholder="Shape name ..."/>
+                    </h1>
+                    <group>
+                        <field name="heel_type"/>
+                        <field name="heel_height"/>
+                        <field name="platform_height"/>
+                    </group>
+                    <group name="shoes_material" string="Materials">
+                        <group>
+                            <field name="sole_material_main_id"/>
+                            <field name="sole_material_secondary_id"/>
+                            <field name="insole_material_id"/>
+                            <field name="platform_material_id"/>
+                        </group>
+                        <group>
+                            <field name="sole_material_main_percent"/>
+                            <field name="sole_material_secondary_percent"/>
+                            <field name="insole_material_percent"/>
+                            <field name="platform_material_percent"/>
+                        </group>
+                    </group>
+                    <group name="description" string="Description"></group>
+                    <field name="description" placeholder="Description"/>
+                </sheet>
+            </form>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">form</field>
+    </record>
+
+    <!-- TREE VIEW: -->
+    <record id="shoes_shape_default_tree" model="ir.ui.view">
+        <field name="name">shoes.shape.default.tree</field>
+        <field name="model">shoes.shape</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="heel_type" optional="show"/>
+                <field name="heel_height" optional="show"/>
+                <field name="platform_height" optional="show"/>
+                <field name="sole_material_main_id" optional="hide"/>
+                <field name="sole_material_secondary_id" optional="hide"/>
+                <field name="insole_material_id" optional="hide"/>
+                <field name="platform_material_id" optional="hide"/>
+                <field name="sole_material_main_percent" optional="hide"/>
+                <field name="sole_material_secondary_percent" optional="hide"/>
+                <field name="insole_material_percent" optional="hide"/>
+                <field name="platform_material_percent" optional="hide"/>
+                <field name="description" optional="hide"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

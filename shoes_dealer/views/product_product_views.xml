@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="product_product_shoes_dealer_inh_tree" model="ir.ui.view">
+        <field name="name">product.product.shoes.dealer.inh.tree</field>
+        <field name="model">product.product</field>
+        <field name="type">list</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <field name="product_tag_ids" position="after">
+                <field name="pairs_count" optional="show"/>
+                <field name="color_attribute_id" optional="hide"/>
+                <field name="size_attribute_id" optional="hide"/>
+                <field name="assortment_attribute_id" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_kanban_view_inh" model="ir.ui.view">
+        <field name="name">product.kanban.view.inh</field>
+        <field name="model">product.product</field>
+        <field name="type">kanban</field>
+        <field name="inherit_id" ref="product.product_kanban_view"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="after">
+                <field name="product_tmpl_single_id"/>
+                <field name="product_tmpl_single_list_price"/>
+            </xpath>
+            <xpath expr="//div[@name='product_lst_price']" position="replace">
+                <div name="product_lst_price" class="mt-1">
+                    <div t-if="!record.product_tmpl_single_id">
+                        Price: <field name="lst_price"/>
+                    </div>
+                    <div t-else="">
+                        Price: <field name="product_tmpl_single_list_price"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- VISTAS DE BÚSQUEDA: -->
+    <record id="product_product_shoes_dealer_inh_search" model="ir.ui.view">
+        <field name="name">product.product.shoes.dealer.inh.search</field>
+        <field name="model">product.product</field>
+        <field name="type">search</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <data>
+                <field name="name" position="after">
+                    <separator/>
+                    <filter string="Color" name="color_value" context="{'group_by':'color_attribute_id'}"/>
+                    <filter string="Size" name="size_value" context="{'group_by':'size_attribute_id'}"/>
+                    <filter string="Assortment" name="assortment_value" context="{'group_by':'assortment_attribute_id'}"/>
+                    <separator/>
+                </field>
+            </data>
+        </field>
+    </record>
+
+    <!-- VISTAS FORM SÓLO PRODUCT.PRODUCT: -->
+    <!-- Vista que indica el número de pares en surtidos, desde el botón de stock: -->
+    <record id="product_product_shoes_dealer_stock_inh_form" model="ir.ui.view">
+        <field name="name">product.product.shoes.dealer.stock.inh.form</field>
+        <field name="model">product.product</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="stock.product_form_view_procurement_button"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty_available']" position="after">
+                <div invisible="not is_pair">
+                    (<field name="assortment_pair_qty" nolabel="1" class="oe_inline"/>)
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

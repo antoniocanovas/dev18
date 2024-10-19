@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- ACCIONES DE VENTANA: -->
+    <record id="action_shoes_pair_weight" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes standard weight</field>
+        <field name="res_model">shoes.pair.weight</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="action_shoes_hs_code" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes standard HScode</field>
+        <field name="res_model">shoes.hs.code</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list</field>
+    </record>
+
+
+    <!-- INVENTORY CONFIG MENU: -->
+    <record id="inventory_shoes_dealer_menu" model="ir.ui.menu">
+        <field name="active" eval="True"/>
+        <field name="name">Shoes Dealer</field>
+        <field name="parent_id" ref="stock.menu_stock_config_settings"/>
+        <field name="sequence">90</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <record id="inventory_shoes_pair_weight_menu" model="ir.ui.menu">
+        <field name="action" ref="shoes_dealer.action_shoes_pair_weight"/>
+        <field name="active" eval="True"/>
+        <field name="name">Pair standard Weights</field>
+        <field name="parent_id" ref="shoes_dealer.inventory_shoes_dealer_menu"/>
+        <field name="sequence">10</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <record id="inventory_shoes_hscode_menu" model="ir.ui.menu">
+        <field name="action" ref="shoes_dealer.action_shoes_hs_code"/>
+        <field name="active" eval="True"/>
+        <field name="name">Standard HSCodes</field>
+        <field name="parent_id" ref="shoes_dealer.inventory_shoes_dealer_menu"/>
+        <field name="sequence">20</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+
+    <!-- list VIEW: -->
+    <record id="shoes_standard_weight_default_tree" model="ir.ui.view">
+        <field name="name">shoes.standard.weight.default.tree</field>
+        <field name="model">shoes.pair.weight</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="pair_weight"/>
+                <field name="pair_net_weight"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+     <record id="shoes_standard_hscode_default_tree" model="ir.ui.view">
+        <field name="name">shoes.standard.hscode.default.tree</field>
+        <field name="model">shoes.hs.code</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="number"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="commission_sale_order_inh" model="ir.ui.view">
+        <field name="name">commission.sale.order.inh</field>
+        <field name="model">sale.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="partner_commission.sale_order_form_quote_inherit_partner_commission"/>
+        <field name="arch" type="xml">
+
+            <!-- Addional fields for Commissions manager: -->
+            <xpath expr="//field[@name='commission_plan_id']" position="after">
+                <field name="manager_id"
+                       domain="[('id','!=',referrer_id),('grade_id','!=',False)]"
+                       invisible="not referrer_id"
+                />
+                <field name="manager_commission_plan_id"
+                       domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"
+                       invisible="not referrer_id or not manager_id"
+                />
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>
