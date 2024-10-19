@@ -16,7 +16,7 @@ from . import mrp_bom
 from . import project_project
 from . import sale_report
 from . import account_invoice_report
-from . import shoes_report
+#from . import shoes_report
 from . import res_users
 from . import stock_picking
 from . import stock_move
