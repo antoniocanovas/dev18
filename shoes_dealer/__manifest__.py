@@ -19,7 +19,7 @@
         "sale_mrp",
         "project",
         "base_automation",
-        "website_sale",
+#        "website_sale",
         "partner_commission",
         "uom",
         # PUNT:

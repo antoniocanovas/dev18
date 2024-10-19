@@ -121,7 +121,8 @@ class AccountMoveLine(models.Model):
 
             record.seller_commission = sign * amount
 
-    @api.depends('move_id.payment_state')
+
+"""    @api.depends('move_id.payment_state')
     def _compute_account_move_line_manager_commission(self):
                  for record in self:
                      move = record.move_id
@@ -145,3 +146,4 @@ class AccountMoveLine(models.Model):
                          #comm_by_rule[r] = amount
 
                      record.manager_commission = sign * amount
+"""
