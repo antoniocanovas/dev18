@@ -1,0 +1,9 @@
+name: Deployment Pull Request
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened, labeled]
+jobs:
+  Deployment:
+    uses: puntsistemes/workflows_odoo/.github/workflows/deploy_pr.yml@main
+    secrets: inherit

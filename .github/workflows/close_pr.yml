@@ -1,0 +1,9 @@
+name: Close Pull Request | Merge
+
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  Deployment:
+    uses: puntsistemes/workflows_odoo/.github/workflows/close_pr.yml@main
+    secrets: inherit

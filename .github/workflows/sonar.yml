@@ -1,0 +1,10 @@
+name: Sonar
+
+on:
+  pull_request:
+    types: [synchronize, opened, closed]
+jobs:
+  Sonar:
+    if: ${{ github.event.action == 'opened' || github.event.action == 'synchronize' || (github.event.action == 'closed' && github.event.pull_request.merged == true) }}
+    uses: puntsistemes/workflows_odoo/.github/workflows/sonar.yml@main
+    secrets: inherit

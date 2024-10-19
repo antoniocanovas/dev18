@@ -1,0 +1,9 @@
+name: Close Stale Issues and PRs
+
+on:
+  schedule:
+    - cron: "0 4 5 * *"
+jobs:
+  Stale:
+    uses: puntsistemes/workflows_odoo/.github/workflows/stale.yml@main
+    secrets: inherit
