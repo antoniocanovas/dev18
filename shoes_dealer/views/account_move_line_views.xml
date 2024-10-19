@@ -23,10 +23,6 @@
                 <field name="pairs_count" optional="show" sum="Pairs"/>
                 <field name="pair_price" optional="show"/>
                 <field name="pair_price_sale" optional="show"/>
-<!-- Hay que refactorizar comisiones:
-                <field name="seller_commission" optional="show"/>
-                <field name="manager_commission" optional="show"/>
--->
                 <field name="shoes_pair_margin" optional="show"/>
                 <field name="discount_amount" optional="show" sum="Discount"/>
                 <field name="shoes_margin" optional="show" sum="Margin"/>
