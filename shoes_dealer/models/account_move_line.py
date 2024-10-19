@@ -85,7 +85,7 @@ class AccountMoveLine(models.Model):
             record['discount_amount'] = type * (record.price_unit * record.quantity - record.price_subtotal)
     discount_amount = fields.Monetary("Total discount", store=True, compute="_get_total_shoes_discount")
 
-"""
+""" Hay que refactorizar comisiones:
     seller_commission = fields.Monetary(
         string="Seller Commission",
         compute="_compute_account_move_line_seller_commission",
