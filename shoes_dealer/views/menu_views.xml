@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- INVENTORY CONFIG MENU: -->
+    <record id="inventory_shoes_dealer_menu" model="ir.ui.menu">
+        <field name="active" eval="True"/>
+        <field name="name">Shoes Dealer</field>
+        <field name="parent_id" ref="stock.menu_stock_config_settings"/>
+        <field name="sequence">90</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+</odoo>
