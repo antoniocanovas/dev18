@@ -30,7 +30,6 @@ class SaleReport(models.Model):
 
     pairs_count = fields.Integer("Pairs", store=True, compute="_get_shoes_pair_count")
 
-#    referrer_id = fields.Many2one("res.partner", string="Referrer")
     shoes_campaign_id = fields.Many2one("project.project", string="Shoes Campaign")
     manufacturer_id = fields.Many2one(
         string="Manufacturer",
@@ -41,7 +40,6 @@ class SaleReport(models.Model):
         res = super()._select_additional_fields()
         res["color_attribute_id"] = "p.color_attribute_id"
         res["size_attribute_id"] = "p.size_attribute_id"
-#        res["referrer_id"] = "s.referrer_id"
         res["shoes_campaign_id"] = "s.shoes_campaign_id"
         res["state_id"] = "partner.state_id"
         res["pairs_count"] = "l.pairs_count"
@@ -50,10 +48,10 @@ class SaleReport(models.Model):
 
     def _group_by_sale(self):
         res = super()._group_by_sale()
-        res += """,
+        """
+        res +=,
          p.color_attribute_id,
          p.size_attribute_id,
-#         s.referrer_id,
          s.shoes_campaign_id,
          partner.state_id,
          t.manufacturer_id,

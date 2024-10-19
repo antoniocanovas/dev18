@@ -14,8 +14,8 @@ from . import account_move_line
 from . import product_material
 from . import mrp_bom
 from . import project_project
-from . import sale_report
-from . import account_invoice_report
+#from . import sale_report
+#from . import account_invoice_report
 #from . import shoes_report
 from . import res_users
 from . import stock_picking

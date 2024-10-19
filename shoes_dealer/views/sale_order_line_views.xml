@@ -21,7 +21,6 @@
         <field name="arch" type="xml">
             <field name="order_id" position="after">
                 <field name="order_line_image" widget="image" optional="show"/>
-                <field name="referrer_id" optional="hide"/>
                 <field name="shoes_campaign_id" optional="show"/>
                 <field name="product_brand_id" optional="hide"/>
                 <field name="product_tmpl_id" optional="hide"/>

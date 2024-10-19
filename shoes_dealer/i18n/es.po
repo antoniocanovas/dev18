@@ -1347,8 +1347,6 @@ msgid "Rating count"
 msgstr "Cuenta de calificación"
 
 #. module: shoes_dealer
-#: model:ir.model.fields,field_description:shoes_dealer.field_sale_order_line__referrer_id
-#: model:ir.model.fields,field_description:shoes_dealer.field_sale_report__referrer_id
 #: model:ir.model.fields,field_description:shoes_dealer.field_shoes_sale_report_line__referrer
 #: model:ir.model.fields.selection,name:shoes_dealer.selection__shoes_sale_report__group_type__referrer
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.shoes_dealer_view_order_product_search
@@ -1367,7 +1365,6 @@ msgid "Referrer commission percent"
 msgstr "Comisión representante %"
 
 #. module: shoes_dealer
-#: model:ir.model.fields,field_description:shoes_dealer.field_shoes_sale_report__referrer_ids
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.shoes_margin_by_sale_line_form
 msgid "Referrers"
 msgstr "Representantes"
