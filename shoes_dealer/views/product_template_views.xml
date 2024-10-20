@@ -190,7 +190,7 @@
                 <field name="product_tmpl_single_id"/>
                 <field name="product_tmpl_single_list_price"/>
             </xpath>
-            <xpath expr="//kanban/templates/t/main/div/span]" position="replace">
+            <xpath expr="//kanban[1]/templates[1]/t[1]/main[1]/div[1]/span[1]" position="replace">
                 <span t-if="!record.product_tmpl_single_id">
                     Price: <field name="list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </span>
