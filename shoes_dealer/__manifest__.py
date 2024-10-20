@@ -13,7 +13,7 @@
         # ODOO:
         "crm",
         "sale_management",
-        "account",
+        "accountant",
         "purchase",
         "stock",
         "mrp",
