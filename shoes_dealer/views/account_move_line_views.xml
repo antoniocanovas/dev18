@@ -52,9 +52,8 @@
         <field name="name">invoice.shoes.dealer.report.line.search</field>
         <field name="arch" type="xml">
             <xpath expr="//group" position="inside">
-                    <filter string="Shoes campaign" name="group_by_shoes_campaign" domain="[]" context="{'group_by': 'shoes_campaign_id'}"/>
+                <filter string="Shoes campaign" name="group_by_shoes_campaign" domain="[]" context="{'group_by': 'shoes_campaign_id'}"/>
             </xpath>
-            </search>
         </field>
         <field name="inherit_id" eval="account.view_account_move_line_filter"/>
         <field name="model">account.move.line</field>
