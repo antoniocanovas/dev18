@@ -16,7 +16,7 @@
 
             <xpath expr="//field[@name='active']" position="after">
                 <field name="shoes_product_tmpl_id"
-                       domain="[('detailed_type','=','product'),('is_pair','=',False)]"
+                       domain="[('type','=','consu'),('is_pair','=',False)]"
                        invisible="not is_shoes_campaign"
                        readonly="shoes_product_tmpl_id"
                 />

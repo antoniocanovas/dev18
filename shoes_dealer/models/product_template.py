@@ -404,7 +404,7 @@ class ProductTemplate(models.Model):
                         "shipping_price": record.shipping_price,
                         "sale_ok": single_sale,
                         "purchase_ok": single_purchase,
-                        "detailed_type": "product",
+                        "type": "consu",
                         "categ_id": record.categ_id.id,
                         "product_brand_id": record.product_brand_id.id,
                         "campaign_code": campaign_code,
