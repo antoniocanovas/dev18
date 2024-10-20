@@ -86,18 +86,4 @@
                ]"/>
     </record>
 
-
-
-    # MENÚ DEL INFORME DE MÁRGENES DESDE FACTURACIÓN:
-    <record id="invoice_shoes_dealer_report_line_menu" model="ir.ui.menu">
-        <field name="action" ref="invoice_shoes_dealer_report_line_action_window"/>
-        <field name="active" eval="True"/>
-        <field name="name">Shoes margin report</field>
-        <field name="parent_id" ref="account_reports.account_reports_partners_reports_menu"/>
-        <field name="sequence">100</field>
-        <field name="web_icon" eval="False"/>
-    </record>
-
-
-
 </odoo>
