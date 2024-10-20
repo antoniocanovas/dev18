@@ -3,7 +3,7 @@
     <record id="invoice_shoes_dealer_inh_tree" model="ir.ui.view">
         <field name="name">invoice.shoes.dealer.azarey.inh.tree</field>
         <field name="arch" type="xml">
-            <field name="state" position="before">
+            <field name="status_in_payment" position="before">
                 <field name="pairs_count" optional="show"/>
             </field>
         </field>
