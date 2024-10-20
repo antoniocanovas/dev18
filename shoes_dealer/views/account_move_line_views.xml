@@ -55,7 +55,7 @@
                 <filter string="Shoes campaign" name="group_by_shoes_campaign" domain="[]" context="{'group_by': 'shoes_campaign_id'}"/>
             </xpath>
         </field>
-        <field name="inherit_id" eval="account.view_account_move_line_filter"/>
+        <field name="inherit_id" ref="account.view_account_move_line_filter"/>
         <field name="model">account.move.line</field>
         <field name="mode">primary</field>
         <field name="active" eval="True"/>
