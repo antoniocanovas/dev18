@@ -39,7 +39,6 @@ class ProjectTask(models.Model):
             newproduct = self.env['product.template'].create({
                 'name': self.name,
                 'type': 'consu',
-                'service_tracking': False,
                 'shoes_campaign_id':self.project_id.id,
                 'product_brand_id':self.product_brand_id.id,
                 'manufacturer_id':self.manufacturer_id.id,
