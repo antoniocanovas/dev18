@@ -7,7 +7,7 @@ class ProjectProject(models.Model):
     _inherit = "project.project"
 
 
-    shoes_color_chart_item_ids = fields.Many2many(
+    shoes_color_value_ids = fields.Many2many(
         "product.attribute.value",
         string="Chart colors",
         relation="shoes_color_chart_item",
@@ -15,3 +15,7 @@ class ProjectProject(models.Model):
         column2="color_value_id",
         copy=True,
     )
+
+    shoes_color_chart_item_ids = fields.One2many(
+        'shoes.color.chart.item', 'shoes_campaign_id',
+        readonly=True, string='Color template')
