@@ -21,9 +21,9 @@
         <field name="name">product.material.shoes.color.chart.default.tree</field>
         <field name="model">product.material</field>
         <field name="arch" type="xml">
-            <field name="name" position="after">
+            <xpath expr="field[@name='name']" position="after">
                 <field name="code"/>
-            </field>
+            </xpath>
         </field>
         <field name="inherit_id" ref="shoes_dealer.product_material_default_tree"/>
         <field name="priority">16</field>
