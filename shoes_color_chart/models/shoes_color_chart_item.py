@@ -18,5 +18,5 @@ class ShoesColorChartItem(models.Model):
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
     def _get_color_chart_name(self):
-        ensure_one()
-        name = 'Hola'
+        for record in self:
+            self.name = 'Hola'
