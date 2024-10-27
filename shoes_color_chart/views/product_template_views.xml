@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- VISTA FORM: -->
+    <record id="shoes_color_chart_product_inh_form" model="ir.ui.view">
+        <field name="name">product.shoes.color.chart.inh.form</field>
+        <field name="model">product.template</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_dealer.shoes_dealer_product_inh_form"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <!-- En Pestaña inicial para datos generales: -->
+            <xpath expr="//field[@name='manufacturer_id']" position="before">
+                <field name="shoes_color_chart_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_attribute_color_chart_inh_form" model="ir.ui.view">
+        <field name="name">product.attribute.color.chart.inh.form</field>
+        <field name="model">product.attribute</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_attribute_bom_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='value_ids']/list" position="inside">
+                <field name="code" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

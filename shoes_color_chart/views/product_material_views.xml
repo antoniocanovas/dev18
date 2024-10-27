@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- FORM VIEW: -->
+    <record id="product_material_color_chart_inh_form" model="ir.ui.view">
+        <field name="name">product.material.color.chart.inh.form</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <field name="comment" position="before">
+                <field name="code"/>
+            </field>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" ref="shoes_dealer.product_material_default_form"/>
+        <field name="priority">16</field>
+        <field name="type">form</field>
+    </record>
+
+    <!-- list VIEW: -->
+    <record id="product_material_shoes_color_chart_default_tree" model="ir.ui.view">
+        <field name="name">product.material.shoes.color.chart.default.tree</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="code"/>
+            </field>
+        </field>
+        <field name="inherit_id" ref="shoes_dealer.product_material_default_tree"/>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>
