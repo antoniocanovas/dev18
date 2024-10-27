@@ -5,7 +5,7 @@
         <field name="name">product.attribute.color.chart.inh.form</field>
         <field name="model">product.attribute</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="product.product_attribute_bom_view_form"/>
+        <field name="inherit_id" ref="product.product_attribute_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='value_ids']/list" position="inside">
                 <field name="code" optional="hide"/>
