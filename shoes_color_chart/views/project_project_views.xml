@@ -16,7 +16,6 @@
                             <field name="name"/>
                             <field name="partner_id"/>
                             <field name="material_id"/>
-                            <field name="color_attribute_id" invisible="1"/>
                         </list>
                     </field>
                 </page>
