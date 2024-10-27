@@ -17,6 +17,7 @@
     </record>
 
     <!-- list VIEW: -->
+    <!--
     <record id="product_material_shoes_color_chart_default_tree" model="ir.ui.view">
         <field name="name">product.material.shoes.color.chart.default.tree</field>
         <field name="model">product.material</field>
@@ -29,5 +30,5 @@
         <field name="priority">16</field>
         <field name="type">list</field>
     </record>
-
+    -->
 </odoo>
