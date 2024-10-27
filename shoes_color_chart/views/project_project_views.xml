@@ -11,7 +11,7 @@
 
             <xpath expr="//page[@name='description']" position="after">
                 <page name="shoes_color_chart" string="Color Chart">
-                    <field name="shoes_color_value_ids" domain="[('attribute_id','=',color_attribute_id.id)]">
+                    <field name="shoes_color_value_ids">
                         <list>
                             <field name="name"/>
                             <field name="partner_id"/>
