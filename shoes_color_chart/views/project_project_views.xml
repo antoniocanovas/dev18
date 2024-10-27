@@ -12,11 +12,6 @@
             <xpath expr="//page[@name='description']" position="after">
                 <page name="shoes_color_chart" string="Color Chart">
                     <field name="shoes_color_value_ids">
-                        <tree>
-                            <field name="name"/>
-                            <field name="partner_id"/>
-                            <field name="material_id"/>
-                        </tree>
                     </field>
                 </page>
             </xpath>
