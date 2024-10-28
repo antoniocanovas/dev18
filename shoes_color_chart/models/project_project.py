@@ -21,6 +21,7 @@ class ProjectProject(models.Model):
         'shoes.color.chart.item', 'shoes_campaign_id',
         readonly=True, string='Color template')
 
+    # Utilizado para enviar valor al wizard:
     color_attribute_id = fields.Many2one(
         "product.attribute",
         string="Color Attribute",
