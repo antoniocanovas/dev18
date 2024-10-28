@@ -23,4 +23,10 @@ class ShoesColorChartWizard(models.TransientModel):
     )
 
     def action_apply(self):
-        return True
+        for li in record.color_value_ids:
+            self.env['shoes.color.chart.item'].create({
+                'shoes_campaign_id': self.shoes_campaign_id.id,
+                'manufacturer_id': self.manyfacturer_id.id,
+                'material_id': self.material_id.id,
+                'color_value_id': li.id,
+            })

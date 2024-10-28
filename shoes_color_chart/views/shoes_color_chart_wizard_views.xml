@@ -15,7 +15,7 @@
                 <button
                         name="action_apply"
                         class="btn btn-primary"
-                        string="Color Chart"
+                        string="Create"
                         type="object"
                     />
                 or
