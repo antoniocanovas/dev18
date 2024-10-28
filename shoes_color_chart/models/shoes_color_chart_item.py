@@ -18,6 +18,7 @@ class ShoesColorChartItem(models.Model):
 
     def create(self):
         res = super().create()
+        raise UserError('hola')
         for line in self:
             line.name = 'hola'
         return res
