@@ -17,7 +17,6 @@ class ShoesColorChartItem(models.Model):
     manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id')
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
-    @api.depends('create_date')
     def _get_item_name(self):
         self.name = 'Hola'
 
