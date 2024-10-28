@@ -8,7 +8,7 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
-
+            <!--
             <xpath expr="//header" position="inside">
                 <button
                     name="%(shoes_color_chart_wizard_act_window)s"
@@ -18,7 +18,7 @@
                     type="action"
                 />
             </xpath>
-
+            -->
             <xpath expr="//page[@name='description']" position="after">
                 <page name="shoes_color_chart" string="Color Chart">
                     <field name="shoes_color_chart_item_ids"/>
