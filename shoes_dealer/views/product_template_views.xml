@@ -116,18 +116,23 @@
     </record>
 
     <!-- VISTA SOLO PT PARA AMPLIAR FUNCIONALIDAD partner_product_attribute_value CON TIPO DE MATERIAL: -->
+    <!--
     <record id="shoes_dealer_pt_only_ptav_material_inh_form" model="ir.ui.view">
         <field name="name">product.template.only.shoes.dealer.inh.form</field>
         <field name="model">product.template</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="partner_product_attribute_value.product_template_only_form_view"/>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="priority">90</field>
         <field name="arch" type="xml">
+        -->
             <!-- Campo puente desde PT a PTAL para pasar material y filtrar valores: -->
+       <!--
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="material_id" column_invisible="1"/>
             </xpath>
+       -->
             <!-- Filtro de valores de atributo por material y partner, según el campo anterior: -->
+       <!--
             <xpath expr="//field[@name='value_ids']" position="attributes">
                 <attribute name="domain">[
                     ('attribute_id','=',attribute_id),
@@ -137,7 +142,7 @@
             </xpath>
         </field>
     </record>
-
+    -->
     <!-- VISTAS DE BÚSQUEDA: -->
     <record id="product_template_shoes_dealer_inh_search" model="ir.ui.view">
         <field name="name">product.shoes.dealer.inh.search</field>
