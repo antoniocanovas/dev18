@@ -6,8 +6,8 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field name="shoes_campaign_id" />
-                    <field name="color_attribute_id" />
+                    <field name="shoes_campaign_id" invisible="1" />
+                    <field name="color_attribute_id" invisible="1"/>
                     <field name="manufacturer_id" />
                     <field name="material_id" />
                     <field name="color_value_ids" domain="[('attribute_id','=',color_attribute_id)]"/>
