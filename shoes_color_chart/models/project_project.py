@@ -29,7 +29,7 @@ class ProjectProject(models.Model):
 
 
     @api.constrains('shoes_color_value_ids')
-    def _check_manufacturer_and_material(self):
+    def _check_manufacturer_partner_and_material_codes_in_color_chart(self):
         for record in self:
             for li in record.shoes_color_value_ids:
                 if not li.partner_id.ref or not li.material_id.code:
