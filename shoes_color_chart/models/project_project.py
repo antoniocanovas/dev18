@@ -16,6 +16,7 @@ class ProjectProject(models.Model):
         copy=True,
     )
 
+    # Registros m2m para búsqueda y filtrado posterior, no se usa en las vistas:
     shoes_color_chart_item_ids = fields.One2many(
         'shoes.color.chart.item', 'shoes_campaign_id',
         readonly=True, string='Color template')
