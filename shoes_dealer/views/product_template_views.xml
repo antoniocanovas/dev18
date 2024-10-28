@@ -120,7 +120,7 @@
         <field name="name">product.template.only.shoes.dealer.inh.form</field>
         <field name="model">product.template</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="partner_product_attribute_value.product_partner_pav_inh_form_view"/>
+        <field name="inherit_id" ref="partner_product_attribute_value.product_template_only_form_view"/>
         <field name="priority">90</field>
         <field name="arch" type="xml">
             <!-- Campo puente desde PT a PTAL para pasar material y filtrar valores: -->
