@@ -33,4 +33,5 @@ class ProjectProject(models.Model):
         for record in self:
             for li in record.shoes_color_value_ids:
                 if not li.partner_id.ref or not li.material_id.code:
-                    raise UserError('Material, manufacturer and color CODES are required in all lines !!')
+                    message = "Material, manufacturer and color CODES are required in all lines !!, please check " + li.name
+                    raise UserError(message)
