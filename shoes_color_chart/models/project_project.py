@@ -6,10 +6,9 @@ class ProjectProject(models.Model):
     _inherit = "project.project"
 
 
-    # Registros m2m para búsqueda y filtrado posterior, no se usa en las vistas:
+    # Carta de colores:
     shoes_color_chart_item_ids = fields.One2many(
-        'shoes.color.chart.item', 'shoes_campaign_id',
-        readonly=True, string='Color template')
+        'shoes.color.chart.item', 'shoes_campaign_id', string='Color template')
 
     # Utilizado para enviar valor al wizard de color_chart:
     color_attribute_id = fields.Many2one(
