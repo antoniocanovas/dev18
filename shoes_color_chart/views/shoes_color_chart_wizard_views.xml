@@ -9,7 +9,7 @@
                     <field name="color_attribute_id" invisible="True" />
                     <field name="manufacturer_id" />
                     <field name="material_id" />
-                    <field name="color_value_ids" />
+                    <field name="color_value_ids" domain="[('attribute_id','=',color_attribute_id)]"/>
                 </group>
                 <footer>
                 <button
