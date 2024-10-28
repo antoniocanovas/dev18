@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- ACCION DE VENTANA: -->
+    <record id="action_assortment_pair" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Assortment pair</field>
+        <field name="res_model">assortment.pair</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- CONFIG MENU: -->
+    <record id="assortment_pair_menu" model="ir.ui.menu">
+        <field name="action" ref="action_assortment_pair"/>
+        <field name="active" eval="True"/>
+        <field name="name">Assortment pair</field>
+        <field name="parent_id" ref="shoes_dealer.inventory_shoes_dealer_menu"/>
+        <field name="sequence">110</field>
+        <field name="web_icon" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_no_one')])]"/>
+    </record>
+
+
+    <!-- FORM VIEW: -->
+    <record id="assortment_pair_default_form" model="ir.ui.view">
+        <field name="name">assortment.pair.default.form</field>
+        <field name="model">assortment.pair</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1>
+                        <field name="name" placeholder="Assortment pair ..."/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="bom_qty"/>
+                            <field name="qty"/>
+                            <field name="lot_id"/>
+                        </group>
+                        <group>
+                            <field name="product_tmpl_id"/>
+                            <field name="partner_id"/>
+                            <field name="sm_id"/>
+                            <field name="sml_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">form</field>
+    </record>
+
+    <!-- list VIEW: -->
+    <record id="product_material_default_tree" model="ir.ui.view">
+        <field name="name">assortment.pair.default.list</field>
+        <field name="model">assortment.pair</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="product_tmpl_id" optional="hide"/>
+                <field name="bom_qty"/>
+                <field name="lot_id" optional="show"/>
+                <field name="qty"/>
+                <field name="partner_id"/>
+                <field name="sm_id" optional="hide"/>
+                <field name="sml_id" optional="hide"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>
