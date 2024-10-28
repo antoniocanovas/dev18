@@ -20,4 +20,6 @@ class ShoesColorChartItem(models.Model):
     @api.depends('color_value_id')
     def _get_color_chart_name(self):
         for record in self:
-            self.name = 'Hola'
+            if not record.material_id.code or not record.color_value_id.code:
+                raise UserError('Material and color CODES are required !!')
+            record.name = record.project_id.name + record.material_id.code + record.color_value_id.code
