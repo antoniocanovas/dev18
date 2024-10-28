@@ -17,10 +17,14 @@ class ShoesColorChartItem(models.Model):
     manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id')
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
-    @api.model_create_multi
-    def create(self):
-        res = super().create()
-        raise UserError('hola')
-        for line in self:
-            line.name = 'hola'
-        return res
+    @api.depends('create_date')
+    def _get_name(self):
+        raise UserError('Hola')
+
+#    @api.model_create_multi
+#    def create(self):
+#        res = super().create()
+#        raise UserError('hola')
+#        for line in self:
+#            line.name = 'hola'
+#        return res
