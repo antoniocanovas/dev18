@@ -34,9 +34,10 @@ class ProjectProject(models.Model):
             for li in record.shoes_color_value_ids:
                 if not li.partner_id.ref or not li.material_id.code:
                     raise UserError('Material, manufacturer and color CODES are required for all colors !!')
-                if not li.name:
+#                if not li.name:
                     campaign = record.name
                     manufacturer = li.partner_id.ref
                     material = li.material_id.code
                     color = li.code
-                    li['name'] = campaign + manufacturer + material + color
+#                    li['name'] = "hola"
+#                    li['name'] = campaign + manufacturer + material + color

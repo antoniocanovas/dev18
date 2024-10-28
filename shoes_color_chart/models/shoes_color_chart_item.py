@@ -2,7 +2,6 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 from odoo import fields, models, api
-from odoo.exceptions import UserError
 
 class ShoesColorChartItem(models.Model):
     _name = 'shoes.color.chart.item'
@@ -16,3 +15,8 @@ class ShoesColorChartItem(models.Model):
     # Estos dos los usaré para agrupar en la vista de "Items de paleta de colores":
     manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id')
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
+
+    def create(self):
+        res=super().create()
+        for line in self:
+            li.name = 'hola'
