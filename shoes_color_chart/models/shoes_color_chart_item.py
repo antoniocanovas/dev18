@@ -14,12 +14,12 @@ class ShoesColorChartItem(models.Model):
     color_value_id = fields.Many2one('product.attribute.value', string="Color")
 
     # Estos dos los usaré para agrupar en la vista de "Items de paleta de colores":
-    manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id')
-    material_id = fields.Many2one('product.material', related='color_value_id.material_id')
+    manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id', required=True)
+    material_id = fields.Many2one('product.material', related='color_value_id.material_id', required=True)
 
-    @api.depends('color_value_id')
+    @api.depends('create_date','color_value_id')
     def _get_color_chart_name(self):
         for record in self:
             if not record.material_id.code or not record.color_value_id.code:
                 raise UserError('Material and color CODES are required !!')
-            record.name = record.project_id.name + record.material_id.code + record.color_value_id.code
+            record['name'] = record.project_id.name + record.material_id.code + record.color_value_id.code
