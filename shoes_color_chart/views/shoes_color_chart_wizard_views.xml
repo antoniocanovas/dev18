@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field name="name" />
                     <field name="color_attribute_id" invisible="True" />
                     <field name="manufacturer_id" />
                     <field name="material_id" />
