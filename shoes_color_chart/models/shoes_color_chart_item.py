@@ -9,7 +9,7 @@ class ShoesColorChartItem(models.Model):
     _description = 'Shoes color chart item'
 
     # Elementos de la tabla de relación de project => valores de atributo tipo color:
-    name = fields.Char('Name', compute='_get_color_chart_name')
+    name = fields.Char('Name', compute='_get_color_chart_name', store=True)
     shoes_campaign_id = fields.Many2one('project.project', string='Campaign', domain="[('is_shoes_campaign','=',True)]")
     color_value_id = fields.Many2one('product.attribute.value', string="Color")
 
@@ -17,7 +17,7 @@ class ShoesColorChartItem(models.Model):
     manufacturer_id = fields.Many2one('res.partner', related='color_value_id.partner_id')
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
-    @api.depends('create_date','color_value_id')
+    @api.depends('write_date')
     def _get_color_chart_name(self):
         for record in self:
 #            if not record.material_id.code or not record.color_value_id.code:
