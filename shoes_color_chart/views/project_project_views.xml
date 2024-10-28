@@ -11,7 +11,7 @@
 
             <xpath expr="//header" position="inside">
                 <button
-                    name="%(shoes_color_chart.shoes_color_chart_wizard_act_window)s"
+                    name="%(shoes_color_chart_wizard_act_window)s"
                     invisible="not is_shoes_campaign"
                     string="Color Chart"
                     groups="project.group_project_manager"
