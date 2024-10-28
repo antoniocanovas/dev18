@@ -28,6 +28,9 @@ class ProductTemplate(models.Model):
         "shoes.pair.weight", string="Pair Weight", default=False
     )
 
+    manufacturer_id = fields.Many2one(
+        "res.partner", string="Manufacturer", store=True, copy=True
+    )
 
     material_id = fields.Many2one(
         "product.material", string="Material", store=True, copy=True
