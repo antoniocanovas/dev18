@@ -26,7 +26,7 @@ class ShoesColorChartWizard(models.TransientModel):
         for li in self.color_value_ids:
             self.env['shoes.color.chart.item'].create({
                 'shoes_campaign_id': self.shoes_campaign_id.id,
-                'manufacturer_id': self.manyfacturer_id.id,
+                'manufacturer_id': self.manufacturer_id.id,
                 'material_id': self.material_id.id,
                 'color_value_id': li.id,
             })
