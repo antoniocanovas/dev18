@@ -30,7 +30,7 @@
                                                     ref('shoes_dealer.field_product_template__exwork'),
                                                     ref('shoes_dealer.field_product_template__exwork_single'),
                                                     ref('product.field_product_template__product_variant_ids'),
-                                                    ref('partner_product_attribute_value.field_product_template__manufacturer_id')])]"
+                                                    ref('shoes_dealer.field_product_template__manufacturer_id')])]"
         />
     </record>
     # SERVER ACTION para el automatismo actualizar precios de coste en variantes:
