@@ -8,4 +8,4 @@ class ProjectTask(models.Model):
 
     shoes_color_chart_id = fields.Many2one('shoes.color.chart.item')
     material_id = fields.Many2one('product.material', related='shoes_color_chart_id.material_id')
-    manufacturer_id = fields.Many2one('product.material', related='shoes_color_chart_id.manufacturer_id')
+    manufacturer_id = fields.Many2one('res.partner', related='shoes_color_chart_id.manufacturer_id')
