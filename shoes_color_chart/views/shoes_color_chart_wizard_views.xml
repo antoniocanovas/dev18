@@ -29,6 +29,7 @@
         <field name="name">Color Chart</field>
         <field name="res_model">shoes.color.chart.wizard</field>
         <field name="view_id" ref="shoes_color_chart_wizard_form" />
+        <field name="context">{'default_shoes_campaign_id': active_id}</field>
         <field name="target">new</field>
     </record>
 
