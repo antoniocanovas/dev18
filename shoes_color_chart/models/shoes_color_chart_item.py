@@ -19,7 +19,7 @@ class ShoesColorChartItem(models.Model):
 
     @api.depends('create_date')
     def _get_name(self):
-        raise UserError('Hola')
+        self.name = 'Hola'
 
 #    @api.model_create_multi
 #    def create(self):
