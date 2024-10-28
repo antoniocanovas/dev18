@@ -9,7 +9,7 @@ class ShoesColorChartWizard(models.TransientModel):
     _description = "Shoes color chart wizard"
 
 
-    name = fields.Char = fields.Char('Name', related='shoes_campaign_id.name')
+#    name = fields.Char = fields.Char('Name', related='shoes_campaign_id.name')
     shoes_campaign_id = fields.Many2one('project.project', string="Campaign")
     manufacturer_id = fields.Many2one('res.partner', string="Manufacturer")
     material_id = fields.Many2one('product.material', string="Material")
