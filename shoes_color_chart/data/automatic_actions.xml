@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    # BASE AUTOMATION shoes_color_chart name assign:
+    <record id="shoes_dealer_update_color_chart_name_aa" model="base.automation">
+        <field name="name">=> Update color chart item name</field>
+        <field name="model_id" ref="shoes_color_chart.model_shoes_color_chart_item"/>
+        <field name="trigger">on_create</field>
+    </record>
+    # SERVER ACTION shoes_color_chart name assign:
+    <record id="shoes_dealer_update_color_chart_name_as" model="ir.actions.server">
+        <field name="name">=> AS Update color chart item name</field>
+        <field name="model_id" ref="shoes_color_chart.model_shoes_color_chart_item"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record._get_item_name()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer_update_color_chart_name_aa"/>
+    </record>
+
+</odoo>

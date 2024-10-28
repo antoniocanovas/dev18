@@ -42,6 +42,7 @@
         'views/product_template_views.xml',
         'views/product_attribute_views.xml',
         'views/product_material_views.xml',
+        'data/automatic_actions.xml',
     ],
     "demo": [],
     "installable": True,
