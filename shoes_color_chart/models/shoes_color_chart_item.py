@@ -17,6 +17,7 @@ class ShoesColorChartItem(models.Model):
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
     def create(self):
-        res=super().create()
+        res = super().create()
         for line in self:
-            li.name = 'hola'
+            line.name = 'hola'
+        return res
