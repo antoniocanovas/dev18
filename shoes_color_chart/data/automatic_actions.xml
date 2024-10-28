@@ -5,7 +5,7 @@
     <record id="shoes_dealer_update_color_chart_name_aa" model="base.automation">
         <field name="name">=> Update color chart item name</field>
         <field name="model_id" ref="shoes_color_chart.model_shoes_color_chart_item"/>
-        <field name="trigger">on_create</field>
+        <field name="trigger">on_write</field>
     </record>
     # SERVER ACTION shoes_color_chart name assign:
     <record id="shoes_dealer_update_color_chart_name_as" model="ir.actions.server">
