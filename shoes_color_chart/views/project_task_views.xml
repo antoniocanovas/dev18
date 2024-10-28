@@ -11,7 +11,7 @@
 
             <xpath expr="//field[@name='manufacturer_id']" position="before">
                 <field name="shoes_color_chart_id"
-                       domain="[('shoes_campaign_id','=','project_id')]"
+                       domain="[('shoes_campaign_id','=', project_id)]"
                        invisible="not is_shoes_campaign"
                 />
             </xpath>
