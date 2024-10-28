@@ -27,7 +27,7 @@
                                 <field name="color_value_id"/>
                                 <field name="manufacturer_id"/>
                                 <field name="material_id"/>
-                                <field name="shoes_campaign_id" optional="hide"/>
+                                <field name="shoes_campaign_id" invisible="1"/>
                             </list>
                     </field>
                 </page>
