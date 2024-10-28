@@ -14,10 +14,7 @@ class ShoesColorChartWizard(models.TransientModel):
     manufacturer_id = fields.Many2one('res.partner', string="Manufacturer")
     material_id = fields.Many2one('product.material', string="Material")
     color_value_ids = fields.Many2many('product.attribute.value', string='Colors')
-    color_attribute_id = fields.Many2one("product.attribute", compute='_get_color_attribute_id')
-
-    def _get_color_attribute_id(self):
-        self.color_attribute_id = self.env.company.color_attribute_id.id
+    color_attribute_id = fields.Many2one("product.attribute", string='Color attribute')
 
     def action_apply(self):
         for li in self.color_value_ids:
