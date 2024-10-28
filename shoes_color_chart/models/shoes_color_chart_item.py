@@ -22,4 +22,5 @@ class ShoesColorChartItem(models.Model):
         for record in self:
 #            if not record.material_id.code or not record.color_value_id.code:
 #                raise UserError('Material and color CODES are required !!')
-            record['name'] = record.shoes_campaign_id.name + record.material_id.code + record.color_value_id.code
+            record['name'] = "prueba2"
+#            record['name'] = record.shoes_campaign_id.name + record.material_id.code + record.color_value_id.code
