@@ -9,7 +9,7 @@ class ShoesColorChartItem(models.Model):
     _description = 'Shoes color chart item'
 
     # Elementos de la tabla de relación de project => valores de atributo tipo color:
-    name = fields.Char('Name')
+    name = fields.Char('Name', compute='_get_item_name')
     shoes_campaign_id = fields.Many2one('project.project', string='Campaign', domain="[('is_shoes_campaign','=',True)]")
     color_value_id = fields.Many2one('product.attribute.value', string="Color")
 
@@ -18,12 +18,9 @@ class ShoesColorChartItem(models.Model):
     material_id = fields.Many2one('product.material', related='color_value_id.material_id')
 
     def _get_item_name(self):
-        self.name = 'Hola'
-
-#    @api.model_create_multi
-#    def create(self):
-#        res = super().create()
-#        raise UserError('hola')
-#        for line in self:
-#            line.name = 'hola'
-#        return res
+        for record in self:
+            campaign = record.shoes_campaign_id.name
+            manufacturer = record.manufacturer_id.ref
+            material = record.material_id.code
+            color = record.color_value_id.code
+            record['name'] = campaign + manufacturer + material + color
