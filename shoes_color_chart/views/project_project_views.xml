@@ -9,16 +9,19 @@
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
 
+            <xpath expr="//header" position="inside">
+                <button
+                    name="%(shoes_color_chart.shoes_color_chart_wizard_act_window)s"
+                    invisible="not is_shoes_campaign"
+                    string="Color Chart"
+                    groups="project.group_project_manager"
+                    type="action"
+                />
+            </xpath>
+
             <xpath expr="//page[@name='description']" position="after">
                 <page name="shoes_color_chart" string="Color Chart">
-                    <field name="shoes_color_value_ids" domain="[('attribute_id','=',color_attribute_id)]">
-                        <list>
-                            <field name="name"/>
-                            <field name="partner_id"/>
-                            <field name="material_id"/>
-                        </list>
-                    </field>
-                    <field name="color_attribute_id" invisible="1"/>
+                    <field name="shoes_color_chart_item_ids"/>
                 </page>
             </xpath>
 

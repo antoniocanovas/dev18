@@ -42,6 +42,7 @@
         'views/product_template_views.xml',
         'views/product_attribute_views.xml',
         'views/product_material_views.xml',
+        'views/shoes_color_chart_wizard_views',
     ],
     "demo": [],
     "installable": True,
