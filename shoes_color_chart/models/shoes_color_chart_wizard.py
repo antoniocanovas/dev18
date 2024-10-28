@@ -18,7 +18,7 @@ class ShoesColorChartWizard(models.TransientModel):
     color_attribute_id = fields.Many2one(
         "product.attribute",
         string="Color Attribute",
-        store=False,
+#        store=False,
         default=lambda self: self.env.user.company_id.color_attribute_id,
     )
 
