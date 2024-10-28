@@ -32,7 +32,11 @@ class ProjectProject(models.Model):
     def _check_manufacturer_and_material(self):
         for record in self:
             for li in record.shoes_color_value_ids:
-                if not li.manufacturer_id.code or not li.material_id.code:
+                if not li.partner_id.code or not li.material_id.code:
                     raise UserError('Material and color CODES are required for all colors !!')
                 if not li.name:
-                    li['name'] = record.shoes_campaign_id.name + li.material_id.code + li.color_value_id.code
+                    campaign = record.name
+                    manufacturer = li.partner_id.ref
+                    material = li.material_id.code
+                    color = li.code
+                    li['name'] = campaign + manufacturer + material + color
