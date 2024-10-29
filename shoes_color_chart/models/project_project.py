@@ -23,3 +23,11 @@ class ProjectProject(models.Model):
         store=False,
         default=lambda self: len(self.shoes_color_chart_item_ids),
     )
+
+    # Colores no repetidos para poder llevarlos como dominio a disponibles en product.template:
+    def _get_campaign_colors(self):
+        colors = set()
+        for li in self.shoes_color_chart_item_ids:
+            colors.append(li.color_value_id.id)
+        self.color_value_ids = [(6,0,colors)]
+    color_value_ids = fields.Many2many('product.attribute.value', string="Campaign colors", compute='_get_campaign_colors')
