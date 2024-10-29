@@ -17,7 +17,7 @@
                         groups="project.group_project_manager"
                         type="action">
                 </button>
-                <button name="%(shoes_color_chart_copy_wizard_act_window)s"
+                <button name="shoes_color_chart_copy_wizard_act_window"
                         icon="fa-paint-brush" class="oe_stat_button"
                         type="object" string="Copy Chart Colors"
                         invisible="not is_shoes_campaign">
