@@ -29,7 +29,7 @@
                 <field name="campaign_value_ids" column_invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='value_ids']" position="attributes">
-                <attribute name="domain">[('attribute_id','=',attribute_id), '|', ('id','in',campaign_value_ids)]</attribute>
+                <attribute name="domain">[('attribute_id','=',attribute_id), ('id','in',campaign_value_ids)]</attribute>
             </xpath>
 
         </field>
