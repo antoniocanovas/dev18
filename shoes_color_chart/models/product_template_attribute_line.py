@@ -16,7 +16,7 @@ class ProductTemplateAttributeLine(models.Model):
             if record.attribute_id == color_attribute:
                 chart_items = self.env['shoes.color.chart.item'].search([
                     ('manufacturer_id','=',record.product_tmpl_id.manufacturer_id.id),
-                    ('material_id','=',record.product_tmpl_id.material_id),
+                    ('material_id','=',record.product_tmpl_id.material_id.id),
                     ('shoes_campaign_id','=',record.product_tmpl_id.shoes_campaign_id.id)
                 ])
                 for li in chart_items:
