@@ -12,7 +12,7 @@ class ProductTemplateAttributeLine(models.Model):
         for record in self:
             color_attribute = self.env.company.color_attribute_id
             if record.attribute_id == color_attribute:
-                values = record.product_tmpl_id.shoes_campaign_id.color_attribute_ids.ids
+                values = record.product_tmpl_id.shoes_campaign_id.color_value_ids.ids
             else:
                 values = self.env['product.attribute.value'].search([('attribute_id','=',record.attribute_id.id)]).ids
             record['campaign_value_ids'] = [(6,0,values)]
