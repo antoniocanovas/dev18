@@ -26,7 +26,7 @@ class ProjectProject(models.Model):
 
     # Colores no repetidos para poder llevarlos como dominio a disponibles en product.template:
     def _get_campaign_colors(self):
-        colors = []
+        colors = set()
         for li in self.shoes_color_chart_item_ids:
             colors.add(li.color_value_id.id)
         self.color_value_ids = [(6,0,colors)]
