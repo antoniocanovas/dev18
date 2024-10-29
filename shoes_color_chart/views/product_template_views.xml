@@ -11,11 +11,10 @@
         <field name="arch" type="xml">
             <!-- En Pestaña inicial para datos generales: -->
             <xpath expr="//field[@name='manufacturer_id']" position="attributes">
-                <attribute name="readonly">True</attribute>
-                <attribute name="can_write">False</attribute>
+                <attribute name="readonly">1</attribute>
             </xpath>
             <xpath expr="//field[@name='material_id']" position="attributes">
-                <attribute name="readonly">True</attribute>
+                <attribute name="readonly">1</attribute>
             </xpath>
         </field>
     </record>
