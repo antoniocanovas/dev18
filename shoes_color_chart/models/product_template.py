@@ -12,7 +12,7 @@ class ProductTemplate(models.Model):
     def update_color_values_from_campaign_chart_colors(self):
         for record in self:
             if record.shoes_campaign_id.id and record.shoes_campaign_id.shoes_color_chart_item_ids.ids:
-                color_attribute = self.env.company_id.color_attribute_id
+                color_attribute = self.env.company.color_attribute_id
                 colors = set()
                 chart_items = self.env['shoes.color.chart.item'].search(
                     [('shoes_campaign_id', '=', record.shoes_campaign_id.id),
