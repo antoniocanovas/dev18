@@ -26,20 +26,6 @@
                 </button>
             </xpath>
 
-            <xpath expr="//page[@name='description']" position="after">
-                <page name="shoes_color_chart" string="Color Chart">
-                    <field name="shoes_color_chart_item_ids">
-                        <list>
-                            <field name="name"/>
-                            <field name="color_value_id"/>
-                            <field name="manufacturer_id"/>
-                            <field name="material_id"/>
-                            <field name="shoes_campaign_id" invisible="1"/>
-                        </list>
-                    </field>
-                </page>
-            </xpath>
-
         </field>
         <field name="priority">99</field>
     </record>
