@@ -17,9 +17,9 @@
             </xpath>
 
             <field name="description" position="after">
-                <field name="manufacturer_value_ids" invisible="0"/>
-                <field name="material_value_ids" invisible="0"/>
-                <field name="color_value_ids" invisible="0"/>
+                <field name="manufacturer_value_ids" invisible="1"/>
+                <field name="material_value_ids" invisible="1"/>
+                <field name="color_value_ids" invisible="1"/>
             </field>
         </field>
         <field name="priority">99</field>
