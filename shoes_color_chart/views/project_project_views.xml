@@ -11,24 +11,30 @@
 
             <xpath expr="//header" position="inside">
                 <button
-                    name="%(shoes_color_chart_wizard_act_window)s"
-                    invisible="not is_shoes_campaign"
-                    string="Color Chart"
-                    groups="project.group_project_manager"
-                    type="action"
+                        name="%(shoes_color_chart_wizard_act_window)s"
+                        invisible="not is_shoes_campaign"
+                        string="Color Chart"
+                        groups="project.group_project_manager"
+                        type="action"
                 />
+            </xpath>
+
+            <xpath expr="//button_box" position="inside">
+                <button class="oe_stat_button" icon="fa-diamond" type="action" name="shoes_color_chart_item_act_window">
+                    <field widget="statinfo" name="shoes_color_chart_item_count" string="Chart items"/>
+                </button>
             </xpath>
 
             <xpath expr="//page[@name='description']" position="after">
                 <page name="shoes_color_chart" string="Color Chart">
                     <field name="shoes_color_chart_item_ids">
-                            <list>
-                                <field name="name"/>
-                                <field name="color_value_id"/>
-                                <field name="manufacturer_id"/>
-                                <field name="material_id"/>
-                                <field name="shoes_campaign_id" invisible="1"/>
-                            </list>
+                        <list>
+                            <field name="name"/>
+                            <field name="color_value_id"/>
+                            <field name="manufacturer_id"/>
+                            <field name="material_id"/>
+                            <field name="shoes_campaign_id" invisible="1"/>
+                        </list>
                     </field>
                 </page>
             </xpath>

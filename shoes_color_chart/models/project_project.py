@@ -18,3 +18,8 @@ class ProjectProject(models.Model):
         default=lambda self: self.env.user.company_id.color_attribute_id,
     )
 
+    shoes_color_chart_item_count = fields.Integer(
+        'Chart items',
+        store=False,
+        default=lambda self: len(self.shoes_color_chart_item_ids),
+    )
