@@ -14,6 +14,6 @@ class ProductTemplateAttributeLine(models.Model):
             if record.attribute_id == color_attribute:
                 values = record.product_tmpl_id.shoes_campaign_id.color_value_ids.ids
             else:
-                values = self.env['product.attribute.value'].search([('attribute_id','=',record.attribute_id.id)]).ids
+                values = self.env['product.attribute.value'].search([('attribute_id','=',record.attribute_id)]).ids
             record['campaign_value_ids'] = [(6,0,values)]
     campaign_value_ids = fields.Many2many('product.attribute.value', compute='_get_valid_product_attribute_values')
