@@ -29,11 +29,11 @@ class ProductTemplate(models.Model):
     )
 
     manufacturer_id = fields.Many2one(
-        "res.partner", string="Manufacturer", store=True, copy=True
+        "res.partner", string="Manufacturer", copy=True
     )
 
     material_id = fields.Many2one(
-        "product.material", string="Material", store=True, copy=True
+        "product.material", string="Material", copy=True
     )
 
     shoes_shape_id = fields.Many2one(
