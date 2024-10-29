@@ -13,6 +13,12 @@
             <xpath expr="//field[@name='manufacturer_id']" position="before">
                 <field name="shoes_color_chart_id"/>
             </xpath>
+            <xpath expr="//field[@name='manufacturer_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='material_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
         </field>
     </record>
 
