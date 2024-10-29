@@ -8,11 +8,8 @@ class ShoesColorChartItem(models.Model):
     _name = 'shoes.color.chart.item'
     _description = 'Shoes color chart item'
 
-    # Elementos de la tabla de relación de project => valores de atributo tipo color:
     name = fields.Char('Name')
     shoes_campaign_id = fields.Many2one('project.project', string='Campaign', domain="[('is_shoes_campaign','=',True)]")
     color_value_id = fields.Many2one('product.attribute.value', string="Color")
-
-    # Estos dos los usaré para agrupar en la vista de "Items de paleta de colores":
     manufacturer_id = fields.Many2one('res.partner', string="Manufacturer")
     material_id = fields.Many2one('product.material', string="Material")
