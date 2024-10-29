@@ -10,9 +10,6 @@
         <field name="priority">90</field>
         <field name="arch" type="xml">
             <!-- En Pestaña inicial para datos generales: -->
-            <xpath expr="//field[@name='manufacturer_id']" position="before">
-                <field name="shoes_color_chart_id"/>
-            </xpath>
             <xpath expr="//field[@name='manufacturer_id']" position="attributes">
                 <attribute name="readonly">1</attribute>
             </xpath>
