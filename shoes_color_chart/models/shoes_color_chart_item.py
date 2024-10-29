@@ -25,4 +25,4 @@ class ShoesColorChartItem(models.Model):
                 ('id','!=',record.id)
             ])
             if exist.ids:
-                raise UserError('This combination already exists: ' + record.name)
+                raise UserError('This combination already exists: ' + record.name + " - " + record.color_value_id.name)
