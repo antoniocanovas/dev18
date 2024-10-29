@@ -15,8 +15,8 @@
                         invisible="not is_shoes_campaign"
                         string="Color Chart"
                         groups="project.group_project_manager"
-                        type="action"
-                />
+                        type="action">
+                </button>
                 <button name="campaign_chart_colors_copy"
                         icon="fa-paint-brush" class="oe_stat_button"
                         type="object" string="Copy Chart Colors"
