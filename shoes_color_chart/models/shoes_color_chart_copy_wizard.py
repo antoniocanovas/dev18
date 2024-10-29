@@ -14,9 +14,9 @@ class ShoesColorChartCopyWizard(models.TransientModel):
     def action_apply(self):
         for li in self.project_id.shoes_color_chart_item_ids:
             newline = self.env['shoes.color.chart.item'].create({
-                'shoes_campaign_id': self.id,
+                'shoes_campaign_id': self.shoes_campaign_id.id,
                 'manufacturer_id': li.manufacturer_id.id,
                 'material_id': li.material_id.id,
                 'color_value_id': li.color_value_id.id,
-                'name': self.name + li.manufacturer_id.ref + li.material_id.code
+                'name': self.shoes_campaign_id.name + li.manufacturer_id.ref + li.material_id.code
             })
