@@ -24,10 +24,26 @@ class ProjectProject(models.Model):
         default=lambda self: len(self.shoes_color_chart_item_ids),
     )
 
-    # Colores no repetidos para poder llevarlos como dominio a disponibles en product.template:
+    # COLORES no repetidos:
     def _get_campaign_colors(self):
         colors = set()
         for li in self.shoes_color_chart_item_ids:
             colors.add(li.color_value_id.id)
         self.color_value_ids = [(6,0,colors)]
     color_value_ids = fields.Many2many('product.attribute.value', string="Campaign colors", compute='_get_campaign_colors')
+
+    # FABRICANTES no repetidos:
+    def _get_campaign_manufacturers(self):
+        manufacturers = set()
+        for li in self.shoes_color_chart_item_ids:
+            manufacturers.add(li.manufacturer_id.id)
+        self.manufacturer_value_ids = [(6,0,manufacturers)]
+    manufacturer_value_ids = fields.Many2many('product.attribute.value', string="Campaign manufacturers", compute='_get_campaign_manufacturers')
+
+    # FABRICANTES no repetidos:
+    def _get_campaign_materials(self):
+        materials = set()
+        for li in self.shoes_color_chart_item_ids:
+            materials.add(li.material_id.id)
+        self.material_value_ids = [(6,0,materials)]
+    material_value_ids = fields.Many2many('product.attribute.value', string="Campaign materials", compute='_get_campaign_materials')
