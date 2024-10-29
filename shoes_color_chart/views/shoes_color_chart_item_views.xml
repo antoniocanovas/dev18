@@ -26,13 +26,13 @@
             <form>
                 <sheet>
                     <h1>
-                        <field name="name" placeholder="Color chart item ..."/>
+                        <field name="name" placeholder="Color chart item ..." required="1"/>
                     </h1>
                     <group>
-                        <field name="color_value_id"/>
-                        <field name="manufacturer_id"/>
-                        <field name="material_id"/>
-                        <field name="shoes_campaign_id" invisible="1"/>
+                        <field name="color_value_id" required="1"/>
+                        <field name="manufacturer_id" required="1"/>
+                        <field name="material_id" required="1"/>
+                        <field name="shoes_campaign_id" readonly="1"/>
                     </group>
                 </sheet>
             </form>
