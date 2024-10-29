@@ -12,4 +12,11 @@ class ShoesColorChartCopyWizard(models.TransientModel):
     shoes_campaign_id = fields.Many2one('project.project', string="Campaign")
     project_id = fields.Many2one('project.project', string="Origin Chart")
     def action_apply(self):
-        return True
+        for li in self.project_id.shoes_color_chart_item_ids:
+            newline = self.env['shoes.color.chart.item'].create({
+                'shoes_campaign_id': self.id,
+                'manufacturer_id': li.manufacturer_id.id,
+                'material_id': li.material_id.id,
+                'color_value_id': li.color_value_id.id,
+                'name': self.name + li.manufacturer_id.ref + li.material_id.code
+            })
