@@ -38,7 +38,7 @@ class ProjectProject(models.Model):
         for li in self.shoes_color_chart_item_ids:
             manufacturers.add(li.manufacturer_id.id)
         self.manufacturer_value_ids = [(6,0,manufacturers)]
-    manufacturer_value_ids = fields.Many2many('product.attribute.value', string="Campaign manufacturers", compute='_get_campaign_manufacturers')
+    manufacturer_value_ids = fields.Many2many('res.partner', string="Campaign manufacturers", compute='_get_campaign_manufacturers')
 
     # FABRICANTES no repetidos:
     def _get_campaign_materials(self):
@@ -46,4 +46,4 @@ class ProjectProject(models.Model):
         for li in self.shoes_color_chart_item_ids:
             materials.add(li.material_id.id)
         self.material_value_ids = [(6,0,materials)]
-    material_value_ids = fields.Many2many('product.attribute.value', string="Campaign materials", compute='_get_campaign_materials')
+    material_value_ids = fields.Many2many('product.material', string="Campaign materials", compute='_get_campaign_materials')
