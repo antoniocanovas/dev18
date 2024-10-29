@@ -20,7 +20,8 @@
             </xpath>
 
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button class="oe_stat_button" icon="fa-diamond" type="action" name="shoes_color_chart_item_act_window">
+                <button class="oe_stat_button" icon="fa-diamond" type="action"
+                        name="shoes_color_chart.shoes_color_chart_item_act_window">
                     <field widget="statinfo" name="shoes_color_chart_item_count" string="Chart items"/>
                 </button>
             </xpath>
