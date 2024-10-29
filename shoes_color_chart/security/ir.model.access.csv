@@ -2,4 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_shoes_color_chart_user, Shoes color_chart user,model_shoes_color_chart_item,base.group_user,1,0,0,0
 access_shoes_color_chart_admin, Shoes color_chart admin,model_shoes_color_chart_item,project.group_project_manager,1,1,1,1
 access_shoes_color_chart_wizard_user, Shoes color_chart_wizard user,model_shoes_color_chart_wizard,base.group_user,1,0,0,0
-access_shoes_color_chart_wizard_admin, Shoes color_chart_wizard admin,model_shoes_color_chart_wizard,project.group_project_manager,1,1,1,1
+access_shoes_color_chart_wizard_admin, Shoes color_chart_wizard admin,model_shoes_color_chart_wizard,project.group_project_user,1,1,1,1
+access_shoes_color_chart_copy_wizard_admin, Shoes color_chart_copy wizard admin,model_shoes_color_chart_copy_wizard,project.group_project_user,1,1,1,1

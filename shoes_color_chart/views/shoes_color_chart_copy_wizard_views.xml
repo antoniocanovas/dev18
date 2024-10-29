@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="shoes_color_chart_copy_wizard_form" model="ir.ui.view">
+        <field name="name">shoes.color.chart.copy.wizard.form</field>
+        <field name="model">shoes.color.chart.copy.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="shoes_campaign_id" invisible="1"/>
+                    <field name="project_id"
+                           domain="[('is_shoes_campaign','=',True),('id','!=',shoes_campaign_id.id)]"/>
+                </group>
+                <footer>
+                <button
+                        name="action_apply"
+                        class="btn btn-primary"
+                        string="Create"
+                        type="object"
+                    />
+                or
+                <button special="cancel" class="btn btn-secondary" string="Cancel" />
+            </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="shoes_color_chart_copy_wizard_act_window" model="ir.actions.act_window">
+        <field name="name">Color chart copy</field>
+        <field name="res_model">shoes.color.chart.copy.wizard</field>
+        <field name="view_id" ref="shoes_color_chart_copy_wizard_form" />
+        <field name="context">{'default_shoes_campaign_id': active_id}</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

@@ -38,6 +38,7 @@
     "data": [
         "security/ir.model.access.csv",
         'views/shoes_color_chart_wizard_views.xml',
+        'views/shoes_color_chart_copy_wizard_views.xml',
         'views/shoes_color_chart_item_views.xml',
         'views/project_project_views.xml',
         'views/project_task_views.xml',

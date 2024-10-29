@@ -17,6 +17,11 @@
                         groups="project.group_project_manager"
                         type="action"
                 />
+                <button name="campaign_chart_colors_copy"
+                        icon="fa-paint-brush" class="oe_stat_button"
+                        type="object" string="Copy Chart Colors"
+                        invisible="not is_shoes_campaign">
+                </button>
             </xpath>
 
             <xpath expr="//div[@name='button_box']" position="inside">

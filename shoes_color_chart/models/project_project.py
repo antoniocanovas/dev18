@@ -47,3 +47,4 @@ class ProjectProject(models.Model):
             materials.add(li.material_id.id)
         self.material_value_ids = [(6,0,materials)]
     material_value_ids = fields.Many2many('product.material', string="Campaign materials", compute='_get_campaign_materials')
+
