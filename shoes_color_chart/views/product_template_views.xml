@@ -27,7 +27,7 @@
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <button name="update_color_values_from_campaign_chart_colors"
-                        icon="fa-spinner" class="oe_stat_button"
+                        icon="fa-paint-brush" class="oe_stat_button"
                         type="object" string="Upd Colors"
                         invisible="not shoes_campaign_id">
                 </button>
