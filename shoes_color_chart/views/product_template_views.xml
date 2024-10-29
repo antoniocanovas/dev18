@@ -22,7 +22,6 @@
         </field>
     </record>
 
-    <!--
     # Vistas FORM; la vista común para PP y PT:
     <record id="shoes_color_chart_pavfilter_inh_form_view" model="ir.ui.view">
         <field name="name">shoes.color.chart.pavfilter.inh.form.view</field>
@@ -30,10 +29,10 @@
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='value_count']" position="after">
-                <field name="color_value_ids" column_invisible="1"/>
+                <field name="campaign_value_ids" column_invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='value_ids']" position="attributes">
-                <attribute name="domain">[('attribute_id','=',attribute_id), '|', ('id','in',color_value_ids)]</attribute>
+                <attribute name="domain">[('attribute_id','=',attribute_id), '|', ('id','in',campaign_value_ids)]</attribute>
             </xpath>
 
         </field>
