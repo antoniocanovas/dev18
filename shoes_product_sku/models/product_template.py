@@ -8,8 +8,8 @@ class ProductTemplate(models.Model):
 
     def _update_product_product_sku(self):
         for r in self:
-            if not r.is_pair or not r.is_assortment:
-                continue
+#            if not r.is_pair or not r.is_assortment:
+#                continue
 
             config = env.company.shoes_sku_item_ids.ids
 
@@ -36,3 +36,4 @@ class ProductTemplate(models.Model):
                     if item.id == id_product:        code += code_product
                     if item.id == id_color:          code += code_color
                 product['default_code'] = code
+            raise UserError('Hola')
