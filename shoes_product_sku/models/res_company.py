@@ -7,7 +7,7 @@ from odoo.exceptions import UserError
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    shoes_sku_item_ids = fields.Many2many('shoes.product.sku.item', string='SKU Items', default=[1,2,3,4,5])
+    shoes_sku_item_ids = fields.Many2many('shoes.product.sku.item', string='SKU Items', default=[(6,0,[1,2,3,4,5])])
 
     @api.constrains('shoes_sku_item_ids')
     def _ensure_unique_sku(self):
