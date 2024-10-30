@@ -11,7 +11,7 @@ class ProductTemplate(models.Model):
 #            if not r.is_pair or not r.is_assortment:
 #                continue
 
-            config = env.company.shoes_sku_item_ids.ids
+            config = self.env.company.shoes_sku_item_ids.ids
 
             id_campaign = self.env['ir.model.data'].search([('name', '=', 'sku_campaign')]).res_id
             id_material = self.env['ir.model.data'].search([('name', '=', 'sku_material')]).res_id
