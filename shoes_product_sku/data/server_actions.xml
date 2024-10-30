@@ -3,7 +3,7 @@
 
     <record id="shoes_product_sku_as" model="ir.actions.server">
         <field name="name">=> Códigos de variante según configuración de compañía</field>
-        <field name="model_id" ref="model_shoes_product_sku"/>
+        <field name="model_id" ref="shoes_product_sku.shoes_product_sku"/>
         <field name="binding_model_id" ref="model_product_template"/>
         <field name="state">code</field>
         <field name="code">
