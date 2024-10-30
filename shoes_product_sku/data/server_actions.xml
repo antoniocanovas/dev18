@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="shoes_product_sku_as" model="ir.actions.server">
-        <field name="name">=> Códigos de variante según configuración de compañía</field>
+        <field name="name">=> Actualizar Códigos de variante</field>
         <field name="model_id" ref="model_product_template"/>
         <field name="binding_model_id" ref="model_product_template"/>
         <field name="state">code</field>

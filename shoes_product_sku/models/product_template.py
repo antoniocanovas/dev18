@@ -13,13 +13,13 @@ class ProductTemplate(models.Model):
 
             config = env.company.shoes_sku_item_ids.ids
 
-            id_campaign = env['ir.model.data'].search([('name', '=', 'sku_campaign')]).res_id
-            id_material = env['ir.model.data'].search([('name', '=', 'sku_material')]).res_id
-            id_manufacturer = env['ir.model.data'].search([('name', '=', 'sku_manufacturer')]).res_id
-            id_product = env['ir.model.data'].search([('name', '=', 'sku_product_campaign_code')]).res_id
-            id_color = env['ir.model.data'].search([('name', '=', 'sku_color')]).res_id
+            id_campaign = self.env['ir.model.data'].search([('name', '=', 'sku_campaign')]).res_id
+            id_material = self.env['ir.model.data'].search([('name', '=', 'sku_material')]).res_id
+            id_manufacturer = self.env['ir.model.data'].search([('name', '=', 'sku_manufacturer')]).res_id
+            id_product = self.env['ir.model.data'].search([('name', '=', 'sku_product_campaign_code')]).res_id
+            id_color = self.env['ir.model.data'].search([('name', '=', 'sku_color')]).res_id
 
-            skuconfig = env['shoes.product.sku.item'].search([('id', 'in', config)], order="sequence")
+            skuconfig = self.env['shoes.product.sku.item'].search([('id', 'in', config)], order="sequence")
 
             for product in r.product_variant_ids:
                 code = ""
@@ -36,4 +36,3 @@ class ProductTemplate(models.Model):
                     if item.id == id_product:        code += code_product
                     if item.id == id_color:          code += code_color
                 product['default_code'] = code
-
