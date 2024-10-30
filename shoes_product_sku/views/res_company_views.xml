@@ -9,9 +9,9 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='shoes_dealer']/group" position="after">
                 <group string="SKU" name="shoes_dealer_sku">
-                    <field name="shoes_sku_item_ids"required="1">
+                    <field name="shoes_sku_item_ids" required="1">
                             <list>
-                                <field name="sequence"/>
+                                <field name="sequence" widget="handle"/>
                                 <field name="name"/>
                             </list>
                     </field>
