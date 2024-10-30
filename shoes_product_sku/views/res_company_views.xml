@@ -9,13 +9,17 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='shoes_dealer']/group" position="after">
                 <group string="SKU" name="shoes_dealer_sku">
-                    <field name="shoes_sku_update"/>
-                    <field name="shoes_sku_item_ids" required="1" nolabel="1">
+                    <group name="shoes_sku_automation" string="Automation">
+                        <field name="shoes_sku_update"/>
+                    </group>
+                    <group name="shoes_sku_sequence" string="Sequence">
+                        <field name="shoes_sku_item_ids" required="1" nolabel="1">
                             <list>
                                 <field name="sequence" widget="handle"/>
                                 <field name="name"/>
                             </list>
-                    </field>
+                        </field>
+                    </group>
                 </group>
             </xpath>
         </field>
