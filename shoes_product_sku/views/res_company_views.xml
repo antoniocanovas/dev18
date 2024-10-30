@@ -11,7 +11,7 @@
                 <group string="SKU" name="shoes_dealer_sku">
                     <field name="shoes_sku_item_ids"required="1">
                             <list>
-                                <field name="sequence" widget="handle"/>
+                                <field name="sequence"/>
                                 <field name="name"/>
                             </list>
                     </field>
