@@ -6,6 +6,7 @@ from odoo.exceptions import UserError
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    # Función para actualizar códigos de variantes para pares y surtidos en función de la configuración en la empresa:
     def _update_product_product_sku(self):
         for r in self:
             if not r.is_pair and not r.is_assortment:
@@ -36,3 +37,7 @@ class ProductTemplate(models.Model):
                     if item.id == id_product:        code += code_product
                     if item.id == id_color:          code += code_color
                 product['default_code'] = code
+
+    # EN EL CASO DE QUE SEA TRUE: self.env.company.shoes_sku_update
+    # super de create_shoe_pairs() para ejecutar el método anterior al final.
+    # super de create_single_products() para ejecutar también.
