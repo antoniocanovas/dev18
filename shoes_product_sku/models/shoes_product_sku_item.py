@@ -9,3 +9,4 @@ class ShoesColorChartItem(models.Model):
     _description = 'Shoes product SKU item'
 
     name = fields.Char('Name')
+    sequence = fields.Integer('Sequence')
