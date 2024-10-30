@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="shoes_product_sku_as" model="ir.actions.server">
+        <field name="name">=> Códigos de variante según configuración de compañía</field>
+        <field name="model_id" ref="model_shoes_product_sku"/>
+        <field name="binding_model_id" ref="model_product_template"/>
+        <field name="state">code</field>
+        <field name="code">
+records._update_product_product_sku()
+        </field>
+    </record>
+
+</odoo>
