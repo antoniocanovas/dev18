@@ -38,6 +38,14 @@ class ProductTemplate(models.Model):
                     if item.id == id_color:          code += code_color
                 product['default_code'] = code
 
-    # EN EL CASO DE QUE SEA TRUE: self.env.company.shoes_sku_update
-    # super de create_shoe_pairs() para ejecutar el método anterior al final.
-    # super de create_single_products() para ejecutar también.
+    def create_shoe_pairs(self)
+        self.ensure_one()
+        res = super().create_shoe_pairs()
+        if self.env.company.shoes_sku_update:
+            self._update_product_product_sku()
+
+    def create_single_products(self)
+        self.ensure_one()
+        res = super().create_single_products()
+        if self.env.company.shoes_sku_update:
+            self._update_product_product_sku()
