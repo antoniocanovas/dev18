@@ -40,7 +40,7 @@ class ProjectTask(models.Model):
                 'name': self.name,
                 'type': 'consu',
                 'is_storable': True,
-                'shoes_campaign_id':self.project_id.id,
+                'shoes_campaign_ids':[(6,0,[self.project_id.id])],
                 'product_brand_id':self.product_brand_id.id,
                 'manufacturer_id':self.manufacturer_id.id,
                 'gender': self.gender,
