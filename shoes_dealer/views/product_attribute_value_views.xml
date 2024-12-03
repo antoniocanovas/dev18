@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!-- INH CUSTOM list VIEW (default form not required): -->
+    <record id="partner_product_manufacturer_value_inh_tree" model="ir.ui.view">
+        <field name="name">partner.attribute.manufacturer.inh.tree</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_list"/>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="material_id"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

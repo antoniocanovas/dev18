@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- VISTA FORM: -->
+    <record id="shoes_campaign_product_inh_form" model="ir.ui.view">
+        <field name="name">product.shoes.campaign.inh.form</field>
+        <field name="model">product.template</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_dealer.shoes_dealer_product_inh_form"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <!-- En Pestaña inicial para datos generales: -->
+            <xpath expr="//field[@name='product_tmpl_set_id']" position="after">
+                <field name="shoes_task_id" readonly="shoes_task_id" force_save="1"
+                       domain="[('is_shoes_campaign','=',True),('project_id','=',shoes_campaign_id)]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

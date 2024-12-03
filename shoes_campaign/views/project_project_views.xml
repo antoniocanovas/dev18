@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Normal project view : -->
+    <record id="shoes_campaign_project_inh_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.campaign.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="is_shoes_campaign"/>
+                <field name="product_brand_id" required="is_shoes_campaign"/>
+                <field name="task_code_prefix" required="is_shoes_campaign"/>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+    <!-- Simplified creation project view : -->
+    <record id="shoes_campaign_simplified_project_inh_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.campaign.simplified.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <group name="shoes_campaign">
+                    <field name="is_shoes_campaign"/>
+                    <field name="product_brand_id" required="is_shoes_campaign"/>
+                    <field name="task_code_prefix" required="is_shoes_campaign"/>
+                </group>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>
