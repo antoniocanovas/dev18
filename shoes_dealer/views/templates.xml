@@ -2,7 +2,7 @@
 
 <odoo>
 
-    <template id="pnt_custom_product_price" inherit_id="website_sale.product_price">
+    <template id="custom_product_price" inherit_id="website_sale.product_price">
         <xpath expr="//div/h3/span[@class='oe_price']" position="replace">
             <t t-if="combination_info['is_surtido']">
                 <span class="oe_price" style="white-space: nowrap;" t-esc="combination_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
