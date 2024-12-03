@@ -29,9 +29,9 @@ class AccountMoveLine(models.Model):
 
     shoes_campaign_id = fields.Many2one('project.project', string='Shoes Campaign',
                                         store=True,
-                                        #  Cambiado 03/12/24 para que un modelo pueda estar en varias campañas
-                                        #  related='product_id.product_tmpl_id.shoes_campaign_id')
-                                        related='move_id.shoes_campaign_id')
+                                        #  Cambiar 03/12/24 para que un modelo pueda estar en varias campañas
+                                        related='product_id.product_tmpl_id.shoes_campaign_id')
+                                        # related='move_id.shoes_campaign_id')
     shoes_model_id = fields.Many2one('product.template', store=True, related='product_id.shoes_model_id')
     exwork_single_euro = fields.Monetary(related="shoes_model_id.exwork_single_euro")
 
