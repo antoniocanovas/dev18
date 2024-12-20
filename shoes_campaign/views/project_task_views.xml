@@ -39,6 +39,7 @@
                             <!-- El siguiente campo creo que no hace falta si usamos intrastat_duty:
                             <field name="shoes_hscode_id" invisible="1"/> -->
                         </group>
+                        <!--
                         <group>
                             <field name="shoes_model_material_ids">
                                 <tree editable="bottom">
@@ -50,6 +51,7 @@
                                 </tree>
                             </field>
                         </group>
+                        -->
                     </group>
 
                     <field name="is_shoes_campaign" invisible="1"/>
