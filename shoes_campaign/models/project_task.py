@@ -33,7 +33,7 @@ class ProjectTask(models.Model):
     # Se incluye en shoes_model_material_ids:
     #shoes_product_tmpl_id = fields.Many2one('product.template', string="Product", copy=False)
 
-    shoes_model_material_ids = fields.Many2many('shoes.model.material', string='Materials')
+    shoes_model_material_ids = fields.One2many('shoes.model.material', 'task_id', string='Materials')
 
     intrastat_duty_id = fields.Many2one('intrastat.duty', string='Duty estimation', copy=False)
 
