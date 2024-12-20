@@ -47,7 +47,6 @@
                                     <field name="shoes_product_tmpl_id"/>
                                     <field name="task_id"/>
                                     <field name="manufacturer_ref"/>
-                                    <field name="material_value_ids" widget="many2many_tags" optional="hide"/>
                                 </tree>
                             </field>
                         </group>
