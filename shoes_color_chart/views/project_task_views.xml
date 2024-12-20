@@ -14,7 +14,7 @@
             </xpath>
 
             <xpath expr="//field[@name='shoes_model_material_ids']/list" position="inside">
-                <field name="material_value_ids" column_invisible="1"/>
+                <field name="material_value_ids" widget="many2many_tags" optional="hide"/>
             </xpath>
 
             <field name="description" position="after">
