@@ -38,7 +38,7 @@
                             <field name="intrastat_duty_id"/>
                         </group>
 
-                        <group>
+                        <group name="material_last_manufacturer-ref">
                             <field name="shoes_model_material_ids">
                                 <list editable="bottom">
                                     <field name="material_id" required="1"/>

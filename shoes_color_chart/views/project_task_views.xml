@@ -13,6 +13,10 @@
                 <attribute name="domain">[('id','in',manufacturer_value_ids)]</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='shoes_model_material_ids']/list/task_id" position="after">
+                <field name="material_value_ids" column_invisible="1"/>
+            </xpath>
+
             <field name="description" position="after">
                 <field name="manufacturer_value_ids" invisible="1"/>
                 <field name="material_value_ids" invisible="1"/>
