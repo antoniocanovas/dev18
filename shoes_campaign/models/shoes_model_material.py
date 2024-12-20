@@ -13,3 +13,5 @@ class AssortmentPair(models.Model):
     shoes_last_id = fields.Many2one('shoes.last', string='Last')
     shoes_product_tmpl_id = fields.Many2one('product.template', string='Product')
     task_id = fields.Many2one('project.task', string='Task')
+    # Valores heredados de la carta de color:
+    material_value_ids = fields.Many2many(related='task_id.project_id.material_value_ids')
