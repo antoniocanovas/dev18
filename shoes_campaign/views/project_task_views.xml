@@ -41,15 +41,15 @@
                     </group>
                     <group>
                         <field name="shoes_model_material_ids">
+                            <!--
                             <tree editable="bottom">
-                                <!--
                                 <field name="material_id"/>
-                                -->
                                 <field name="shoes_last_id"/>
                                 <field name="shoes_product_tmpl_id"/>
                                 <field name="task_id"/>
                                 <field name="manufacturer_ref"/>
                             </tree>
+                                -->
                         </field>
                     </group>
                 </group>
