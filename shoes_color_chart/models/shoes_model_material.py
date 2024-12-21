@@ -10,7 +10,7 @@ class ShoesModelMaterial(models.Model):
     # Valores heredados de la carta de color, PARA EL FABRICANTE DEL MODELO:
     def _get_manufacturer_campaign_materials(self):
         materials = set()
-        for li in self.shoes_color_chart_item_ids:
+        for li in self.project_id.shoes_color_chart_item_ids:
             if li.manufacturer_id == self.task_id.manufacturer_id:
                 materials.add(li.material_id.id)
         self.material_value_ids = [(6,0,materials)]
