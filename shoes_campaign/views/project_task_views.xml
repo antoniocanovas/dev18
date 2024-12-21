@@ -41,7 +41,7 @@
                         <group name="material_last_manufacturer-ref">
                             <field name="shoes_model_material_ids">
                                 <list editable="bottom">
-                                    <field name="material_id" required="1"/>
+                                    <field name="material_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
                                     <field name="shoes_last_id" required="1"/>
                                     <field name="name" required="1"/>
                                     <field name="shoes_product_tmpl_id" readonly="1" optional="show"/>
