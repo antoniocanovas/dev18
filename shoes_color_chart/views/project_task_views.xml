@@ -17,7 +17,7 @@
                 <field name="material_value_ids" widget="many2many_tags" optional="hide"/>
             </xpath>
             <xpath expr="//field[@name='material_id']" position="attributes">
-                <attribute name="material_id" domain="[('id','in',shoes_model_material_ids)]"/>
+                <attribute name="material_id" domain="[('id','in',material_value_ids)]"/>
             </xpath>
 
             <field name="description" position="after">
