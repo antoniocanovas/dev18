@@ -11,9 +11,12 @@ class ShoesModelMaterial(models.Model):
     def _get_manufacturer_campaign_materials(self):
         for record in self:
             materials = set()
-            for li in record.task_id.project_id.shoes_color_chart_item_ids:
-                if li.manufacturer_id == record.task_id.manufacturer_id:
-                    materials.add(li.material_id.id)
+            shoes_color_chart_items = self.env['shoes.color.chart.item'].search([
+                ('project_id','=',record.task_id.project_id.id),
+                ('manufacturer_id','=',record.task_id.manufacturer_id.id)
+            ])
+            for li in shoes_color_chart_items:
+                materials.add(li.material_id.id)
             record['material_value_ids'] = [(6,0,materials)]
     material_value_ids = fields.Many2many('product.material', string='Materials',
                                           compute='_get_manufacturer_campaign_materials')
