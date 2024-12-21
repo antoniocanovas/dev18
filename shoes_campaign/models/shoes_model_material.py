@@ -13,4 +13,4 @@ class ShoesModelMaterial(models.Model):
     shoes_last_id = fields.Many2one('shoes.last', string='Last')
     shoes_product_tmpl_id = fields.Many2one('product.template', string='Product')
     task_id = fields.Many2one('project.task', string='Task')
-    project_id = fields.Many2one(related='task_id.project_id')
+    shoes_campaign_id = fields.Many2one(related='task_id.project_id')

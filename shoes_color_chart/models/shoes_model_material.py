@@ -12,7 +12,7 @@ class ShoesModelMaterial(models.Model):
         for record in self:
             materials = set()
             shoes_color_chart_items = self.env['shoes.color.chart.item'].search([
-                ('project_id','=',record.task_id.project_id.id),
+                ('shoes_campaign_id','=',record.task_id.project_id.id),
                 ('manufacturer_id','=',record.task_id.manufacturer_id.id)
             ])
             for li in shoes_color_chart_items:
