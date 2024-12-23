@@ -14,16 +14,6 @@
                             invisible="not is_shoes_campaign"/>
                 </xpath>
 
-                <!--
-                <xpath expr="//field[@name='active']" position="after">
-                    <field name="shoes_product_tmpl_id"
-                           domain="[('type','=','consu'),('is_pair','=',False)]"
-                           invisible="not is_shoes_campaign"
-                           readonly="shoes_product_tmpl_id"
-                    />
-                </xpath>
-                -->
-
                 <xpath expr="//field[@name='description']" position="before">
                     <group name="shoes_dealer_campaign" invisible="not is_shoes_campaign">
                         <group>
@@ -52,6 +42,9 @@
                     </group>
 
                     <field name="is_shoes_campaign" invisible="1"/>
+                    <!-- Pendiente calcular y poner como invisible: -->
+                    <field name="pending_product_material_ids" widget="many2many_tags"/>
+
                 </xpath>
             </data>
 

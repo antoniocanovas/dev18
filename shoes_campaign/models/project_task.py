@@ -26,6 +26,8 @@ class ProjectTask(models.Model):
     )
 
     shoes_model_material_ids = fields.One2many('shoes.model.material', 'task_id', string='Materials')
+    pending_product_material_ids = fields.Many2many('product.material', string='Pending materials',
+                                                    help='Pending product materials creation.')
 
     intrastat_duty_id = fields.Many2one('intrastat.duty', string='Duty estimation', copy=False)
 

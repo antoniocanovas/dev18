@@ -8,15 +8,19 @@ class ShoesProductCreationWizard(models.TransientModel):
     _name = "shoes.product.creation.wizard"
     _description = "Shoes product creation wizard"
 
-    """ Crear productos, proponiendo todos los restantes (deseleccionables) y asignado a la línea el nuevo creado):
-    #    name = fields.Char = fields.Char('Name', related='shoes_campaign_id.name')
-    shoes_campaign_id = fields.Many2one('project.project', string="Campaign")
-    manufacturer_id = fields.Many2one('res.partner', string="Manufacturer", required=True)
-    material_id = fields.Many2one('product.material', string="Material", required=True)
-    color_value_ids = fields.Many2many('product.attribute.value', string='Colors', required=True)
-    color_attribute_id = fields.Many2one("product.attribute", related='shoes_campaign_id.color_attribute_id')
+    # Crear productos, proponiendo todos los restantes (deseleccionables) y asignado a la línea el nuevo creado):
+    name = fields.Char = fields.Char('Name', related='shoes_campaign_id.name')
+    task_id = fields.Many2ome('project.task')
+
+    shoes_campaign_id = fields.Many2one(related='task_id.project_id')
+    manufacturer_id = fields.Many2one(related='task_id.manufacturer_id')
+    material_ids = fields.Many2one('product.material', string="Materials", required=True)
+    pending_product_material_ids = fields.Many2many(related='task_id.pending_product_material_ids')
+
 
     def action_apply(self):
+        return True
+        """
         # Chequeo de referencias y códigos requeridos para componer el campo name:
         message = ""
         if self.manufacturer_id.ref == "":
@@ -36,4 +40,4 @@ class ShoesProductCreationWizard(models.TransientModel):
                 'color_value_id': li.id,
                 'name': self.shoes_campaign_id.name + self.manufacturer_id.ref + self.material_id.code
             })
-    """
+        """
