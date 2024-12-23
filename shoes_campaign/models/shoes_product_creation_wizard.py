@@ -23,7 +23,6 @@ class ShoesProductCreationWizard(models.TransientModel):
     def action_apply(self):
         return True
         """
-        def create_shoe_model(self):
             if not self.shoes_product_tmpl_id.id:
                 newproduct = self.env['product.template'].with_context(default_task_id=False, default_project_id=False).create({
                     'name': self.name,
