@@ -17,10 +17,11 @@ class ShoesProductCreationWizard(models.TransientModel):
 
     pending_product_material_ids = fields.Many2many(related='task_id.pending_product_material_ids')
 
-    @api.depends('pending_product_material_ids')
+    @api.depends('task_id')
     def _get_default_all_materials(self):
-        self.material_ids = [(6,0,self.pending_product_material_ids.ids)]
-    material_ids = fields.Many2one('product.material', string="Materials", required=True, default='_get_default_all_materials')
+        self.material_ids = [(6,0,self.task_id.pending_product_material_ids.ids)]
+    material_ids = fields.Many2one('product.material', string="Materials", required=True, store=True,
+                                   compute='_get_default_all_materials')
 
 
     def action_apply(self):
