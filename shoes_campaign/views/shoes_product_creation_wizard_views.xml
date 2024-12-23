@@ -5,7 +5,6 @@
         <field name="model">shoes.product.creation.wizard</field>
         <field name="arch" type="xml">
             <form>
-      <!--
                 <group>
                     <field name="name" readonly="1"/>
                     <field name="task_id" readonly="1"/>
@@ -18,16 +17,15 @@
                     <field name="shoes_model_material_ids"/>
                 </group>
                 <footer>
-                <button
-                        name="action_apply"
-                        class="btn btn-primary"
-                        string="Create"
-                        type="object"
+                    <button
+                            name="action_apply"
+                            class="btn btn-primary"
+                            string="Create"
+                            type="object"
                     />
-                or
-                <button special="cancel" class="btn btn-secondary" string="Cancel" />
-            </footer>
-       -->
+                    or
+                    <button special="cancel" class="btn btn-secondary" string="Cancel" />
+                </footer>
             </form>
         </field>
     </record>
