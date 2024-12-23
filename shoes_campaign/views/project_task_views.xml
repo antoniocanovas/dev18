@@ -42,7 +42,26 @@
                             <field name="shoes_pair_weight_id"/>
                             <field name="intrastat_duty_id"/>
                         </group>
-
+                    </group>
+                    <group>
+                        <group name="shoes_detail_left">
+                            <field name="shoes_type"/>
+                            <field name="shoes_closure_id"/>
+                            <field name="shoes_material_main_id"/>
+                            <field name="shoes_material_external1_id"/>
+                            <field name="shoes_material_external1_percent"/>
+                            <field name="shoes_material_external2_id"/>
+                            <field name="shoes_material_external2_percent"/>
+                        </group>
+                        <group name="shoes_detail_right">
+                            <field name="shoes_material_lin_internal1_id"/>
+                            <field name="shoes_material_lin_internal1_percent"/>
+                            <field name="shoes_material_lin_internal2_id"/>
+                            <field name="shoes_material_lin_internal2_percent"/>
+                            <field name="shoes_height"/>
+                            <field name="shoes_shalft_categ"/>
+                            <field name="shoes_with"/>
+                        </group>
                         <group name="material_last_manufacturer-ref">
                             <field name="shoes_model_material_ids" invisible="not manufacturer_id">
                                 <list editable="bottom">

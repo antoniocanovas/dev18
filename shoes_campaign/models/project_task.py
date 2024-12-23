@@ -50,4 +50,4 @@ class ProjectTask(models.Model):
     shoes_height = fields.Float('Shalft height')
     shoes_shalft_categ = fields.Selection([('long','Long'),('half','Half'),('lower','Lower')], string='Shaft type')
     shoes_type = fields.Many2one('shoes.type', string='Type')
-    shoes_with = fields.Char('With')
+    shoes_with = fields.Char('With', translate=True)
