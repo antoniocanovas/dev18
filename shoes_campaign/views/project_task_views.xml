@@ -1,6 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
+    <!-- WIZARD creación de productos (window action): -->
+    <record id="shoes_product_creation_wizard_action_window" model="ir.actions.act_window">
+        <field name="name">Product creation</field>
+        <field name="res_model">shoes.product.creation.wizard</field>
+        <field name="view_id" ref="shoes_product_creation_wizard_form" />
+        <field name="context">{'task_id':active_id}</field>
+        <field name="target">new</field>
+    </record>
+
     <!-- Task customization : -->
     <record id="shoes_campaign_task_inh_form" model="ir.ui.view">
         <field name="name">shoes.dealer.campaign.task.inh.form</field>

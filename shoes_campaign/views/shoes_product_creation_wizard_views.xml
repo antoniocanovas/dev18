@@ -30,12 +30,4 @@
         </field>
     </record>
 
-    <record id="shoes_product_creation_wizard_action_window" model="ir.actions.act_window">
-        <field name="name">Product creation</field>
-        <field name="res_model">shoes.product.creation.wizard</field>
-        <field name="view_id" ref="shoes_product_creation_wizard_form" />
-        <field name="context">{'task_id':active_id}</field>
-        <field name="target">new</field>
-    </record>
-
 </odoo>
