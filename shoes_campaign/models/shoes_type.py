@@ -8,4 +8,4 @@ class ShoesType(models.Model):
     _name = 'shoes.type'
     _description = 'Shoes type'
 
-    name = fields.Char('Name', required=True translate=True)
+    name = fields.Char('Name', required=True, translate=True)
