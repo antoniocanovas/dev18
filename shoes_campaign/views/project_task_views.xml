@@ -18,6 +18,7 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <data>
+                <!--
                 <xpath expr="//header" position="inside">
                     <button
                             name="%(shoes_campaign.shoes_product_creation_wizard_action_window)s"
@@ -29,7 +30,7 @@
                     >
                     </button>
                 </xpath>
-
+                -->
                 <xpath expr="//field[@name='description']" position="before">
                     <group name="shoes_dealer_campaign" invisible="not is_shoes_campaign">
                         <group>
