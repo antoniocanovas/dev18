@@ -14,7 +14,7 @@
             </xpath>
 
             <xpath expr="//field[@name='shoes_model_material_ids']/list" position="inside">
-                <field name="material_value_ids" widget="many2many_tags" optional="hide"/>
+                <field name="material_value_ids" widget="many2many_tags" column_invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='material_id']" position="attributes">
                 <attribute name="domain">[('id','in',material_value_ids)]</attribute>>
