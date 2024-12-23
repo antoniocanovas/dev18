@@ -11,10 +11,16 @@
                     <field name="shoes_campaign_id" readonly="1"/>
                     <field name="manufacturer_id" readonly="1"/>
                     <field name="material_ids"
+                           domain="[('id','in',shoes_model_material_ids),('shoes_product_tmpl_id','=',False)]"
+                           options="{'no_create':true, 'no_create_edit':true}"
+                    />
+                    <field name="shoes_model_material_ids"/>
+                    <!--
+                    <field name="material_ids"
                            domain="[('id','in',pending_product_material_ids)]"
                            options="{'no_create':true, 'no_create_edit':true}"
                     />
-                    <field name="pending_product_material_ids" widget="many2many_tags" invisible="1"/>
+                    <field name="pending_product_material_ids" widget="many2many_tags" invisible="1"/> -->
                 </group>
                 <footer>
                 <button
