@@ -26,22 +26,3 @@ class ShoesProductCreationWizard(models.TransientModel):
 
     def action_apply(self):
         return True
-        """
-        for li in material_ids:
-            newproduct = self.env['product.template'].with_context(default_task_id=False, default_project_id=False).create({
-                'name': self.name,
-                'type': 'consu',
-                'is_storable': True,
-                'shoes_campaign_id': self.task_id.project_id.id,
-                'shoes_campaign_ids':[(6,0,[self.task_id.project_id.id])],
-                'product_brand_id':self.task_id.product_brand_id.id,
-                'manufacturer_id':self.manufacturer_id.id,
-                'gender': self.task_id.gender,
-                'shoes_pair_weight_id': self.task_id.shoes_pair_weight_id.id,
-                'material_id': li.id,
-                'shoes_task_id': self.task_id.id,
-                'service_tracking': 'no',
-                'intrastat_duty_id': self.task_id.intrastat_duty_id.id,
-            })
-            #self.shoes_product_tmpl_id = newproduct.id
-        """
