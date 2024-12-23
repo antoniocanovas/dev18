@@ -11,7 +11,7 @@
             <data>
                 <xpath expr="//header" position="inside">
                     <button
-                            name="shoes_product_creation_wizard_action_window"
+                            name="%(shoes_campaign.shoes_product_creation_wizard_action_window)s"
                             invisible="not is_shoes_campaign"
                             string="Products creation"
                             groups="project.group_project_user"

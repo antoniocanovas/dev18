@@ -37,9 +37,9 @@
     """,
     "data": [
         'views/project_project_views.xml',
-        'views/project_task_views.xml',
         'views/product_template_views.xml',
         'views/shoes_product_creation_wizard_views.xml',
+        'views/project_task_views.xml',
         'security/ir.model.access.csv',
     ],
     "demo": [],
