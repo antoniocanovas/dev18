@@ -51,7 +51,7 @@ class ProjectTask(models.Model):
     shoes_shalft_categ = fields.Selection([('long','Long'),('half','Half'),('lower','Lower')], string='Shaft type')
     shoes_type = fields.Many2one('shoes.type', string='Type')
     shoes_with = fields.Char('With', translate=True)
-    exwork = fields.Monetary("Exwork", store=True, copy=True, tracking=10)
+    exwork = fields.Float("Exwork", store=True, copy=True, tracking=10)
 
     @api.depends("manufacturer_id")
     def _get_exwork_currency(self):
