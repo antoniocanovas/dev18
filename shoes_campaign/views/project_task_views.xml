@@ -23,7 +23,7 @@
                             name="shoes_campaign.shoes_product_creation_wizard_action_window"
                             invisible="not is_shoes_campaign"
                             string="Products creation"
-                            type="object"
+                            type="action"
                             context="{'default_task_id':id}"
                     >
                     </button>
