@@ -24,6 +24,7 @@
                             invisible="not is_shoes_campaign"
                             string="Products creation"
                             type="action"
+                            groups="project.group_project_user"
                             context="{'default_task_id':active_id}"
                     >
                     </button>
