@@ -6,7 +6,7 @@
         <field name="name">shoes.model.material.default.list</field>
         <field name="model">shoes.model.material</field>
         <field name="arch" type="xml">
-            <list>
+            <list create="False" edit="False">
                 <field name="material_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
                 <field name="shoes_last_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
                 <field name="manufacturer_ref" required="1"/>
