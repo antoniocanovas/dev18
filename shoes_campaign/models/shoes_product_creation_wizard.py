@@ -25,6 +25,8 @@ class ShoesProductCreationWizard(models.TransientModel):
     material_ids = fields.Many2many('shoes.model.material', name='Model materials')
 
     def action_apply(self):
+        return True
+        """
         for li in material_ids:
             newproduct = self.env['product.template'].with_context(default_task_id=False, default_project_id=False).create({
                 'name': self.name,
@@ -42,3 +44,4 @@ class ShoesProductCreationWizard(models.TransientModel):
                 'intrastat_duty_id': self.task_id.intrastat_duty_id.id,
             })
             #self.shoes_product_tmpl_id = newproduct.id
+        """
