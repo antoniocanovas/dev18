@@ -9,7 +9,7 @@ class ShoesProductCreationWizard(models.TransientModel):
     _description = "Shoes product creation wizard"
 
     # Crear productos, proponiendo todos los restantes (deseleccionables) y asignado a la línea el nuevo creado):
-    name = fields.Char = fields.Char('Name', related='shoes_campaign_id.name')
+    name = fields.Char = fields.Char('Name', related='task_id.name')
     task_id = fields.Many2ome('project.task')
 
     shoes_campaign_id = fields.Many2one(related='task_id.project_id')
