@@ -47,9 +47,6 @@
                             </field>
                         </group>
                         <field name="is_shoes_campaign" invisible="1"/>
-                        <!--
-                        <field name="pending_product_material_ids" widget="many2many_tags" invisible="1"/>
-                        -->
                     </group>
 
                 </xpath>
