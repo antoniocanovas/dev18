@@ -17,12 +17,8 @@ class ShoesProductCreationWizard(models.TransientModel):
 
     pending_product_material_ids = fields.Many2many(related='task_id.pending_product_material_ids')
 
-    @api.depends('task_id')
-    def _get_default_all_materials(self):
-        for record in self:
-            record['material_ids'] = [(6,0,record.task_id.pending_product_material_ids.ids)]
     material_ids = fields.Many2one('product.material', string="Materials", required=True, store=True,
-                                   readonly=False, compute='_get_default_all_materials')
+                                   default=lambda self:self.pending_product_material_ids.ids)
 
 
     def action_apply(self):
