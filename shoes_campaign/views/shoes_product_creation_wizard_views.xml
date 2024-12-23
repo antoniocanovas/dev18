@@ -5,12 +5,12 @@
         <field name="model">shoes.product.creation.wizard</field>
         <field name="arch" type="xml">
             <form>
+      <!--
                 <group>
                     <field name="name" readonly="1"/>
                     <field name="task_id" readonly="1"/>
                     <field name="shoes_campaign_id" readonly="1"/>
                     <field name="manufacturer_id" readonly="1"/>
-      <!--
                     <field name="material_ids"
                            domain="[('id','in',shoes_model_material_ids),('shoes_product_tmpl_id','=',False)]"
                            options="{'no_create':true, 'no_create_edit':true}"
