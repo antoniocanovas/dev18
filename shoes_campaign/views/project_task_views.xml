@@ -43,7 +43,7 @@
                             <field name="intrastat_duty_id"/>
                         </group>
                     </group>
-                    <group>
+                    <group name="shoes_model_details" string="Shoes details" invisible="not is_shoes_campaign">
                         <group name="shoes_detail_left">
                             <field name="shoes_type"/>
                             <field name="shoes_closure_id"/>
@@ -62,6 +62,8 @@
                             <field name="shoes_shalft_categ"/>
                             <field name="shoes_with"/>
                         </group>
+                    </group>
+                    <group name="material_variants" string="Material variants" invisible="not is_shoes_campaign">
                         <group name="material_last_manufacturer-ref">
                             <field name="shoes_model_material_ids" invisible="not manufacturer_id">
                                 <list editable="bottom">
