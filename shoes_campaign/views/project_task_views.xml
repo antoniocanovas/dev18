@@ -10,8 +10,13 @@
         <field name="arch" type="xml">
             <data>
                 <xpath expr="//header" position="inside">
-                    <button string="Create product" name="create_shoe_model" type="object"
-                            invisible="not is_shoes_campaign"/>
+                    <button
+                            name="%(shoes_product_creation_wizard_action_window)s"
+                            invisible="not is_shoes_campaign"
+                            string="Products creation"
+                            groups="project.group_project_user"
+                            type="action">
+                    </button>
                 </xpath>
 
                 <xpath expr="//field[@name='description']" position="before">
