@@ -1,7 +1,7 @@
 # Copyright 2024 Punt Sistemes
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import fields, models
+from odoo import fields, models, api, _
 
 
 class ShoesProductCreationWizard(models.TransientModel):
