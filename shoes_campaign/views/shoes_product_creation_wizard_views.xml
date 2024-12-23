@@ -11,7 +11,8 @@
                     <field name="shoes_campaign_id" readonly="1"/>
                     <field name="manufacturer_id" readonly="1"/>
                     <field name="material_ids"
-                           domain="[('is_shoes_campaign','=',True),('id','!=',shoes_campaign_id)]"/>
+                           domain="[('id','in',pending_product_material_ids)]"/>
+                    <field name="pending_product_material_ids" widget="many2many_tags"/>
                 </group>
                 <footer>
                 <button
