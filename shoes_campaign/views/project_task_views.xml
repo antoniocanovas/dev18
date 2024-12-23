@@ -38,7 +38,6 @@
                             <field name="manufacturer_id" readonly="shoes_model_material_ids" force_save="1"/>
                         </group>
                         <group>
-                            <field name="shoes_last_id"/>
                             <field name="gender"/>
                             <field name="shoes_pair_weight_id"/>
                             <field name="intrastat_duty_id"/>
