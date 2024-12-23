@@ -41,25 +41,6 @@ class ProjectTask(models.Model):
 
     intrastat_duty_id = fields.Many2one('intrastat.duty', string='Duty estimation', copy=False)
 
-    def create_shoe_model(self):
-        if not self.shoes_product_tmpl_id.id:
-            newproduct = self.env['product.template'].with_context(default_task_id=False, default_project_id=False).create({
-                'name': self.name,
-                'type': 'consu',
-                'is_storable': True,
-                'shoes_campaign_id': self.project_id.id,
-                'shoes_campaign_ids':[(6,0,[self.project_id.id])],
-                'product_brand_id':self.product_brand_id.id,
-                'manufacturer_id':self.manufacturer_id.id,
-                'gender': self.gender,
-                'shoes_pair_weight_id': self.shoes_pair_weight_id.id,
-                #'material_id': self.material_id.id,
-                'shoes_task_id': self.id,
-                'service_tracking': 'no',
-                'intrastat_duty_id': self.intrastat_duty_id.id,
-            })
-            self.shoes_product_tmpl_id = newproduct.id
-
     @api.constrains('create_date')
     def task_code_sequence(self):
         prefix = self.project_id.task_code_prefix
