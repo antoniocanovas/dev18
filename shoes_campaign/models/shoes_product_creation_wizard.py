@@ -17,8 +17,8 @@ class ShoesProductCreationWizard(models.TransientModel):
 
     pending_product_material_ids = fields.Many2many(related='task_id.pending_product_material_ids')
 
-    material_ids = fields.Many2one('product.material', string="Materials", required=True, store=True,
-                                   default=lambda self:self.pending_product_material_ids.ids)
+    material_ids = fields.Many2many('product.material', string="Materials", required=True,
+                                    default=lambda self:self.pending_product_material_ids.ids)
 
 
     def action_apply(self):
