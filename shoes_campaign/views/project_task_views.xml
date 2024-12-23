@@ -26,7 +26,6 @@
                             string="Products creation"
                             type="action"
                             groups="project.group_project_user"
-                            context="{'default_task_id':id}"
                     >
                     </button>
                 </xpath>
