@@ -16,8 +16,12 @@ class ShoesModelMaterial(models.Model):
                 ('shoes_campaign_id','=',record.task_id.project_id.id),
                 ('manufacturer_id','=',record.task_id.manufacturer_id.id)
             ])
+            used_materials = set()
+            for li in record.shoes_model_material_ids:
+                used_materials.add(li.material_id.id)
             for li in shoes_color_chart_items:
-                materials.add(li.material_id.id)
+                if li.material_id.id not in used_materials:
+                    materials.add(li.material_id.id)
             record['material_value_ids'] = [(6,0,materials)]
     material_value_ids = fields.Many2many('product.material', string='Materials',
                                           compute='_get_manufacturer_campaign_materials')
