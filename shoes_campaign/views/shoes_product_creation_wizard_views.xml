@@ -11,9 +11,14 @@
                     <field name="manufacturer_id" readonly="1"/>
                     <field name="material_ids"
                            domain="[('id','in',shoes_model_material_ids),('shoes_product_tmpl_id','=',False)]"
-                           options="{'no_create':true, 'no_create_edit':true}"
-                    />
-                    <field name="shoes_model_material_ids"/>
+                           options="{'no_create':true, 'no_create_edit':true}">
+                        <list>
+                            <field name="material_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
+                            <field name="shoes_last_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
+                            <field name="name" required="1"/>
+                        </list>
+                    </field>
+                    <field name="shoes_model_material_ids" invisible="1"/>
                 </group>
                 <footer>
                     <button
