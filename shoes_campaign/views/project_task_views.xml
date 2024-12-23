@@ -41,7 +41,7 @@
                             <field name="gender"/>
                             <field name="shoes_pair_weight_id"/>
                             <field name="intrastat_duty_id"/>
-                            <field name="exwork" options="{'currency_field':'exwork_currency_id'}"/>
+                            <field name="exwork" widget="monetary" options="{'currency_field':'exwork_currency_id'}"/>
                         </group>
                     </group>
                     <group name="shoes_model_details" string="Shoes details" invisible="not is_shoes_campaign">
