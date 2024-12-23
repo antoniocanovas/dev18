@@ -15,7 +15,10 @@ class ShoesProductCreationWizard(models.TransientModel):
     shoes_campaign_id = fields.Many2one(related='task_id.project_id')
     manufacturer_id = fields.Many2one(related='task_id.manufacturer_id')
 
-    shoes_model_material_ids = fields.Many2many(related='task_id.shoes_model_material_ids')
+    def _get_shoes_model_material_ids(self):
+        self.shoes_model_material_ids = [(6,0,self.task_id.shoes_model_material_ids.ids)]
+    shoes_model_material_ids = fields.Many2many('Task Model-materials', compute='_get_shoes_model_material_ids')
+
     material_ids = fields.Many2many('shoes.model.material', name='Model materials')
 
     def action_apply(self):
