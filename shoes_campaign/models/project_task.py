@@ -51,3 +51,22 @@ class ProjectTask(models.Model):
     shoes_shalft_categ = fields.Selection([('long','Long'),('half','Half'),('lower','Lower')], string='Shaft type')
     shoes_type = fields.Many2one('shoes.type', string='Type')
     shoes_with = fields.Char('With', translate=True)
+    exwork = fields.Monetary("Exwork", store=True, copy=True, tracking=10)
+
+    @api.depends("manufacturer_id")
+    def _get_exwork_currency(self):
+        for record in self:
+            if (
+                    record.manufacturer_id.id
+                    and record.manufacturer_id.property_purchase_currency_id.id
+            ):
+                currency = record.manufacturer_id.property_purchase_currency_id.id
+            elif (
+                    record.manufacturer_id.id
+                    and not record.manufacturer_id.property_purchase_currency_id.id
+            ):
+                currency = self.env.company.currency_id.id
+            else:
+                currency = self.env.user.company_id.exwork_currency_id.id
+            record["exwork_currency_id"] = currency
+    exwork_currency_id = fields.Many2one("res.currency", compute="_get_exwork_currency")

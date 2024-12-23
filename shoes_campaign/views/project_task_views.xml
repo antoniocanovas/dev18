@@ -41,6 +41,7 @@
                             <field name="gender"/>
                             <field name="shoes_pair_weight_id"/>
                             <field name="intrastat_duty_id"/>
+                            <field name="exwork" options="{'currency_field':'exwork_currency_id'}"/>
                         </group>
                     </group>
                     <group name="shoes_model_details" string="Shoes details" invisible="not is_shoes_campaign">
@@ -74,6 +75,7 @@
                         </list>
                     </field>
                     <field name="is_shoes_campaign" invisible="1"/>
+                    <field name="exwork_currency_id" invisible="1"/>
                 </xpath>
             </data>
 
