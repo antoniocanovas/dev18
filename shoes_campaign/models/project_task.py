@@ -33,7 +33,7 @@ class ProjectTask(models.Model):
             materials = set()
             for li in record.shoes_model_material_ids:
                 if not li.shoes_product_tmpl_id.id:
-                    materials.add('li.material_id.id')
+                    materials.add(li.material_id.id)
             record['pending_product_material_ids'] = [(6,0,materials)]
     pending_product_material_ids = fields.Many2many('product.material', string='Pending materials',
                                                     compute='_get_pending_product_material_ids',
