@@ -6,7 +6,7 @@
         <field name="name">Product creation</field>
         <field name="res_model">shoes.product.creation.wizard</field>
         <field name="view_id" ref="shoes_product_creation_wizard_form"/>
-        <field name="context">{'default_task_id':id}</field>
+        <field name="context">{'default_task_id':active_id}</field>
         <field name="target">new</field>
     </record>
 
