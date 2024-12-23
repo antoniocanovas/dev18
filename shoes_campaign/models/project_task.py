@@ -26,7 +26,17 @@ class ProjectTask(models.Model):
     )
 
     shoes_model_material_ids = fields.One2many('shoes.model.material', 'task_id', string='Materials')
+
+    @api.depends('shoes_model_material_ids.shoes_product_tmpl_id')
+    def _get_pending_product_material_ids(self):
+        for record in self:
+            materials = set()
+            for li in record.shoes_model_material_ids:
+                if not li.shoes_product_tmpl_id.id:
+                    materials.add('li.material_id.id')
+            record['pending_product_material_ids'] = [(6,0,materials)]
     pending_product_material_ids = fields.Many2many('product.material', string='Pending materials',
+                                                    compute='_get_pending_product_material_ids',
                                                     help='Pending product materials creation.')
 
     intrastat_duty_id = fields.Many2one('intrastat.duty', string='Duty estimation', copy=False)
