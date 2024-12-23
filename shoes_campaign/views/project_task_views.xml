@@ -43,12 +43,11 @@
                                     <field name="task_id" column_invisible="1"/>
                                 </list>
                             </field>
+                            <field name="is_shoes_campaign" invisible="1"/>
+                            <!-- Pendiente calcular y poner como invisible: -->
+                            <field name="pending_product_material_ids" widget="many2many_tags"/>
                         </group>
                     </group>
-
-                    <field name="is_shoes_campaign" invisible="1"/>
-                    <!-- Pendiente calcular y poner como invisible: -->
-                    <field name="pending_product_material_ids" widget="many2many_tags"/>
 
                 </xpath>
             </data>
