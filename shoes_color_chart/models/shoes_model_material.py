@@ -8,7 +8,7 @@ class ShoesModelMaterial(models.Model):
     _inherit = 'shoes.model.material'
 
     # Valores heredados de la carta de color, PARA EL FABRICANTE DEL MODELO:
-    @api.depends('task_id')
+    @api.depends('task_id','task_id.manufacturer_id')
     def _get_manufacturer_campaign_materials(self):
         for record in self:
             materials = set()
