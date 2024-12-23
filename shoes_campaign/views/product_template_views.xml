@@ -14,8 +14,8 @@
                 <field name="shoes_task_id" readonly="shoes_task_id" force_save="1"
                        domain="[('is_shoes_campaign','=',True),('project_id','=',shoes_campaign_id)]"/>
             </xpath>
-            <!-- No editar el material, si se ha creado desde un boceto: -->
-            <xpath expr="//field[@name='material_id']" position="attributes">
+            <!-- No editar la horma, si se ha creado desde un boceto: -->
+            <xpath expr="//field[@name='shoes_last_id']" position="attributes">
                 <attribute name="readonly">is_pair or product_tmpl_set_id or shoes_task_id</attribute>
             </xpath>
         </field>
