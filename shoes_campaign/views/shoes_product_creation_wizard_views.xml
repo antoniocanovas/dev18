@@ -14,7 +14,7 @@
                            domain="[('id','in',pending_product_material_ids)]"
                            options="{'no_create':true, 'no_create_edit':true}"
                     />
-                    <field name="pending_product_material_ids" widget="many2many_tags"/>
+                    <field name="pending_product_material_ids" widget="many2many_tags" groups="base.group_no_one"/>
                 </group>
                 <footer>
                 <button
