@@ -17,7 +17,7 @@ class ShoesModelMaterial(models.Model):
                 ('manufacturer_id','=',record.task_id.manufacturer_id.id)
             ])
             used_materials = set()
-            for li in record.shoes_model_material_ids:
+            for li in record.task_id.shoes_model_material_ids:
                 used_materials.add(li.material_id.id)
             for li in shoes_color_chart_items:
                 if li.material_id.id not in used_materials:
