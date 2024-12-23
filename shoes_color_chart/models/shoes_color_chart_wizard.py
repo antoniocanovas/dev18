@@ -34,5 +34,5 @@ class ShoesColorChartWizard(models.TransientModel):
                 'manufacturer_id': self.manufacturer_id.id,
                 'material_id': self.material_id.id,
                 'color_value_id': li.id,
-                'name': self.shoes_campaign_id.name + self.manufacturer_id.ref + self.material_id.code
+                'name': self.shoes_campaign_id.name + "-" + self.material_id.code + "-" + self.manufacturer_id.ref + li.name
             })
