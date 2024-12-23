@@ -66,7 +66,7 @@
                     <group name="material_variants" string="Material variants" invisible="not is_shoes_campaign">
                         <group name="material_last_manufacturer-ref">
                             <field name="shoes_model_material_ids" invisible="not manufacturer_id">
-                                <list editable="bottom">
+                                <list editable="bottom" colspan="2">
                                     <field name="material_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
                                     <field name="shoes_last_id" required="1" options="{'no_create':true, 'no_create_edit':true}"/>
                                     <field name="manufacturer_ref" required="1"/>
