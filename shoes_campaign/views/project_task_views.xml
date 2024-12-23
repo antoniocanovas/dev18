@@ -20,10 +20,10 @@
             <data>
                 <xpath expr="//header" position="inside">
                     <button
-                            name="%(shoes_product_creation_wizard_action_window)s"
+                            name="shoes_campaign.shoes_product_creation_wizard_action_window"
                             invisible="not is_shoes_campaign"
                             string="Products creation"
-                            type="action"
+                            type="object"
                             context="{'default_task_id':id}"
                     >
                     </button>
