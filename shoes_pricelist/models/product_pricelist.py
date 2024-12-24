@@ -4,8 +4,8 @@ from odoo import fields, models, api
 from odoo.exceptions import UserError
 
 class ProductPricelist(models.Model):
-    _inherit = ["product.pricelist"]
-
+    _inherit = ["product.pricelist", "mail.thread"]
+#, "mail.thread", "mail.activity.mixin
 
     shoes_campaign_id = fields.Many2one("project.project", string="Campaign", store=True, copy=False, tracking=16)
     margin = fields.Float("Margin %", store=True, copy=True, tracking=16)
