@@ -33,10 +33,7 @@
         Shoes dealer pricelist. 
     """,
     "data": [
-#        'security/ir.model.access.csv',
-#        'data/shoes_product_sku_item.xml',
-#        'views/res_company_views.xml',
-#        'data/server_actions.xml',
+        'views/product_pricelist_views.xml',
     ],
     "demo": [],
     "installable": True,

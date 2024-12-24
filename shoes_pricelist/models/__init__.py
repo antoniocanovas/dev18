@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-#from . import product.pricelist
+from . import product_pricelist
+
