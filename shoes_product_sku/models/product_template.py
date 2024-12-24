@@ -38,13 +38,13 @@ class ProductTemplate(models.Model):
                     if item.id == id_color:          code += code_color
                 product['default_code'] = code
 
-    def create_shoe_pairs(self)
+    def create_shoe_pairs(self):
         self.ensure_one()
         res = super().create_shoe_pairs()
         if self.env.company.shoes_sku_update:
             self._update_product_product_sku()
 
-    def create_single_products(self)
+    def create_single_products(self):
         self.ensure_one()
         res = super().create_single_products()
         if self.env.company.shoes_sku_update:
