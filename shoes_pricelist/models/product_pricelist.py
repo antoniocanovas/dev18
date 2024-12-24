@@ -3,7 +3,7 @@
 from odoo import fields, models, api
 from odoo.exceptions import UserError
 
-class ProductPricelist(models.Model):
+class product.pricelist(models.Model):
     _inherit = ["product.pricelist", "mail.thread", "mail.activity.mixin"]
 
 
