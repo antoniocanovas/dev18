@@ -20,30 +20,23 @@
 ##############################################################################
 
 {
-    "name": 'Shoes Dealer Campaign',
+    "name": 'Shoes Pricelist',
     "version": '18.0',
     "depends": [
-        'product',
-        'project',
-        'product_brand',
+        'sale_management',
         'shoes_dealer',
-        'intrastat_duty',
     ],
     "author": "Punt Sistemes",
-    "category": 'Project',
+    "category": 'Sales',
     "website": "https://www.puntsistemes.es",
     "description": """
-        Project attributes to shoes dealer campaign and product creation from tasks. 
+        Shoes dealer pricelist. 
     """,
     "data": [
-        'views/project_project_views.xml',
-        'views/product_template_views.xml',
-        'views/shoes_product_creation_wizard_views.xml',
-        'views/project_task_views.xml',
-        'views/shoes_model_material_views.xml',
-        'views/shoes_type_views.xml',
-        'views/shoes_closure_views.xml',
-        'security/ir.model.access.csv',
+#        'security/ir.model.access.csv',
+#        'data/shoes_product_sku_item.xml',
+#        'views/res_company_views.xml',
+#        'data/server_actions.xml',
     ],
     "demo": [],
     "installable": True,
