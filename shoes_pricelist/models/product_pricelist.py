@@ -27,7 +27,7 @@ class ProductPricelist(models.Model):
         for li in self.item_ids:
             if li.product_tmpl_id.id not in templates:
                 templates.append(li.product_id.product_tmpl_id.id)
-        self.pnt_product_tmpl_ids = [(6, 0, templates)]
+        self.product_tmpl_ids = [(6, 0, templates)]
 
     product_tmpl_ids = fields.Many2many(
         "product.template",
@@ -44,8 +44,8 @@ class ProductPricelist(models.Model):
                 pares = self.env["product.template"].search(
                     [
                         ("product_tmpl_set_id", "!=", False),
-                        ("shoes_campaign_id", "=", record.pnt_campaign_id.id),
-                        ("product_brand_id", "=", record.pnt_product_brand_id.id),
+                        ("shoes_campaign_id", "=", record.shoes_campaign_id.id),
+                        ("product_brand_id", "=", record.shoes_product_brand_id.id),
                     ]
                 )
                 for p in pares:
@@ -76,29 +76,18 @@ class ProductPricelist(models.Model):
                 pairs = self.env["product.product"].search(
                     [
                         ("product_tmpl_set_id", "!=", False),
-                        ("shoes_campaign_id", "=", record.pnt_campaign_id.id),
-                        ("product_brand_id", "=", record.pnt_product_brand_id.id),
+                        ("shoes_campaign_id", "=", record.shoes_campaign_id.id),
+                        ("product_brand_id", "=", record.shoes_product_brand_id.id),
                     ]
                 )
 
                 pair_templates = []
-                pre_margin = record.pnt_pre_margin_amount
-                landed = record.pnt_landed_amount
-                margin = record.pnt_margin
-                post_margin = record.pnt_post_margin_amount
+                margin = record.margin
 
                 # Pricelist item deletion to avoid old prices of pairs changed of campaign:
-                lines = self.env["product.pricelist.item"].search(
-                    [
-                        ("pricelist_id", "=", record.id),
-                        ("pnt_brand_id", "=", record.pnt_product_brand_id.id),
-                        (
-                            "product_tmpl_id.shoes_campaign_id",
-                            "=",
-                            record.pnt_campaign_id.id,
-                        ),
-                    ]
-                )
+                lines = self.env["product.pricelist.item"].search([
+                    ("pricelist_id", "=", record.id),
+                    ("product_tmpl_id.shoes_campaign_id", "=", record.shoes_campaign_id.id)])
                 lines.unlink()
 
                 for pr in pairs:
@@ -143,8 +132,7 @@ class ProductPricelist(models.Model):
                 sets = self.env["product.product"].search(
                     [
                         ("product_tmpl_single_id", "!=", False),
-                        ("shoes_campaign_id", "=", record.pnt_campaign_id.id),
-                        ("product_brand_id", "=", record.pnt_product_brand_id.id),
+                        ("shoes_campaign_id", "=", record.shoes_campaign_id.id),
                     ]
                 )
                 for pr in sets:
