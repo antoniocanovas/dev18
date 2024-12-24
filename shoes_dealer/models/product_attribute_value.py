@@ -8,6 +8,7 @@ class ProductAttributeValue(models.Model):
     _inherit = 'product.attribute.value'
 
     assortment_id = fields.Many2one('shoes.assortment', string='Template', store=True, copy=False)
+    gender = fields.Selection(related='assortment_id.gender')
 
     # Calcula si el atributo de conjunto debe estar oculto basado en la configuración de la compañía
     def _get_set_hidden(self):
