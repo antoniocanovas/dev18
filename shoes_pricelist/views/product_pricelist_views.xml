@@ -7,24 +7,23 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='pricelist_config']" position="inside">
-                <group name="pricelist_recalculation" string="Product prices recalculation">
-                    <field name="shoes_campaign_id" required="1" widget="selection"/>
-                    <field name="margin" />
-                    <field name="currency_exchange" />
-                </group>
-                <group attrs="{'invisible':['|',('shoes_campaign_id','=',False)]}">
-                    <button class="oe_highlight"
-                            type="object"
-                            name="products_pricelist_recalculation_by_campaign"
-                            string="Recalculate"/>
-                </group>
-                <group name="product_template_in_pricelist">
-                    <field name="product_tmpl_ids" groups="base.group_no_one"/>
-                </group>
-            </xpath>
-
-            <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+            <xpath expr="//notebook" position="inside">
+                <page>
+                    <group name="pricelist_recalculation" string="Product prices recalculation">
+                        <field name="shoes_campaign_id" required="1" widget="selection"/>
+                        <field name="margin" />
+                        <field name="currency_exchange" />
+                    </group>
+                    <group attrs="{'invisible':['|',('shoes_campaign_id','=',False)]}">
+                        <button class="oe_highlight"
+                                type="object"
+                                name="products_pricelist_recalculation_by_campaign"
+                                string="Recalculate"/>
+                    </group>
+                    <group name="product_template_in_pricelist">
+                        <field name="product_tmpl_ids" groups="base.group_no_one"/>
+                    </group>
+                </page>
                 <page string="Pairs" name="pairs_pricelist">
                     <field name="product_tmpl_item_ids">
                         <list>
