@@ -11,8 +11,6 @@ class ProductTemplate(models.Model):
         for r in self:
             if not r.is_pair and not r.is_assortment:
                 continue
-            if not self.env.company.shoes_sku_item_ids.ids:
-                raise UserError("Missing reference mode creation parameters in company configuration.")
 
             config = self.env.company.shoes_sku_item_ids.ids
 
@@ -45,9 +43,13 @@ class ProductTemplate(models.Model):
         res = super().create_shoe_pairs()
         if self.env.company.shoes_sku_update:
             self._update_product_product_sku()
+            shoes_pair = self.product_tmpl_single_id
+            shoes_pair._update_product_product_sku()
 
+    """ no funciona
     def create_single_products(self):
         self.ensure_one()
         res = super().create_single_products()
         if self.env.company.shoes_sku_update:
             self._update_product_product_sku()
+    """
