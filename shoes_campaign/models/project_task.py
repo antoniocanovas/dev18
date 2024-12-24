@@ -14,7 +14,7 @@ class ProjectTask(models.Model):
     manufacturer_id = fields.Many2one('res.partner', string='Manufacturer')
     code = fields.Char('Code')
     gender = fields.Selection(
-        [("man", "Man"), ("woman", "Woman"), ("unisex", "Unisex")],
+        [("man", "Man"), ("woman", "Woman"), ("children", "Children")],
         string="Gender",
         copy=True,
         store=True,
