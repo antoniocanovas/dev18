@@ -8,7 +8,7 @@
         <field name="inherit_id" ref="product.product_pricelist_view"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page>
+                <page string="Recalculation">
                     <group name="pricelist_recalculation" string="Product prices recalculation">
                         <field name="shoes_campaign_id" required="1" widget="selection"/>
                         <field name="margin" />
