@@ -45,11 +45,3 @@ class ProductTemplate(models.Model):
             self._update_product_product_sku()
             shoes_pair = self.product_tmpl_single_id
             shoes_pair._update_product_product_sku()
-
-    """ no funciona
-    def create_single_products(self):
-        self.ensure_one()
-        res = super().create_single_products()
-        if self.env.company.shoes_sku_update:
-            self._update_product_product_sku()
-    """
