@@ -44,7 +44,7 @@ class ProductPricelist(models.Model):
 
     def products_pricelist_recalculation_by_campaign(self):
         for record in self:
-            if record.id=1: # por poner algo, pendiente de estudiar:
+            if record.id == 1: # por poner algo, pendiente de estudiar:
                 pares = self.env["product.template"].search(
                     [
                         ("product_tmpl_set_id", "!=", False),
