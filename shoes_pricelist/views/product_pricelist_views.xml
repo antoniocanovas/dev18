@@ -11,10 +11,11 @@
                 <page string="Recalculation">
                     <group name="pricelist_recalculation" string="Product prices recalculation">
                         <field name="shoes_campaign_id" required="1" widget="selection"/>
+                        <field name="recalculation_type"/>
                         <field name="margin" />
                         <field name="currency_exchange" />
                     </group>
-                    <group invisible="not shoes_campaign_id">
+                    <group invisible="not shoes_campaign_id or not recalculation_type">
                         <button class="oe_highlight"
                                 type="object"
                                 name="products_pricelist_recalculation_by_campaign"

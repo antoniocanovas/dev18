@@ -6,9 +6,15 @@ from odoo.exceptions import UserError
 class ProductPricelist(models.Model):
     _inherit = ["product.pricelist"]
 
+    RECALCULATION_TYPE = [
+        ("integer_rounded", "Integer Rounded"),
+        ("integer_up", "Integer UP"),
+    ]
+
     shoes_campaign_id = fields.Many2one("project.project", string="Campaign", store=True, copy=False, tracking=16)
     margin = fields.Float("Margin %", store=True, copy=True, tracking=16)
     currency_exchange = fields.Monetary('Currency exchange')
+    recalculation_type = fields.Selection(selection=RECALCULATION_TYPE, string='Recalculation type')
 
     # Función para actualizar tarifasde precio:
     def _update_campaign_pricelist(self):
@@ -38,8 +44,6 @@ class ProductPricelist(models.Model):
 
     def products_pricelist_recalculation_by_campaign(self):
         for record in self:
-            if record.id == self.env.company.retail_pricelist_id.id:
-                record.item_ids.unlink()
 
                 pares = self.env["product.template"].search(
                     [
