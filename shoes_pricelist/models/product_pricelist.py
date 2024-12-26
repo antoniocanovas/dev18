@@ -41,7 +41,7 @@ class ProductPricelist(models.Model):
     def campaign_pricelist_recalculation(self):
         for record in self:
             # Borrar líneas de la tarifa especificada:
-            self.env['product.pricelist.item'].search([('shoes_campaign_id','=',record.id)]).unlink()
+            self.env['product.pricelist.item'].search([('product_tmpl_id.shoes_campaign_id','=',record.id)]).unlink()
 
 
 
