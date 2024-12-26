@@ -10,7 +10,7 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Recalculation">
                     <group name="pricelist_recalculation" string="Product prices recalculation">
-                        <field name="shoes_campaign_id" required="1" widget="selection"/>
+                        <field name="shoes_campaign_id" widget="selection"/>
                         <field name="recalculation_type"/>
                         <field name="margin" />
                         <field name="dollar_exchange" />

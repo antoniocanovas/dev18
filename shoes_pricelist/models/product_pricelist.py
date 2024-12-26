@@ -9,6 +9,7 @@ class ProductPricelist(models.Model):
     RECALCULATION_TYPE = [
         ("integer_rounded", "Integer Rounded"),
         ("integer_up", "Integer UP"),
+        ("integer_low", "Integer LOW")
     ]
 
     shoes_campaign_id = fields.Many2one("project.project", string="Campaign", store=True, copy=False, tracking=16)
