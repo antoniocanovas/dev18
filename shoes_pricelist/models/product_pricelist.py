@@ -22,12 +22,12 @@ class ProductPricelist(models.Model):
         domain=[("applied_on", "=", "1_product")],
     )
 
-    @api.depends("item_ids")
+    @api.depends("write_date")
     def _get_pricelist_product_tmpl(self):
         templates = []
         for li in self.item_ids:
-        #    if li.product_tmpl_id.id not in templates:
-        #        templates.append(li.product_id.product_tmpl_id.id)
+            if li.product_tmpl_id.id not in templates:
+                templates.append(li.product_id.product_tmpl_id.id)
         self.product_tmpl_ids = [(6, 0, templates)]
 
     product_tmpl_ids = fields.Many2many(
