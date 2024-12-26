@@ -26,8 +26,8 @@ class ProductPricelist(models.Model):
     def _get_pricelist_product_tmpl(self):
         templates = []
         for li in self.item_ids:
-            if li.product_tmpl_id.id not in templates:
-                templates.append(li.product_id.product_tmpl_id.id)
+        #    if li.product_tmpl_id.id not in templates:
+        #        templates.append(li.product_id.product_tmpl_id.id)
         self.product_tmpl_ids = [(6, 0, templates)]
 
     product_tmpl_ids = fields.Many2many(
@@ -39,6 +39,7 @@ class ProductPricelist(models.Model):
 
     # Función para actualizar tarifas de precio llamada desde la pestaña "Recalculation" en cada tarifa:
     def campaign_pricelist_recalculation(self):
+
         for record in self:
             # Borrar líneas de la tarifa especificada:
             lines = self.env['product.pricelist.item'].search([
@@ -53,5 +54,12 @@ class ProductPricelist(models.Model):
             ])
 
             # Cálculo de precio del par en función del cambio de moneda y margen:
-
+            company_currency = self.env.company_currency_id
+            pricelist_currency = record.currency_id
+            for pair in pairs:
+                # Moneda del fabricante de este producto:
+                manufacturer_currency = pair.manufacturer_id.property_purchase_currency_id
+                #if pricelist_currency == manufacturer_currency:
+                #if manufacturer_currency == company_currency
+                #price = 1
 
