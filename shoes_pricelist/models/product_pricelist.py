@@ -74,7 +74,7 @@ class ProductPricelist(models.Model):
                     raise UserError("Asigna una moneda de compra para el proveedor: " + str(pair.manufacturer_id.name))
 
                 # Alerta de PRODUCTO SIN COSTE EXWORK:
-                if (pair.exwork <= 0):
+                if (pair.exwork == 0) or (pair.exwork < 0):
                     raise UserError("Producto sin coste EXWORK: " + str(pair.name))
 
                 # EL CAMBIO DE MONEDA no aplica para los casos:
