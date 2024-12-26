@@ -25,6 +25,7 @@
     "depends": [
         'sale_management',
         'shoes_dealer',
+        'intrastat_duty',
     ],
     "author": "Punt Sistemes",
     "category": 'Sales',
