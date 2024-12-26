@@ -47,4 +47,8 @@ class ProductPricelist(models.Model):
             lines.unlink()
 
             # Buscar productos PAR de esta CAMPAÑA:
+            pairs = self.env['product.template'].search([
+                ('shoes_campaign_id','=',record.id),
+                ('is_pair','=',True)
+            ])
 
