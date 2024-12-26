@@ -9,13 +9,20 @@ class ProductPricelist(models.Model):
     RECALCULATION_TYPE = [
         ("integer_rounded", "Integer Rounded"),
         ("integer_up", "Integer UP"),
-        ("integer_low", "Integer LOW")
+        ("integer_low", "Integer LOW"),
+        ("5cent", "Integer rounded -5 cents")
+    ]
+
+    MARKETING_DISCOUNT = [
+        ("1cent", "Integer -1 cent"),
+        ("5cent", "Integer -5 cents"),
     ]
 
     shoes_campaign_id = fields.Many2one("project.project", string="Campaign", store=True, copy=False, tracking=16)
     margin = fields.Float("Margin %", store=True, copy=True, tracking=16)
     dollar_exchange = fields.Monetary('Currency exchange')
     recalculation_type = fields.Selection(selection=RECALCULATION_TYPE, string='Recalculation type')
+    marketing_discount = fields.Selection(selection=MARKETING_DISCOUNT, string='Marketing discount')
 
     product_tmpl_item_ids = fields.One2many(
         "product.pricelist.item",

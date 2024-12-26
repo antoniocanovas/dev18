@@ -12,6 +12,7 @@
                     <group name="pricelist_recalculation" string="Product prices recalculation">
                         <field name="shoes_campaign_id" widget="selection"/>
                         <field name="recalculation_type"/>
+                        <field name="marketing_discount"/>
                         <field name="margin" />
                         <field name="dollar_exchange" />
                     </group>
