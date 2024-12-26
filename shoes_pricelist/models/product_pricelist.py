@@ -16,11 +16,6 @@ class ProductPricelist(models.Model):
     currency_exchange = fields.Monetary('Currency exchange')
     recalculation_type = fields.Selection(selection=RECALCULATION_TYPE, string='Recalculation type')
 
-    # Función para actualizar tarifasde precio:
-    def _update_campaign_pricelist(self):
-        return True
-
-
     product_tmpl_item_ids = fields.One2many(
         "product.pricelist.item",
         "pricelist_id",
@@ -42,8 +37,15 @@ class ProductPricelist(models.Model):
         compute="_get_pricelist_product_tmpl",
     )
 
+    # Función para actualizar tarifas de precio llamada desde la pestaña "Recalculation" en cada tarifa:
     def campaign_pricelist_recalculation(self):
         for record in self:
+            # Borrar líneas de la tarifa especificada:
+            self.env['product.pricelist.item'].search([('shoes_campaign_id','=',record.id)]).unlink()
+
+
+
+            """
             # Pares sueltos (tarifa por plantilla de producto):
             pairs = self.env["product.product"].search(
                 [
@@ -151,3 +153,4 @@ class ProductPricelist(models.Model):
                         "fixed_price": rounded_price,
                     }
                 )
+            """
