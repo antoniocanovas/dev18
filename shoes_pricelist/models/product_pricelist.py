@@ -62,7 +62,7 @@ class ProductPricelist(models.Model):
             ])
 
             # Cálculo de precio del par en función del cambio de moneda y margen:
-            company_currency = env.company.currency_id
+            company_currency = self.env.company.currency_id
             pricelist_currency = record.currency_id
             for pair in pairs:
                 # Moneda del fabricante de este producto y los impuestos en aduana:
