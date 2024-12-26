@@ -13,7 +13,7 @@ class ProductPricelist(models.Model):
 
     shoes_campaign_id = fields.Many2one("project.project", string="Campaign", store=True, copy=False, tracking=16)
     margin = fields.Float("Margin %", store=True, copy=True, tracking=16)
-    currency_exchange = fields.Monetary('Currency exchange')
+    dollar_exchange = fields.Monetary('Currency exchange')
     recalculation_type = fields.Selection(selection=RECALCULATION_TYPE, string='Recalculation type')
 
     product_tmpl_item_ids = fields.One2many(
@@ -51,4 +51,7 @@ class ProductPricelist(models.Model):
                 ('shoes_campaign_id','=',record.id),
                 ('is_pair','=',True)
             ])
+
+            # Cálculo de precio del par en función del cambio de moneda y margen:
+
 
