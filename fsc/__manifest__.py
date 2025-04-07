@@ -2,17 +2,15 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
-    'name': 'Referrer Commission Manager',
+    'name': 'FSM',
     'version': '18.0.1.0.0',
-    'category': 'sale_management',
+    'category': 'mrp',
     "license": "AGPL-3",
     'website': "https://puntsistemes.es",
-    'summary': 'Add Manager and commission to referrer',
+    'summary': 'FSM Traceability',
     'author': 'Punt Sistemes',
     'depends': [
-        'sale_management',
-        'sale_commission',
-        'account',
+        'mrp',
     ],
     'data': [
         'views/stock_lot_views.xml',
