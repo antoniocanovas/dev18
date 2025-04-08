@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
-    'name': 'FSM',
+    'name': 'FSC',
     'version': '18.0.1.0.0',
     'category': 'mrp',
     "license": "AGPL-3",
@@ -10,11 +10,13 @@
     'summary': 'FSM Traceability',
     'author': 'Punt Sistemes',
     'depends': [
+        'stock',
         'mrp',
     ],
     'data': [
-        'views/stock_lot_views.xml',
         'views/mrp_production_views.xml',
+        'views/stock_lot_views.xml',
+#        'views/stock_move_line_views.xml',
     ],
     'installable': True,
     'application': False,

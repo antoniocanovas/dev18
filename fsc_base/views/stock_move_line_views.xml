@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="fsc_stock_move_line_form_inh" model="ir.ui.view">
+        <field name="name">fsc.stock.move.line.form.inh</field>
+        <field name="model">stock.move.line</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="stock.view_move_line_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='lot_id']" position="after">
+                <field name="base_lot_id"/>
+                <field name="parent_lot_id"/>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>
+
