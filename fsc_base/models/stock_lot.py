@@ -15,14 +15,9 @@ class StockLot(models.Model):
             efficiency = 1
             lots = record + record.descendant_lot_ids
             products = lots.product_id
-
-            # Lo que queda del producto principal:
-            moves = self.env['stock.quant'].search([
-                ('product_id', '=', record.product_id.id),
-                ('location_id.usage', '=', 'internal'),
-                ('lot_id', '=', record.id),
-            ])
-            volume = sum(moves.mapped('available_quantity')) * record.product_id.volume
+            # initial_volume considera cualquier entrada a internal (incluidas regularizaciones de stock):
+            initial_volume = record.initial_received_quantity_computed
+            volume = initial_volume
 
             # Cálculo de producidos:
             for product in products:
@@ -34,6 +29,7 @@ class StockLot(models.Model):
                 ])
                 for sml in moves:
                     volume += sml.quantity * sml.product_id.volume
+                    print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
 
             # Restar lo consumido en entradas de subproducciones:
             for product in products:
@@ -45,8 +41,26 @@ class StockLot(models.Model):
                 ])
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume
+                    print("Materia prima: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
+
+            # Considerar las pérdidas por ajustes de inventario en todos los productos:
+            for product in products:
+                moves = self.env['stock.move.line'].search([
+                    ('product_id', '=', product.id),
+                    ('lot_id', 'in', lots.ids),
+                    ('location_dest_id.usage', '=', 'inventory'),
+                ])
+                # Partimos de que este ajuste de inventario es una pérdida de eficiencia:
+                # (otra forma de considerarlo sería la propiedad (scrap_location) en stock.location.
+                for sml in moves:
+                    volume -= sml.quantity * sml.product_id.volume
+                    print("Ajuste de inventario: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
+
+
             if record.initial_received_quantity_computed != 0:
-                efficiency = volume / record.initial_received_quantity_computed * 100
+                efficiency = volume / initial_volume * 100
+                print("Stock inicial del lote: " + str(record.initial_received_quantity_computed))
+                print("Volume: " + str(volume) + " / Cantidad inicial: " + str(record.initial_received_quantity_computed) + " = " + str(efficiency))
             record['raw_efficiency'] = efficiency
 
 
@@ -127,21 +141,22 @@ class StockLot(models.Model):
 
     def get_initial_received_quantity(self):
         """
-        Calcula y devuelve la cantidad total recibida/producida originalmente
-        para este lote en ubicaciones internas.
-        Suma todas las entradas a ubicaciones internas registradas para este lote.
-        """
+                Calcula y devuelve la cantidad total recibida/producida originalmente
+                para este lote en ubicaciones internas.
+                Suma todas las entradas a ubicaciones internas registradas para este lote,
+                provenientes de Compras, Producción, Ajustes de Inventario positivos,
+                Devoluciones de Venta o Transferencias Internas.
+                """
         self.ensure_one()  # Asegura que se llama sobre un solo lote
 
         # Buscar todas las líneas de movimiento 'done' donde este lote
-        # entró a una ubicación interna.
+        # entró a una ubicación interna. Esto incluye recepciones de compra,
+        # salidas de producción, ajustes de inventario positivos, etc.
         move_lines = self.env['stock.move.line'].search_read(
             domain=[
                 ('lot_id', '=', self.id),
                 ('state', '=', 'done'),
                 ('location_dest_id.usage', '=', 'internal')  # Destino es interno
-                # No filtramos por location_id.usage para incluir transferencias internas,
-                # ajustes, devoluciones, etc. que incrementan el stock interno.
             ],
             fields=['qty_done']  # Campo que contiene la cantidad real movida
         )
@@ -150,6 +165,7 @@ class StockLot(models.Model):
         initial_quantity = sum(line['qty_done'] for line in move_lines)
 
         _logger.info(f"Cantidad inicial calculada para lote {self.name} (ID: {self.id}): {initial_quantity}")
+        print(move_lines)
         return initial_quantity
 
     # --- Opcional: Campo Computado (NO ALMACENADO - ¡Cuidado con rendimiento!) ---
