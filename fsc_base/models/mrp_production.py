@@ -9,7 +9,7 @@ class MrpProduction(models.Model):
     def _get_raw_efficiency(self):
         for record in self:
             rawvolume, producedvolume, efficiency = 0, 0, 1
-            # move_finished_ids son todas las salidas, move_byproduct_ids sólo los subproductos, move_raw_ids las entradas:
+            # move_raw_ids son entradas, move_finished_ids son todas las salidas, move_byproduct_ids sólo los subproductos:
             for sm in record.move_raw_ids:
                 for sml in sm.move_line_ids:
                     factor = 1
@@ -23,9 +23,10 @@ class MrpProduction(models.Model):
                     if smlproduced.id and smlproduced.move_id.production_id.raw_efficiency > 0:
                         factor = smlproduced.move_id.production_id.raw_efficiency / 100
                     rawvolume += sml.product_id.volume * sml.quantity / factor
-
+            # Si un producto está marcado como desecho no cuenta como volumen producido:
             for li in record.move_finished_ids:
-                producedvolume += li.product_id.volume * li.quantity
+                if li.product_id.fsc_scrap == False:
+                    producedvolume += li.product_id.volume * li.quantity
             if rawvolume > 0:
                 efficiency = producedvolume / rawvolume * 100
             record['raw_efficiency'] = efficiency

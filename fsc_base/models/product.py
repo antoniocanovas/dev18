@@ -8,7 +8,11 @@ class ProductProduct(models.Model):
     def _get_raw_efficiency_product_product(self):
         for record in self:
             raw, produced, efficiency = 0, 0, 1
-            lots = self.env['stock.lot'].search([('product_id','=',record.id),('initial_received_quantity_computed','!=',0)])
+            lots = self.env['stock.lot'].search([
+                ('product_id','=',record.id),
+                ('initial_received_quantity_computed','!=',0),
+                ('product_id.fsc_scrap','=',False),
+            ])
             for lot in lots:
                 raw += lot.initial_received_quantity_computed
                 produced += lot.initial_received_quantity_computed * lot.raw_efficiency / 100
@@ -19,12 +23,17 @@ class ProductProduct(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    fsc_scrap = fields.Boolean('FSC Scrap', help='Not considered in MRP FSC efficiency when active.')
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
 
     def _get_raw_efficiency_product_template(self):
         for record in self:
             rawvolume, producedvolume, efficiency = 0, 0, 1
-            lots = self.env['stock.lot'].search([('product_id.product_tmpl_id','=',record.id),('initial_received_quantity_computed','!=',0)])
+            lots = self.env['stock.lot'].search([
+                ('product_id.product_tmpl_id','=',record.id),
+                ('initial_received_quantity_computed','!=',0),
+                ('product_id.fsc_scrap','=',False),
+            ])
             for lot in lots:
                 rawvolume += lot.initial_received_quantity_computed * lot.product_id.volume
                 producedvolume += lot.initial_received_quantity_computed * lot.product_id.volume * lot.raw_efficiency / 100

@@ -19,25 +19,27 @@ class StockLot(models.Model):
             initial_volume = record.initial_received_quantity_computed
             volume = initial_volume
 
-            # Cálculo de producidos:
+            # Cálculo de producidos (no fsc_scrap):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
                     ('move_id.production_id', '!=', False),
                     ('location_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
+                    ('product_id.fsc_scrap','=',False),
                 ])
                 for sml in moves:
                     volume += sml.quantity * sml.product_id.volume
                     print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
 
-            # Restar lo consumido en entradas de subproducciones:
+            # Restar lo consumido en entradas de subproducciones (sin fsc_scrap):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
                     ('production_id', '!=', False),
                     ('location_dest_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
+                    ('product_id.fsc_scrap','=',False),
                 ])
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume
