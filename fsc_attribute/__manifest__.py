@@ -7,15 +7,14 @@
     'category': 'mrp',
     "license": "AGPL-3",
     'website': "https://puntsistemes.es",
-    'summary': 'FSC Traceability',
+    'summary': 'FSC Attributes',
     'author': 'Punt Sistemes',
     'depends': [
         'stock',
         'mrp',
     ],
     'data': [
-        'views/mrp_production_views.xml',
-        'views/stock_lot_views.xml',
+        'views/res_company_views.xml',
         'views/product_views.xml',
     ],
     'installable': True,
