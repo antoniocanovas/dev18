@@ -1,34 +1,25 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
-    <record id="fsc_attribute_product_product_form_inh" model="ir.ui.view">
-        <field name="name">fsc.attribute.product.product.form.inh</field>
+    <!-- VISTAS DE BÚSQUEDA: -->
+    <record id="fsc_attribute_product_inh_search" model="ir.ui.view">
+        <field name="name">fsc.attribute.product.inh.search</field>
         <field name="model">product.product</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="type">search</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="priority">90</field>
         <field name="arch" type="xml">
-
-            <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-
-            </xpath>
-
+            <data>
+                <field name="all_product_tag_ids" position="before">
+                    <field name="fsc_dimension_value_id"/>
+                    <field name="fsc_quality_value_id"/>
+                </field>
+                <xpath expr="//filter[@name='group_by_product_tmpl_id']" position="after">
+                    <filter string="Dimension" name="fsc_dimension" context="{'group_by':'fsc_dimension_value_id'}"/>
+                    <filter string="Quality" name="fsc_quality" context="{'group_by':'fsc_quality_value_id'}"/>
+                </xpath>
+            </data>
         </field>
-        <field name="priority">99</field>
-    </record>
-
-    <record id="fsc_attribute_product_template_form_inh" model="ir.ui.view">
-        <field name="name">fsc.attribute.product.template.form.inh</field>
-        <field name="model">product.template</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="product.product_template_form_view"/>
-        <field name="arch" type="xml">
-
-            <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-
-            </xpath>
-
-        </field>
-        <field name="priority">99</field>
     </record>
 
 </odoo>

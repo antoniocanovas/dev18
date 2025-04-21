@@ -3,6 +3,9 @@ from odoo import fields, models, api, _
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    # Reescribir campo para permitir ver las variantes con un sólo valor:
+    product_template_variant_value_ids = fields.Many2many(domain=[], store=True)
+    # Campos personalizados para poder agrupar y filtrar por dimensión y acabado:
     fsc_dimension_value_id = fields.Many2one('product.attribute.value', string='Dimension', store=True, compute='_get_fsc_dimension_value_id')
     fsc_quality_value_id = fields.Many2one('product.attribute.value', string='Quality', store=True, compute='_get_fsc_quality_value_id')
 
