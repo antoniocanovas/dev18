@@ -8,8 +8,20 @@ class StockLot(models.Model):
     _inherit = 'stock.lot'
 
     raw_efficiency = fields.Float('Raw efficiency',
-                                  compute='_get_raw_efficiency'
+                                  compute='_get_raw_efficiency',
+                                  help='Global efficiency with all child productions'
                                   )
+
+    mrp_efficiency = fields.Float('FSC efficiency',
+                                  compute='_get_fsc_efficiency',
+                                  help = 'MRP efficiency from parents productions.'
+                                  )
+    def _get_mrp_efficiency(self):
+        for record in self:
+            # Hay que buscar su orden de producción y asignarle la que tenga en el campo raw_efficiency (renombrar)?
+            production = self.env['mrp.production'].search([('lot_producing_id','=',record.id)], limit=1)
+            record['mrp_efficiency'] = 1
+
     def _get_raw_efficiency(self):
         for record in self:
             efficiency = 1
