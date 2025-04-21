@@ -19,8 +19,8 @@ class StockLot(models.Model):
     def _get_mrp_efficiency(self):
         for record in self:
             # Hay que buscar su orden de producción y asignarle la que tenga en el campo raw_efficiency (renombrar)?
-            production = self.env['mrp.production'].search([('lot_producing_id','=',record.id)], limit=1)
-            record['mrp_efficiency'] = 1
+            smproduction = self.env['stock.move'].search([('lot_producing_id','=',record.id),('production_id','!=',False)], limit=1)
+            record['mrp_efficiency'] = smproduction.production_id.raw_efficiency
 
     def _get_raw_efficiency(self):
         for record in self:
