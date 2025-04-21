@@ -10,7 +10,7 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='product_tooltip']" position="before">
-                <field name="material_id"/>
+                <field name="material_id" readonly="is_product_variant"/>
             </xpath>
 
         </field>

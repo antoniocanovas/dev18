@@ -1,4 +1,5 @@
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
@@ -24,7 +25,13 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     fsc_tracking = fields.Boolean(related='material_id.fsc_tracking')
-
+    fsc_mix_estimation = fields.Boolean(related='material_id.fsc_mix_estimation')
+    fsc_type = fields.Selection(
+        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"), ("mrp", "Manufactured")],
+        string="FSC Type",
+        copy=True,
+    )
+    fsc_percentage = fields.Float('FSC Percentage (%)')
 
     fsc_scrap = fields.Boolean('FSC Scrap', help='Not considered in MRP FSC efficiency when active.')
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
@@ -43,3 +50,8 @@ class ProductTemplate(models.Model):
             if rawvolume != 0:
                 efficiency = producedvolume / rawvolume
             record['raw_efficiency_pt'] = efficiency * 100
+
+    @api.constrains('fsc_type','fsc_percentage')
+    def _check_fsc_percentage(self):
+        if self.fsc_type in ['mix_credit','mix_recycled'] and not self.fsc_mix_estimation and self.fsc_percentage <= 0:
+            raise UserError('FSC percentage must be greater than 0 in mixed types !!')

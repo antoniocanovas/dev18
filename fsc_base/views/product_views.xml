@@ -23,11 +23,22 @@
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-                <field name="fsc_scrap"/>
-                <field name="raw_efficiency_pt" invisible="is_product_variant or fsc_scrap"/>
+            <xpath expr="//notebook" position="inside">
+                <page string="FSC" name="fsc" invisible="not fsc_tracking">
+                    <group>
+                        <field name="material_id"/>
+                        <field name="fsc_type" invisible="not fsc_tracking" required="fsc_tracking"/>
+                        <field name="fsc_tracking"/>
+                        <field name="fsc_mix_estimation"/>
+                        <field name="fsc_percentage"
+                               required="fsc_type in ['mix_credit','mix_recycled'] and not fsc_mix_estimation"
+                               invisible="fsc_type not in ['mix_credit','mix_recycled'] or fsc_mix_estimation"
+                               />
+                        <field name="fsc_scrap"/>
+                        <field name="raw_efficiency_pt" invisible="is_product_variant or fsc_scrap"/>
+                    </group>
+                </page>
             </xpath>
-
         </field>
         <field name="priority">99</field>
     </record>

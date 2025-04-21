@@ -14,12 +14,6 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    fsc_material_attribute_id = fields.Many2one(
-        "product.attribute",
-        string="Material attribute",
-        store=True,
-        help="Internal attribute to group products",
-    )
     fsc_dimension_attribute_id = fields.Many2one(
         "product.attribute",
         string="Dimension attribute",

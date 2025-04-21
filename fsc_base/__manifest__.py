@@ -15,6 +15,7 @@
         'product_material',
     ],
     'data': [
+        'views/product_material_views.xml',
         'views/mrp_production_views.xml',
         'views/stock_lot_views.xml',
         'views/product_views.xml',

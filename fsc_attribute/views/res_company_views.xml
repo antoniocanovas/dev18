@@ -11,7 +11,6 @@
                 <page string="FSC">
                     <group>
                         <group>
-                            <field name="fsc_material_attribute_id"/>
                             <field name="fsc_dimension_attribute_id"/>
                             <field name="fsc_quality_attribute_id"/>
                         </group>
