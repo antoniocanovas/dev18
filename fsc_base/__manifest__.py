@@ -12,6 +12,7 @@
     'depends': [
         'stock',
         'mrp',
+        'product_material',
     ],
     'data': [
         'views/mrp_production_views.xml',

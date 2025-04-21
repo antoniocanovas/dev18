@@ -23,6 +23,9 @@ class ProductProduct(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    fsc_tracking = fields.Boolean(related='material_id.fsc_tracking')
+
+
     fsc_scrap = fields.Boolean('FSC Scrap', help='Not considered in MRP FSC efficiency when active.')
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
 
