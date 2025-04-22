@@ -54,7 +54,7 @@ class StockLot(models.Model):
                     ('production_id', '!=', False),
                     ('location_dest_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
-                    ('product_id.fsc_scrap','=',False),
+                    ('product_id.fsc_tracking','=',True),
                 ])
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume
