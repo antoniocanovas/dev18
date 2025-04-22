@@ -26,8 +26,8 @@
                     <group>
                         <field name="material_id"/>
                         <field name="fsc_type" invisible="not fsc_tracking" required="fsc_tracking"/>
-                        <field name="fsc_tracking"/>
-                        <field name="fsc_mix_estimation"/>
+                        <field name="fsc_tracking" invisible="1"/>
+                        <field name="fsc_mix_estimation" invisible="1"/>
                         <field name="fsc_percentage"
                                required="fsc_type in ['mix_credit','mix_recycled'] and not fsc_mix_estimation"
                                invisible="fsc_type not in ['mix_credit','mix_recycled'] or fsc_mix_estimation"

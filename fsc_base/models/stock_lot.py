@@ -18,12 +18,15 @@ class StockLot(models.Model):
                                   )
     def _get_fsc_efficiency(self):
         for record in self:
-            # Hay que buscar su orden de producción y asignarle la que tenga en el campo raw_efficiency (renombrar)?
+            efficiency = 100
+            # Hay que buscar su orden de producción y asignarle la que tenga en el campo fsc_efficiency (o 1 si no existe)
             smlproduction = self.env['stock.move.line'].search([
                 ('lot_id','=',record.id),
                 ('location_id.usage', '=', 'production'),
                 ('move_id.production_id','!=',False)], limit=1)
-            record['fsc_efficiency'] = smlproduction.move_id.production_id.fsc_efficiency
+            if smlproduction.id:
+                efficiency = smlproduction.move_id.production_id.fsc_efficiency
+            record['fsc_efficiency'] = efficiency
 
     def _get_raw_efficiency(self):
         for record in self:
