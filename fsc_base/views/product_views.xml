@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
 
             <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-                <field name="raw_efficiency" invisible="fsc_scrap"/>
+                <field name="raw_efficiency" invisible="not fsc_tracking"/>
             </xpath>
 
         </field>
@@ -34,8 +34,7 @@
                                required="fsc_type in ['mix_credit','mix_recycled'] and not fsc_mix_estimation"
                                invisible="fsc_type not in ['mix_credit','mix_recycled'] or fsc_mix_estimation"
                                />
-                        <field name="fsc_scrap"/>
-                        <field name="raw_efficiency_pt" invisible="is_product_variant or fsc_scrap"/>
+                        <field name="raw_efficiency_pt" invisible="is_product_variant or not fsc_tracking"/>
                     </group>
                 </page>
             </xpath>

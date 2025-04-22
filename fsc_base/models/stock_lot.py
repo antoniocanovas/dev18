@@ -12,15 +12,18 @@ class StockLot(models.Model):
                                   help='Global efficiency with all child productions'
                                   )
 
-    mrp_efficiency = fields.Float('FSC efficiency',
+    fsc_efficiency = fields.Float('FSC efficiency',
                                   compute='_get_fsc_efficiency',
                                   help = 'MRP efficiency from parents productions.'
                                   )
-    def _get_mrp_efficiency(self):
+    def _get_fsc_efficiency(self):
         for record in self:
             # Hay que buscar su orden de producción y asignarle la que tenga en el campo raw_efficiency (renombrar)?
-            smproduction = self.env['stock.move'].search([('lot_producing_id','=',record.id),('production_id','!=',False)], limit=1)
-            record['mrp_efficiency'] = smproduction.production_id.raw_efficiency
+            smlproduction = self.env['stock.move.line'].search([
+                ('lot_id','=',record.id),
+                ('location_id.usage', '=', 'production'),
+                ('move_id.production_id','!=',False)], limit=1)
+            record['fsc_efficiency'] = smlproduction.move_id.production_id.fsc_efficiency
 
     def _get_raw_efficiency(self):
         for record in self:
@@ -31,20 +34,20 @@ class StockLot(models.Model):
             initial_volume = record.initial_received_quantity_computed
             volume = initial_volume
 
-            # Cálculo de producidos (no fsc_scrap):
+            # Cálculo de producidos (fsc_tracking):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
                     ('move_id.production_id', '!=', False),
                     ('location_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
-                    ('product_id.fsc_scrap','=',False),
+                    ('product_id.fsc_tracking','=',True),
                 ])
                 for sml in moves:
                     volume += sml.quantity * sml.product_id.volume
                     print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
 
-            # Restar lo consumido en entradas de subproducciones (sin fsc_scrap):
+            # Restar lo consumido en entradas de subproducciones (fsc_tracking):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
