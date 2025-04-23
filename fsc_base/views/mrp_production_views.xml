@@ -10,6 +10,7 @@
 
             <xpath expr="//field[@name='user_id']" position="after">
                 <field name="fsc_efficiency"/>
+                <field name="fsc_percentage" readonly="1"/>
             </xpath>
 
         </field>

@@ -26,3 +26,11 @@ class ResCompany(models.Model):
         store=True,
         help="Internal attribute to group products",
     )
+
+    #Métodos para el caso puntual de que se parametricen los atributos después de crear productos:
+    # (requiere modo debug):
+    def update_product_attributes(self):
+        products = self.env['product.product'].search([('fsc_tracking','=',True)])
+        for product in products:
+            product._get_fsc_dimension_value_id()
+            product._get_fsc_quality_value_id()

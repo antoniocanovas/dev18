@@ -27,7 +27,7 @@ class ProductTemplate(models.Model):
     fsc_tracking = fields.Boolean(related='material_id.fsc_tracking')
     fsc_mix_estimation = fields.Boolean(related='material_id.fsc_mix_estimation')
     fsc_type = fields.Selection(
-        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"), ("mrp", "Manufactured")],
+        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled")],
         string="FSC Type",
         copy=True,
     )

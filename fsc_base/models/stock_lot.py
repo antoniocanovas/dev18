@@ -16,6 +16,35 @@ class StockLot(models.Model):
                                   compute='_get_fsc_efficiency',
                                   help = 'MRP efficiency from parents productions.'
                                   )
+
+    fsc_percentage = fields.Float('FSC percentage',
+                                  compute='_get_fsc_percentage',
+                                  help = 'FSC certified material percentage.'
+                                  )
+
+    fsc_lot_type = fields.Selection(
+        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('no_fsc','No FSC')],
+        string="FSC Type",
+        compute='_get_fsc_lot_type',
+        help='FSC Type computed from FSC percentage and FSC product type.',
+    )
+
+    @api.depends('fsc_percentage')
+    def _get_fsc_lot_type(self):
+        for rec in self:
+            product = rec.product_id
+            if product.fsc_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage == 100:
+                type = 'fsc'
+            elif product.fsc_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage != 100:
+                type = 'mix_credit'
+            elif product.fsc_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage == 100:
+                type = 'recycled'
+            elif product.fsc_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage != 100:
+                type = 'mix_recycled'
+            if not product.fsc_tracking or rec.fsc_percentage == 0:
+                type = 'no_fsc'
+            rec['fsc_lot_type'] = type
+
     def _get_fsc_efficiency(self):
         for record in self:
             efficiency = 100
@@ -27,6 +56,35 @@ class StockLot(models.Model):
             if smlproduction.id:
                 efficiency = smlproduction.move_id.production_id.fsc_efficiency
             record['fsc_efficiency'] = efficiency
+
+    def _get_fsc_percentage(self):
+        for record in self:
+            material = record.product_id.material_id
+            product  = record.product_id
+
+            # Para productos NO FSC:
+            if not material.fsc_tracking:
+                percentage = 0
+            elif material.fsc_tracking and product.fsc_type in ['fsc','recycled']:
+                percentage = 100
+            # Caso de que el % sea estimado y responsabilidad del cliente en compras y fabricaciones:
+            elif material.fsc_tracking and material.fsc_mix_estimation:
+                percentage = material.fsc_mix_percentage
+            # Caso de producto comprado con un % certificado de FSC pero el % cambiará al mezclar en fabricación:
+            elif material.fsc_tracking and not material.fsc_mix_estimation and product.fsc_type in ['mix_credit','mix_recycled']:
+                percentage = product.fsc_percentage
+
+            # Casos en que posteriormente hay que buscar su orden de producción y asignarle la que tenga en mrp.production:
+            # (suponemos que 'fsc' y 'recycled' no se permite terminar la fabricación si fsc_percentage < 100)
+            if product.fsc_tracking and product.fsc_type in ['mix_credit','mix_recycled']:
+                smlproduction = self.env['stock.move.line'].search([
+                    ('lot_id','=',record.id),
+                    # Sale de producción como producido:
+                    ('location_id.usage', '=', 'production'),
+                    ('move_id.production_id','!=',False)], limit=1)
+                if smlproduction.id:
+                    percentage = smlproduction.move_id.production_id.fsc_percentage
+            record['fsc_percentage'] = percentage
 
     def _get_raw_efficiency(self):
         for record in self:
@@ -44,6 +102,7 @@ class StockLot(models.Model):
                     ('move_id.production_id', '!=', False),
                     ('location_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
+                    ('lot_id', '!=', record.id),
                     ('product_id.fsc_tracking','=',True),
                 ])
                 for sml in moves:
@@ -89,7 +148,7 @@ class StockLot(models.Model):
     descendant_lot_ids = fields.Many2many(
         comodel_name='stock.lot',
         compute='_compute_descendant_lots',
-        string='Lotes Descendientes (Calculado al vuelo)',
+        string='Child lots',
         help="Lotes producidos directa o indirectamente a partir de este lote (incluyendo subproductos). Calculado dinámicamente (puede ser lento).",
         # NOTA: store=False es el valor por defecto para campos computados.
         # No se almacena en la base de datos.
@@ -190,7 +249,7 @@ class StockLot(models.Model):
 
     # --- Opcional: Campo Computado (NO ALMACENADO - ¡Cuidado con rendimiento!) ---
     initial_received_quantity_computed = fields.Float(
-        string="Cantidad Inicial Recibida (Calculada)",
+        string="Initial qty",
         compute='_compute_initial_received_quantity',
         digits='Product Unit of Measure',  # Usa la precisión de la UdM del producto
         help="Cantidad total originalmente recibida/producida para este lote en stock interno. Calculado dinámicamente (puede ser lento)."
