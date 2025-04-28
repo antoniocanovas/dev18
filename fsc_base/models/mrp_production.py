@@ -56,8 +56,9 @@ class MrpProduction(models.Model):
                         incomevolume += product.volume * sml.quantity
                         fscvolume += product.volume * sml.quantity * fsc_percentage / 100
 
-            fsc_percentage = fscvolume / incomevolume * 100
-            print('fsc_percentage: ' + str(fsc_percentage) + " fscvolume: " + str(fscvolume)+ " incomevolume: " + str(incomevolume))
+            if incomevolume > 0:
+                fsc_percentage = fscvolume / incomevolume * 100
+                print('fsc_percentage: ' + str(fsc_percentage) + " fscvolume: " + str(fscvolume)+ " incomevolume: " + str(incomevolume))
 
             # Si un producto está marcado como desecho no cuenta como volumen producido:
             for li in record.move_finished_ids:
@@ -69,15 +70,16 @@ class MrpProduction(models.Model):
 
     def _fsc_update_mrp_update(self):
         for rec in self:
-            # Actualizar datos de eficiencia:
-            rec._get_fsc_efficiency_and_percentage()
+            if rec.state not in ['draft']:
+                # Actualizar datos de eficiencia:
+                rec._get_fsc_efficiency_and_percentage()
 
-            # Chequear si los productos finales son 100% FSC y los de entrada son también 100%:
-            if rec.state == 'done' and rec.fsc_percentage < 100:
-                products = rec.finished_move_line_ids.product_id
-                product_names = ""
-                for product in products:
-                    if product.fsc_type in ['fsc','recycled']:
-                        product_names += "[" + product.name + "] "
-                if product_names != "":
-                    raise UserError('Los productos a fabricar ' + product_names + ' requieren que todos materiales sean FSC 100%')
+                # Chequear si los productos finales son 100% FSC y los de entrada son también 100%:
+                if rec.state == 'done' and rec.fsc_percentage < 100:
+                    products = rec.finished_move_line_ids.product_id
+                    product_names = ""
+                    for product in products:
+                        if product.fsc_type in ['fsc','recycled']:
+                            product_names += "[" + product.name + "] "
+                    if product_names != "":
+                        raise UserError('Los productos a fabricar ' + product_names + ' requieren que todos materiales sean FSC 100%')
