@@ -1,19 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
-    <record id="fsc_product_product_form_inh" model="ir.ui.view">
-        <field name="name">fsc.product.product.form.inh</field>
-        <field name="model">product.product</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="product.product_normal_form_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-                <field name="raw_efficiency" invisible="not fsc_tracking"/>
-            </xpath>
-        </field>
-        <field name="priority">99</field>
-    </record>
-
     <record id="fsc_product_template_form_inh" model="ir.ui.view">
         <field name="name">fsc.product.template.form.inh</field>
         <field name="model">product.template</field>
@@ -35,6 +22,19 @@
                         <field name="raw_efficiency_pt" invisible="is_product_variant or not fsc_tracking"/>
                     </group>
                 </page>
+            </xpath>
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+    <record id="fsc_product_product_form_inh" model="ir.ui.view">
+        <field name="name">fsc.product.product.form.inh</field>
+        <field name="model">product.product</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='fsc']/group" position="inside">
+                <field name="raw_efficiency" invisible="not is_product_variant"/>
             </xpath>
         </field>
         <field name="priority">99</field>

@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='user_id']" position="after">
-                <field name="fsc_efficiency"/>
+                <field name="fsc_efficiency" readonly="1"/>
                 <field name="fsc_percentage" readonly="1"/>
             </xpath>
 
