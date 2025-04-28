@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="mrp_tool_reservation_form_inh" model="ir.ui.view">
+        <field name="name">mrp.tool.reservation.form.inh</field>
+        <field name="model">mrp.production</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="tool_ids" widget="many2many_tags"
+                       domain="[('maintenance_open_count', '=', 0),('id','in',bom_tool_ids)]"
+                />
+                <field name="bom_tool_ids" invisible="1"/>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>
