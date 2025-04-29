@@ -58,7 +58,7 @@ class MrpProduction(models.Model):
 
             if incomevolume > 0:
                 fsc_percentage = fscvolume / incomevolume * 100
-                print('fsc_percentage: ' + str(fsc_percentage) + " fscvolume: " + str(fscvolume)+ " incomevolume: " + str(incomevolume))
+                #print('fsc_percentage: ' + str(fsc_percentage) + " fscvolume: " + str(fscvolume)+ " incomevolume: " + str(incomevolume))
 
             # Si un producto está marcado como desecho no cuenta como volumen producido:
             for li in record.move_finished_ids:
