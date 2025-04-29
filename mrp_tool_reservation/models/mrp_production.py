@@ -16,6 +16,24 @@ class MrpProduction(models.Model):
                 tools = self.env['maintenance.equipment'].search([('id','in',rec.bom_id.tool_ids.ids)])
             rec['bom_tool_ids'] = [(6,0,tools.ids)]
 
+    # Crear un constrains de tool_ids que chequee que el producto no está reservado, o un m2m calculado que diga de la
+    # lista de materiales cuales están disponibles en función de la la fecha y duración:
+
+    @api.constrains('tool_ids','date_start','duration')
+    def _avoid_reserved_tools(self):
+        for rec in self:
+            for tool in rec.tool_ids:
+                maintenances = self.env['maintenance.request'].search([
+                    ('production_id', '!=', rec.id),
+                    ('equipment_id', '=', tool.id),
+                    ('stage_id.done', '=', False), # Filtra etapas no finales (ej. 'Nuevo', 'En Progreso')
+                    ('schedule_date', '<=', rec.date_start), # Fecha inicio es menor o igual que fecha prevista fin prod.
+                    ('expected_close_date', '>=', rec.date_start), # Fecha fin es menor o igual que fecha prevista fin prod.
+                ])
+                if maintenances.ids:
+                    message = ('La herramienta ' + tool.name + ', está en mantenimiento o en otra producción.')
+                    raise UserError(message)
+
     @api.constrains('state')
     def _avoid_begin_production_with_reserved_tools(self):
         for rec in self:
@@ -24,13 +42,6 @@ class MrpProduction(models.Model):
                 raise UserError('Please configure "COMPANY => MRP Tools => STAGES" before confirm orders.')
 
             if rec.state in ['confirmed'] and rec.tool_ids:
-                # Chequear que las herramientas están disponibles:
-                for tool in rec.tool_ids:
-                    print(tool.maintenance_open_count)
-                    if tool.maintenance_open_count - rec.maintenance_count > 0:
-                        message = ('La herramienta ' + tool.name +
-                                   (', está en mantenimiento o en otra producción. Cambia el estado o seleccionar otra.'))
-                        raise UserError(message)
                 # Crear los mantenimientos para todas las herramientas implicadas:
                 for tool in rec.tool_ids:
                     exist = self.env['maintenance.request'].search([

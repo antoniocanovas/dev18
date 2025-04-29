@@ -10,7 +10,7 @@
 
             <xpath expr="//field[@name='user_id']" position="after">
                 <field name="tool_ids" widget="many2many_tags"
-                       domain="[('maintenance_open_count', '=', 0),('id','in',bom_tool_ids)]"
+                       domain="[('id','in',bom_tool_ids)]"
                 />
                 <field name="bom_tool_ids" invisible="1"/>
             </xpath>
