@@ -25,7 +25,7 @@ class MrpProduction(models.Model):
             for sm in record.move_raw_ids:
                 if sm.product_id.material_id.fsc_tracking:
                     for sml in sm.move_line_ids:
-                        factor = 1
+                        factor, fsc_percentage = 1, 0
                         product = sml.product_id
 
                         # Para productos FSC 100%:
