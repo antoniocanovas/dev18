@@ -4,6 +4,8 @@ from odoo.exceptions import UserError
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
+    material_id = fields.Many2one(related='product_id.material_id', store=True)
+    fsc_tracking = fields.Boolean(related='product_id.fsc_tracking')
     fsc_efficiency = fields.Float('FSC efficiency')
 
     # Para control de purezo FSC hay que revisar materiales de entrada y asignar % a la orden de producción.
@@ -70,7 +72,7 @@ class MrpProduction(models.Model):
 
     def _fsc_update_mrp_update(self):
         for rec in self:
-            if rec.state not in ['draft']:
+            if rec.state not in ['draft'] and rec.material_id.fsc_tracking:
                 # Actualizar datos de eficiencia:
                 rec._get_fsc_efficiency_and_percentage()
 
