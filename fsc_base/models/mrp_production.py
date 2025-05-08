@@ -68,7 +68,7 @@ class MrpProduction(models.Model):
                     producedvolume += li.product_id.volume * li.quantity
             if rawvolume > 0:
                 efficiency = producedvolume / rawvolume * 100
-            record.write({'fsc_efficiency': efficiency, 'fsc_percentage':fsc_percentage})
+            record.write({'fsc_efficiency': round(efficiency,2), 'fsc_percentage':round(fsc_percentage,2)})
 
     def _fsc_update_mrp_update(self):
         for rec in self:
