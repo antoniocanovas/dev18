@@ -41,6 +41,7 @@
                     </h1>
                     <group>
                         <group>
+                            <field name="alias" placeholder="Technical name or alias"/>
                             <field name="comment"/>
                         </group>
                         <group>

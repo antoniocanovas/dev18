@@ -23,7 +23,7 @@ class StockLot(models.Model):
                                   )
 
     fsc_lot_type = fields.Selection(
-        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('no_fsc','No FSC')],
+        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('control','Control Wood'),('no_fsc','No FSC')],
         string="FSC Type",
         compute='_get_fsc_lot_type',
         help='FSC Type computed from FSC percentage and FSC product type.',
@@ -33,15 +33,17 @@ class StockLot(models.Model):
     def _get_fsc_lot_type(self):
         for rec in self:
             product = rec.product_id
-            if product.fsc_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage == 100:
+            if product.wood_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage == 100:
                 type = 'fsc'
-            elif product.fsc_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage != 100:
+            elif product.wood_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage != 100:
                 type = 'mix_credit'
-            elif product.fsc_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage == 100:
+            elif product.wood_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage == 100:
                 type = 'recycled'
-            elif product.fsc_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage != 100:
+            elif product.wood_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage != 100:
                 type = 'mix_recycled'
-            if not product.fsc_tracking or rec.fsc_percentage == 0:
+            elif product.wood_tracking and product.fsc_type in ['control_wood']:
+                type = 'control_wood'
+            if not product.wood_tracking or rec.fsc_percentage == 0:
                 type = 'no_fsc'
             rec['fsc_lot_type'] = type
 
@@ -63,20 +65,24 @@ class StockLot(models.Model):
             product  = record.product_id
 
             # Para productos NO FSC:
-            if not material.fsc_tracking:
+            ####### Sólo permitir como extraños los CONTROL WOOD, en otro caso el resultado es 0:
+
+
+
+            if not material.wood_tracking:
                 percentage = 0
-            elif material.fsc_tracking and product.fsc_type in ['fsc','recycled']:
+            elif material.wood_tracking and product.fsc_type in ['fsc','recycled']:
                 percentage = 100
             # Caso de que el % sea estimado y responsabilidad del cliente en compras y fabricaciones:
-            elif material.fsc_tracking and material.fsc_mix_estimation:
+            elif material.wood_tracking and material.fsc_mix_estimation:
                 percentage = material.fsc_mix_percentage
             # Caso de producto comprado con un % certificado de FSC pero el % cambiará al mezclar en fabricación:
-            elif material.fsc_tracking and not material.fsc_mix_estimation and product.fsc_type in ['mix_credit','mix_recycled']:
+            elif material.wood_tracking and not material.fsc_mix_estimation and product.fsc_type in ['mix_credit','mix_recycled']:
                 percentage = product.fsc_percentage
 
             # Casos en que posteriormente hay que buscar su orden de producción y asignarle la que tenga en mrp.production:
             # (suponemos que 'fsc' y 'recycled' no se permite terminar la fabricación si fsc_percentage < 100)
-            if product.fsc_tracking and product.fsc_type in ['mix_credit','mix_recycled']:
+            if product.wood_tracking and product.fsc_type in ['mix_credit','mix_recycled']:
                 smlproduction = self.env['stock.move.line'].search([
                     ('lot_id','=',record.id),
                     # Sale de producción como producido:
@@ -95,7 +101,7 @@ class StockLot(models.Model):
             initial_volume = record.initial_received_quantity_computed
             volume = initial_volume
 
-            # Cálculo de producidos (fsc_tracking):
+            # Cálculo de producidos (wood_tracking):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
@@ -103,20 +109,20 @@ class StockLot(models.Model):
                     ('location_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
                     ('lot_id', '!=', record.id),
-                    ('product_id.fsc_tracking','=',True),
+                    ('product_id.wood_tracking','=',True),
                 ])
                 for sml in moves:
                     volume += sml.quantity * sml.product_id.volume
                     print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
 
-            # Restar lo consumido en entradas de subproducciones (fsc_tracking):
+            # Restar lo consumido en entradas de subproducciones (wood_tracking):
             for product in products:
                 moves = self.env['stock.move.line'].search([
                     ('product_id', '=', product.id),
                     ('production_id', '!=', False),
                     ('location_dest_id.usage', '=', 'production'),
                     ('lot_id', 'in', lots.ids),
-                    ('product_id.fsc_tracking','=',True),
+                    ('product_id.wood_tracking','=',True),
                 ])
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume

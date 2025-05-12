@@ -9,5 +9,6 @@ class ProductMaterial(models.Model):
     _description = 'Product material'
 
     name = fields.Char('Name' , translate=True)
+    alias = fields.Char('Alias', translate=True)
     image = fields.Binary('Image', copy=False)
     comment = fields.Html('Comments',  copy=False , translate=True)

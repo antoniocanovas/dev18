@@ -9,10 +9,10 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='user_id']" position="after">
-                <field name="fsc_efficiency" readonly="1" invisible="not fsc_tracking"/>
-                <field name="fsc_percentage" readonly="1" invisible="not fsc_tracking"/>
+                <field name="fsc_efficiency" readonly="1" invisible="not wood_tracking"/>
+                <field name="fsc_percentage" readonly="1" invisible="not wood_tracking"/>
                 <field name="material_id"/>
-                <field name="fsc_tracking" invisible="1"/>
+                <field name="wood_tracking" invisible="1"/>
             </xpath>
 
         </field>

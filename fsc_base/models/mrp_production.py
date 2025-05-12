@@ -5,13 +5,13 @@ class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
     material_id = fields.Many2one(related='product_id.material_id', store=True)
-    fsc_tracking = fields.Boolean(related='product_id.fsc_tracking')
+    wood_tracking = fields.Boolean(related='product_id.wood_tracking')
     fsc_efficiency = fields.Float('FSC efficiency')
 
     # Para control de purezo FSC hay que revisar materiales de entrada y asignar % a la orden de producción.
     # Si el material viene de otra orden => el de la orden; si es comprado hay tres opciones:
         # a) 100% si type es FSC,
-        # b) El porcentaje estimado si el MATERIAL del PRODUCTO tiene este tratamiento
+        # QUITAR, NO CONSIDERADO !! b) El porcentaje estimado si el MATERIAL del PRODUCTO tiene este tratamiento
         # c) Porcentaje directo del producto si es type MIX y el material no es por porcentaje fijo.
     fsc_percentage = fields.Float('FSC percentage')
 
@@ -25,7 +25,7 @@ class MrpProduction(models.Model):
 
             # move_raw_ids son entradas, move_finished_ids son todas las salidas, move_byproduct_ids sólo los subproductos:
             for sm in record.move_raw_ids:
-                if sm.product_id.material_id.fsc_tracking:
+                if sm.product_id.material_id.wood_tracking:
                     for sml in sm.move_line_ids:
                         factor, fsc_percentage = 1, 0
                         product = sml.product_id
@@ -33,12 +33,17 @@ class MrpProduction(models.Model):
                         # Para productos FSC 100%:
                         if product.fsc_type in ['fsc', 'recycled']:
                             fsc_percentage = 100
+                        elif product.fsc_type in ['mix_credit', 'mix_recycled']:
+                            fsc_percentage = product.fsc_mix_percentage
+
+                        """    
                         # Caso de que el % sea estimado y responsabilidad del cliente en compras y fabricaciones:
                         elif material.fsc_mix_estimation:
                             fsc_percentage = material.fsc_mix_percentage
                         # Caso de producto comprado con un % certificado de FSC pero el % cambiará al mezclar en fabricación:
                         elif not material.fsc_mix_estimation and product.fsc_type in ['mix_credit', 'mix_recycled']:
                             fsc_percentage = product.fsc_percentage
+                        """
 
                         # Buscamos la orden de producción para este producto y lote por si encontramos eficiencia previa:
                         smlproduced = self.env['stock.move.line'].search([
@@ -47,10 +52,11 @@ class MrpProduction(models.Model):
                             ('location_id.usage', '=', 'production'),
                             ('lot_id', '=', sml.lot_id.id),
                         ], limit=1)
+                        # Eficiencia en la producción anterior:
                         if smlproduced.id and smlproduced.move_id.production_id.fsc_efficiency > 0:
                             factor = smlproduced.move_id.production_id.fsc_efficiency / 100
 
-                            # Para el caso de productos que puedan fluctuar su certificación FSC:
+                        # Para productos que fluctuan su certificación FSC, sobreescribimos los valores por defecto:
                         if smlproduced.id and product.fsc_type in ['mix_credit', 'mix_recycled']:
                             fsc_percentage = smlproduced.move_id.production_id.fsc_percentage
 
@@ -64,7 +70,7 @@ class MrpProduction(models.Model):
 
             # Si un producto está marcado como desecho no cuenta como volumen producido:
             for li in record.move_finished_ids:
-                if li.product_id.material_id.fsc_tracking:
+                if li.product_id.wood_tracking:
                     producedvolume += li.product_id.volume * li.quantity
             if rawvolume > 0:
                 efficiency = producedvolume / rawvolume * 100
@@ -72,7 +78,7 @@ class MrpProduction(models.Model):
 
     def _fsc_update_mrp_update(self):
         for rec in self:
-            if rec.state not in ['draft'] and rec.material_id.fsc_tracking:
+            if rec.state not in ['draft'] and rec.wood_tracking:
                 # Actualizar datos de eficiencia:
                 rec._get_fsc_efficiency_and_percentage()
 

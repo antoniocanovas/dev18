@@ -12,7 +12,7 @@ class ProductProduct(models.Model):
             lots = self.env['stock.lot'].search([
                 ('product_id','=',record.id),
                 ('initial_received_quantity_computed','!=',0),
-                ('product_id.fsc_tracking','=',True),
+                ('product_id.wood_tracking','=',True),
             ])
             for lot in lots:
                 raw += lot.initial_received_quantity_computed
@@ -24,14 +24,30 @@ class ProductProduct(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    fsc_tracking = fields.Boolean(related='material_id.fsc_tracking')
-    fsc_mix_estimation = fields.Boolean(related='material_id.fsc_mix_estimation')
+    wood_tracking = fields.Boolean(related='material_id.wood_tracking')
+
+   # CITES:
+    is_cites = fields.Boolean('Is CITES')
+
+    # FSC & CONTROL WOOD:
     fsc_type = fields.Selection(
-        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled")],
+        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('control','Control Wood')],
         string="FSC Type",
         copy=True,
     )
-    fsc_percentage = fields.Float('FSC Percentage (%)')
+    fsc_mix_estimation = fields.Boolean(
+        'Use FSC Mix estimation',
+        help='Use an estation percentage of FSC 100% and other certified origen products.'
+             'This case requires an separated control of purchases to get this assortment percentages.'
+    )
+
+
+    ### PROBABLEMENTE SOBRA UNO DE ESTOS CAMPOS Y SU CONSTRAINS (que están al final):
+    fsc_mix_percentage = fields.Float('FSC Mix factor', help='Percent FSC produced without ERP control.')
+    #fsc_percentage = fields.Float('FSC Percentage factor', help='Use this field in FSC < 100% purchased products.')
+
+
+
 
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
 
@@ -41,7 +57,7 @@ class ProductTemplate(models.Model):
             lots = self.env['stock.lot'].search([
                 ('product_id.product_tmpl_id','=',record.id),
                 ('initial_received_quantity_computed','!=',0),
-                ('product_id.fsc_tracking','=',True),
+                ('product_id.wood_tracking','=',True),
             ])
             for lot in lots:
                 rawvolume += lot.initial_received_quantity_computed * lot.product_id.volume
@@ -50,7 +66,23 @@ class ProductTemplate(models.Model):
                 efficiency = producedvolume / rawvolume
             record['raw_efficiency_pt'] = efficiency * 100
 
+
+    @api.constrains('fsc_type','fsc_mix_percentage')
+    def _check_fsc_mix_percentage(self):
+        if (self.fsc_type in ['mix_credit','mix_recycled'] and self.fsc_mix_percentage <= 0
+                or self.fsc_type in ['mix_credit','mix_recycled'] and self.fsc_mix_percentage > 100):
+            raise UserError('FSC percentage must be greater than 0 and maximum 1 !!')
+
+
+"""
     @api.constrains('fsc_type','fsc_percentage')
     def _check_fsc_percentage(self):
         if self.fsc_type in ['mix_credit','mix_recycled'] and not self.fsc_mix_estimation and self.fsc_percentage <= 0:
             raise UserError('FSC percentage must be greater than 0 in mixed types !!')
+
+    @api.constrains('fsc_mix_percentage')
+    def _check_fsc_mix_percentage(self):
+        if self.fsc_mix_estimation and self.fsc_mix_percentage <= 0:
+            raise UserError('FSC percentage must be greater than 0 !!')
+
+"""
