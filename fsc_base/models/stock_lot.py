@@ -7,6 +7,11 @@ _logger = logging.getLogger(__name__)
 class StockLot(models.Model):
     _inherit = 'stock.lot'
 
+    wood_tracking = fields.Boolean(related='product_id.wood_tracking')
+    material_id = fields.Many2one(related='product_id.material_id')
+    is_fsc = fields.Boolean(related='product_id.is_fsc')
+    is_cites = fields.Boolean(related='product_id.is_cites')
+
     raw_efficiency = fields.Float('Raw efficiency',
                                   compute='_get_raw_efficiency',
                                   help='Global efficiency with all child productions'
@@ -23,28 +28,31 @@ class StockLot(models.Model):
                                   )
 
     fsc_lot_type = fields.Selection(
-        [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('control','Control Wood'),('no_fsc','No FSC')],
+        [("fsc", "FSC"),
+         ("mix_credit", "Mix credit"),
+         ("recycled", "Recycled"),
+         ("mix_recycled", "Mix recycled"),
+         ('control','Control Wood')],
         string="FSC Type",
         compute='_get_fsc_lot_type',
         help='FSC Type computed from FSC percentage and FSC product type.',
     )
 
-    @api.depends('fsc_percentage')
+    @api.depends('fsc_percentage','product_id')
     def _get_fsc_lot_type(self):
         for rec in self:
-            product = rec.product_id
-            if product.wood_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage == 100:
-                type = 'fsc'
-            elif product.wood_tracking and product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage != 100:
-                type = 'mix_credit'
-            elif product.wood_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage == 100:
-                type = 'recycled'
-            elif product.wood_tracking and product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage != 100:
-                type = 'mix_recycled'
-            elif product.wood_tracking and product.fsc_type in ['control_wood']:
-                type = 'control_wood'
-            if not product.wood_tracking or rec.fsc_percentage == 0:
-                type = 'no_fsc'
+            product, type = rec.product_id, False
+            if product.wood_tracking and product.is_fsc:
+                if product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage == 100:
+                    type = 'fsc'
+                elif product.fsc_type in ['fsc','mix_credit'] and rec.fsc_percentage != 100:
+                    type = 'mix_credit'
+                elif product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage == 100:
+                    type = 'recycled'
+                elif product.fsc_type in ['recycled', 'mix_recycled'] and rec.fsc_percentage != 100:
+                    type = 'mix_recycled'
+                elif product.fsc_type in ['control']:
+                    type = 'control_wood'
             rec['fsc_lot_type'] = type
 
     def _get_fsc_efficiency(self):
@@ -60,37 +68,25 @@ class StockLot(models.Model):
             record['fsc_efficiency'] = efficiency
 
     def _get_fsc_percentage(self):
-        for record in self:
-            material = record.product_id.material_id
-            product  = record.product_id
-
-            # Para productos NO FSC:
-            ####### Sólo permitir como extraños los CONTROL WOOD, en otro caso el resultado es 0:
-
-
-
-            if not material.wood_tracking:
+        for rec in self:
+            # Asignación de porcentages en función del tipo:
+            if rec.wood_tracking and rec.is_fsc and rec.product_id.fsc_type not in ['control']:
+                if rec.product_id.fsc_type in ['fsc','recycled']: percentage = 100
+                if rec.product_id.fsc_type in ['mix_credit','mix_recycled']: percentage = rec.product_id.fsc_mix_percentage
+            else:
                 percentage = 0
-            elif material.wood_tracking and product.fsc_type in ['fsc','recycled']:
-                percentage = 100
-            # Caso de que el % sea estimado y responsabilidad del cliente en compras y fabricaciones:
-            elif material.wood_tracking and material.fsc_mix_estimation:
-                percentage = material.fsc_mix_percentage
-            # Caso de producto comprado con un % certificado de FSC pero el % cambiará al mezclar en fabricación:
-            elif material.wood_tracking and not material.fsc_mix_estimation and product.fsc_type in ['mix_credit','mix_recycled']:
-                percentage = product.fsc_percentage
 
             # Casos en que posteriormente hay que buscar su orden de producción y asignarle la que tenga en mrp.production:
             # (suponemos que 'fsc' y 'recycled' no se permite terminar la fabricación si fsc_percentage < 100)
-            if product.wood_tracking and product.fsc_type in ['mix_credit','mix_recycled']:
+            if rec.wood_tracking and rec.fsc_lot_type in ['mix_credit','mix_recycled']:
                 smlproduction = self.env['stock.move.line'].search([
-                    ('lot_id','=',record.id),
+                    ('lot_id','=',rec.id),
                     # Sale de producción como producido:
                     ('location_id.usage', '=', 'production'),
                     ('move_id.production_id','!=',False)], limit=1)
                 if smlproduction.id:
                     percentage = smlproduction.move_id.production_id.fsc_percentage
-            record['fsc_percentage'] = percentage
+            rec['fsc_percentage'] = percentage
 
     def _get_raw_efficiency(self):
         for record in self:
@@ -150,7 +146,7 @@ class StockLot(models.Model):
 
 
 
-    # --- CAMPO COMPUTADO NO ALMACENADO ---
+    # --- CAMPO COMPUTADO NO ALMACENADO para obtener los lotes hijos: ---
     descendant_lot_ids = fields.Many2many(
         comodel_name='stock.lot',
         compute='_compute_descendant_lots',
@@ -202,9 +198,6 @@ class StockLot(models.Model):
         return list(descendant_ids)
 
     # --- MÉTODO COMPUTE ---
-    # @api.depends(...) NO es estrictamente necesario aquí si solo se usa para visualización,
-    # pero Odoo podría requerirlo en futuras versiones o contextos. Dejarlo sin depends
-    # significa que se recalculará siempre al acceder.
     def _compute_descendant_lots(self):
         """
         Método compute para el campo descendant_lot_ids.

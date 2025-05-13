@@ -30,25 +30,20 @@ class ProductTemplate(models.Model):
     is_cites = fields.Boolean('Is CITES')
 
     # FSC & CONTROL WOOD:
+    is_fsc = fields.Boolean('Is FSC')
     fsc_type = fields.Selection(
         [("fsc", "FSC"), ("mix_credit", "Mix credit"), ("recycled", "Recycled"), ("mix_recycled", "Mix recycled"),('control','Control Wood')],
         string="FSC Type",
         copy=True,
     )
-    fsc_mix_estimation = fields.Boolean(
-        'Use FSC Mix estimation',
-        help='Use an estation percentage of FSC 100% and other certified origen products.'
-             'This case requires an separated control of purchases to get this assortment percentages.'
-    )
-
-
-    ### PROBABLEMENTE SOBRA UNO DE ESTOS CAMPOS Y SU CONSTRAINS (que están al final):
     fsc_mix_percentage = fields.Float('FSC Mix factor', help='Percent FSC produced without ERP control.')
-    #fsc_percentage = fields.Float('FSC Percentage factor', help='Use this field in FSC < 100% purchased products.')
+    fsc_format_attribute_id = fields.Many2one('product.attribute', compute='_get_fsc_format_attribute')
+    fsc_format_value_id = fields.Many2one('product.attribute.value', string='Format', store=True)
 
+    # EUTR (normativa europea):
+    eutr_nc_code = fields.Char('EUTR NC', compute='_get_eutr_nc_code', help='4 letf digits from Intrastat code.')
 
-
-
+    # Eficiencia tras producir y mermas:
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
 
     def _get_raw_efficiency_product_template(self):
@@ -73,16 +68,11 @@ class ProductTemplate(models.Model):
                 or self.fsc_type in ['mix_credit','mix_recycled'] and self.fsc_mix_percentage > 100):
             raise UserError('FSC percentage must be greater than 0 and maximum 1 !!')
 
+    def _get_fsc_format_attribute(self):
+        self.fsc_format_attribute_id = self.env.company.fsc_format_attribute_id.id
 
-"""
-    @api.constrains('fsc_type','fsc_percentage')
-    def _check_fsc_percentage(self):
-        if self.fsc_type in ['mix_credit','mix_recycled'] and not self.fsc_mix_estimation and self.fsc_percentage <= 0:
-            raise UserError('FSC percentage must be greater than 0 in mixed types !!')
-
-    @api.constrains('fsc_mix_percentage')
-    def _check_fsc_mix_percentage(self):
-        if self.fsc_mix_estimation and self.fsc_mix_percentage <= 0:
-            raise UserError('FSC percentage must be greater than 0 !!')
-
-"""
+    @api.depends('intrastat_code_id')
+    def _get_eutr_nc_code(self):
+        code = ""
+        if self.intrastat_code_id.id: code = self.intrastat_code_id.code[:4]
+        self.eutr_nc_code = code

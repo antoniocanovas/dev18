@@ -11,8 +11,7 @@ class MrpProduction(models.Model):
     # Para control de purezo FSC hay que revisar materiales de entrada y asignar % a la orden de producción.
     # Si el material viene de otra orden => el de la orden; si es comprado hay tres opciones:
         # a) 100% si type es FSC,
-        # QUITAR, NO CONSIDERADO !! b) El porcentaje estimado si el MATERIAL del PRODUCTO tiene este tratamiento
-        # c) Porcentaje directo del producto si es type MIX y el material no es por porcentaje fijo.
+        # b) Porcentaje directo del producto si es type MIX y el material no es por porcentaje fijo.
     fsc_percentage = fields.Float('FSC percentage')
 
     def _get_fsc_efficiency_and_percentage(self):
@@ -25,25 +24,16 @@ class MrpProduction(models.Model):
 
             # move_raw_ids son entradas, move_finished_ids son todas las salidas, move_byproduct_ids sólo los subproductos:
             for sm in record.move_raw_ids:
-                if sm.product_id.material_id.wood_tracking:
+                if sm.product_id.wood_tracking:
                     for sml in sm.move_line_ids:
                         factor, fsc_percentage = 1, 0
                         product = sml.product_id
 
-                        # Para productos FSC 100%:
+                        # Valores por defecto para productos FSC:
                         if product.fsc_type in ['fsc', 'recycled']:
                             fsc_percentage = 100
                         elif product.fsc_type in ['mix_credit', 'mix_recycled']:
                             fsc_percentage = product.fsc_mix_percentage
-
-                        """    
-                        # Caso de que el % sea estimado y responsabilidad del cliente en compras y fabricaciones:
-                        elif material.fsc_mix_estimation:
-                            fsc_percentage = material.fsc_mix_percentage
-                        # Caso de producto comprado con un % certificado de FSC pero el % cambiará al mezclar en fabricación:
-                        elif not material.fsc_mix_estimation and product.fsc_type in ['mix_credit', 'mix_recycled']:
-                            fsc_percentage = product.fsc_percentage
-                        """
 
                         # Buscamos la orden de producción para este producto y lote por si encontramos eficiencia previa:
                         smlproduced = self.env['stock.move.line'].search([

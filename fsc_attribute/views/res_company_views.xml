@@ -5,21 +5,15 @@
         <field name="name">fsc.attribute.res.company.inh.form</field>
         <field name="model">res.company</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="inherit_id" ref="fsc_base.fsc_base_res_company_inh_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="inside">
-                <page string="FSC">
-                    <group>
-                        <group>
-                            <field name="fsc_dimension_attribute_id"/>
-                            <field name="fsc_quality_attribute_id"/>
-                            <button name="update_product_attributes" string="Update product attributes" type="object"
-                                    invisible="not fsc_dimension_attribute_id"
-                                    help="Update product dimension and quality fields."
-                                    class="oe_link pt-0" colspan="2"/>
-                        </group>
-                    </group>
-                </page>
+            <xpath expr="//group[@name='fsc_attributes']" position="inside">
+                <field name="fsc_dimension_attribute_id"/>
+                <field name="fsc_quality_attribute_id"/>
+                <button name="update_product_attributes" string="Update product attributes" type="object"
+                        invisible="not fsc_dimension_attribute_id"
+                        help="Update product dimension and quality fields."
+                        class="oe_link pt-0" colspan="2"/>
             </xpath>
         </field>
     </record>

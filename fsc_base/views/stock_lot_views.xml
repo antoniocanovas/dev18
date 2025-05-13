@@ -8,13 +8,23 @@
         <field name="inherit_id" ref="stock.view_production_lot_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//group[@name='main_group']/group[2]" position="inside">
-                <field name="fsc_efficiency"/>
-                <field name="fsc_percentage"/>
-                <field name="fsc_lot_type"/>
-                <field name="raw_efficiency"/>
-                <field name="initial_received_quantity_computed"/>
-                <field name="descendant_lot_ids" widget="many2many_tags"/>
+            <xpath expr="//group[@name='main_group']" position="after">
+                <group name="wood_tracking" string="Wood tracking" invisible="not wood_tracking">
+                    <group>
+                        <field name="material_id"/>
+                        <field name="wood_tracking"/>
+                        <field name="is_fsc" invisible="not wood_tracking"/>
+                        <field name="is_cites" invisible="not wood_tracking"/>
+                        <field name="fsc_efficiency"/>
+                    </group>
+                    <group>
+                        <field name="fsc_lot_type"/>
+                        <field name="fsc_percentage"/>
+                        <field name="raw_efficiency"/>
+                        <field name="initial_received_quantity_computed"/>
+                        <field name="descendant_lot_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
             </xpath>
 
         </field>

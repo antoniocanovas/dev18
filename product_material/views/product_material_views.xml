@@ -41,8 +41,8 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="alias" placeholder="Technical name or alias"/>
-                            <field name="comment"/>
+                            <field name="alias" placeholder="Technical or alias name"/>
+                            <field name="comment" placeholder="Notes"/>
                         </group>
                         <group>
                             <field name="image" widget="image"/>
