@@ -12,6 +12,7 @@
     'depends': [
         'stock',
         'mrp',
+        'fsc_base',
     ],
     'data': [
         'views/res_company_views.xml',
