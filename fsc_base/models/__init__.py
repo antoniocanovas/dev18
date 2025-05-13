@@ -3,7 +3,7 @@ from . import product_material
 from . import mrp_production
 from . import stock_lot
 from . import product
-from . import fsc_audit
 from . import fsc_audit_line
-from . import eutr_audit
+from . import fsc_audit
 from . import eutr_audit_line
+from . import eutr_audit

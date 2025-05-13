@@ -58,13 +58,13 @@
                     <field name="line_ids">
                         <list>
                             <field name="product_id"/>
-                            <field name="eudr_nc_code"/>
+                            <field name="eutr_nc_code"/>
                             <field name="name"/>
                             <field name="qty"/>
                             <field name="state_id"/>
                             <field name="country_id"/>
-                            <field name="eudr_cdc"/>
-                            <field name="eudr_cl"/>
+                            <field name="eutr_cdc"/>
+                            <field name="eutr_cl"/>
                             <field name="intrastat_code_id" optional="hide"/>
                             <field name="eutr_audit_id" invisible="1"/>
                         </list>
