@@ -31,5 +31,25 @@
         <field name="priority">99</field>
     </record>
 
+    <!-- VISTAS DE BÚSQUEDA: -->
+    <record id="fsc_base_stock_lot_inh_search" model="ir.ui.view">
+        <field name="name">fsc.base.stock.lot.inh.search</field>
+        <field name="model">stock.lot</field>
+        <field name="type">search</field>
+        <field name="inherit_id" ref="stock.search_product_lot_filter"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <data>
+                <filter name="creation_date" position="after">
+                    <separator/>
+                    <filter string="Wood tracking" name="wood_tracking" domain="[('wood_tracking','=',True)]"/>
+                    <filter string="Is FSC" name="is_fsc" domain="[('is_fsc','=',True)]"/>
+                    <filter string="Is CITES" name="is_cites" domain="[('is_cites','=',True)]"/>
+                </filter>
+            </data>
+        </field>
+    </record>
+
+
 </odoo>
 
