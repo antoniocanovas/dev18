@@ -109,7 +109,7 @@ class StockLot(models.Model):
                 ])
                 for sml in moves:
                     volume += sml.quantity * sml.product_id.volume
-                    print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
+                    #print("Producido: " + sml.product_id.name + " Volumen: " + str(volume))
 
             # Restar lo consumido en entradas de subproducciones (wood_tracking):
             for product in products:
