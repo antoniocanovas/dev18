@@ -24,6 +24,7 @@
         'views/stock_lot_views.xml',
         'views/product_views.xml',
         'views/fsc_audit_views.xml',
+        'views/eutr_audit_views.xml',
         'views/res_company_views.xml',
         'data/automatic_actions.xml',
     ],

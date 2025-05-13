@@ -41,7 +41,7 @@ class ProductTemplate(models.Model):
     fsc_format_value_id = fields.Many2one('product.attribute.value', string='Format', store=True)
 
     # EUTR (normativa europea):
-    eutr_nc_code = fields.Char('EUTR NC', compute='_get_eutr_nc_code', help='4 letf digits from Intrastat code.')
+    eudr_nc_code = fields.Char('EUDR NC', compute='_get_eudr_nc_code', help='4 letf digits from Intrastat code.')
 
     # Eficiencia tras producir y mermas:
     raw_efficiency_pt = fields.Float('Raw efficiency', compute='_get_raw_efficiency_product_template')
@@ -72,7 +72,7 @@ class ProductTemplate(models.Model):
         self.fsc_format_attribute_id = self.env.company.fsc_format_attribute_id.id
 
     @api.depends('intrastat_code_id')
-    def _get_eutr_nc_code(self):
+    def _get_eudr_nc_code(self):
         code = ""
         if self.intrastat_code_id.id: code = self.intrastat_code_id.code[:4]
-        self.eutr_nc_code = code
+        self.eudr_nc_code = code
