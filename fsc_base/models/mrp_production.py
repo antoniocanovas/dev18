@@ -17,7 +17,7 @@ class MrpProduction(models.Model):
     def _get_fsc_efficiency_and_percentage(self):
         for record in self:
             # Para el cálculo de eficiencia FSC en base a pérdidas por corte y desechos:
-            rawvolume, producedvolume, efficiency = 0, 0, 1
+            rawvolume, producedvolume, efficiency, fsc_percentage = 0, 0, 1, 0
 
             # Para el cálculo de porcentaje FSC en la entrada de producción que se guardará en el mrp.production:
             fscvolume, incomevolume  = 0, 0
