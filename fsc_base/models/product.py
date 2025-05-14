@@ -27,7 +27,7 @@ class ProductTemplate(models.Model):
     wood_tracking = fields.Boolean(related='material_id.wood_tracking')
 
    # CITES:
-    is_cites = fields.Boolean('Is CITES')
+    is_cites = fields.Boolean('Is CITES', related='material_id.is_cites')
 
     # FSC & CONTROL WOOD:
     is_fsc = fields.Boolean('Is FSC')

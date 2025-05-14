@@ -10,6 +10,7 @@
 
             <xpath expr="//field[@name='comment']" position="before">
                 <field name="wood_tracking"/>
+                <field name="is_cites" invisible="not wood_tracking"/>
             </xpath>
 
         </field>
@@ -24,6 +25,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="wood_tracking"/>
+                <field name="is_cites" readonly="not wood_tracking"/>
             </xpath>
         </field>
         <field name="priority">16</field>

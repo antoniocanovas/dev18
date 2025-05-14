@@ -18,7 +18,7 @@
                         <field name="fsc_format_attribute_id" invisible="1"/>
                         <field name="fsc_format_value_id"
                                domain="[('attribute_id','=',fsc_format_attribute_id)]"
-                               invisible="not is_fsc" required="is_fsc"
+                               invisible="not is_fsc"
                                options="{'no_quick_create':1, 'no_create_edit':1}"/>
                         <field name="fsc_type" invisible="not is_fsc" required="is_fsc"/>
                         <field name="fsc_mix_percentage"
