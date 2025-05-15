@@ -122,7 +122,7 @@ class StockLot(models.Model):
                 ])
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume
-                    print("Materia prima: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
+                    #print("Materia prima: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
 
             # Considerar las pérdidas por ajustes de inventario en todos los productos:
             for product in products:
@@ -135,13 +135,13 @@ class StockLot(models.Model):
                 # (otra forma de considerarlo sería la propiedad (scrap_location) en stock.location.
                 for sml in moves:
                     volume -= sml.quantity * sml.product_id.volume
-                    print("Ajuste de inventario: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
+                    #print("Ajuste de inventario: " + sml.product_id.name + "Volumen: " + str(-sml.quantity * sml.product_id.volume))
 
 
             if record.initial_received_quantity_computed != 0:
                 efficiency = volume / initial_volume * 100
-                print("Stock inicial del lote: " + str(record.initial_received_quantity_computed))
-                print("Volume: " + str(volume) + " / Cantidad inicial: " + str(record.initial_received_quantity_computed) + " = " + str(efficiency))
+                #print("Stock inicial del lote: " + str(record.initial_received_quantity_computed))
+                #print("Volume: " + str(volume) + " / Cantidad inicial: " + str(record.initial_received_quantity_computed) + " = " + str(efficiency))
             record['raw_efficiency'] = efficiency
 
 
@@ -243,7 +243,7 @@ class StockLot(models.Model):
         initial_quantity = sum(line['qty_done'] for line in move_lines)
 
         _logger.info(f"Cantidad inicial calculada para lote {self.name} (ID: {self.id}): {initial_quantity}")
-        print(move_lines)
+        #print(move_lines)
         return initial_quantity
 
     # --- Opcional: Campo Computado (NO ALMACENADO - ¡Cuidado con rendimiento!) ---
