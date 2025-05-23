@@ -59,15 +59,17 @@
                     </group>
                     <field name="line_ids">
                         <list>
-                            <field name="raw_product_id"/>
-                            <field name="raw_product_qty"/>
+                            <field name="material_id"/>
+                            <field name="fsc_audit_product_ids" widget="many2many_tags"/>
+                            <field name="raw_purchase_vol"/>
                             <field name="raw_fsc_format_id"/>
-                            <field name="raw_scientific_name"/>
-                            <field name="raw_consumed"/>
-                            <field name="raw_stock"/>
+                            <field name="name" optional="show"/>
+                            <field name="raw_consumed_vol"/>
+                            <field name="raw_stock_start_vol"/>
+                            <field name="raw_stock_final_vol"/>
                             <field name="final_fsc_format_id"/>
-                            <field name="final_sold_qty"/>
-                            <field name="final_no_tracking"/>
+                            <field name="final_sale_vol"/>
+                            <field name="final_no_tracking_vol"/>
                             <field name="final_efficiency"/>
                         </list>
                     </field>

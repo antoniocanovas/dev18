@@ -6,3 +6,4 @@ class ProductMaterial(models.Model):
 
     wood_tracking = fields.Boolean('Wood Tracking')
     is_cites = fields.Boolean('Is CITES')
+    type = fields.Selection(default='wood')

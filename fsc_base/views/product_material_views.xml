@@ -9,8 +9,8 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='comment']" position="before">
-                <field name="wood_tracking"/>
-                <field name="is_cites" invisible="not wood_tracking"/>
+                <field name="wood_tracking" invisible="type != 'wood'"/>
+                <field name="is_cites" invisible="type != 'wood' or not wood_tracking"/>
             </xpath>
 
         </field>
@@ -23,7 +23,7 @@
         <field name="type">list</field>
         <field name="inherit_id" ref="product_material.product_material_default_list"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
+            <xpath expr="//field[@name='type']" position="after">
                 <field name="wood_tracking"/>
                 <field name="is_cites" readonly="not wood_tracking"/>
             </xpath>

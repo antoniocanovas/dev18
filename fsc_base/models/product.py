@@ -28,6 +28,7 @@ class ProductTemplate(models.Model):
 
    # CITES:
     is_cites = fields.Boolean('Is CITES', related='material_id.is_cites')
+    material_type = fields.Selection(related='material_id.type')
 
     # FSC & CONTROL WOOD:
     is_fsc = fields.Boolean('Is FSC')
@@ -68,6 +69,7 @@ class ProductTemplate(models.Model):
                 or self.fsc_type in ['mix_credit','mix_recycled'] and self.fsc_mix_percentage > 100):
             raise UserError('FSC percentage must be greater than 0 and maximum 1 !!')
 
+    @api.depends('is_fsc')
     def _get_fsc_format_attribute(self):
         self.fsc_format_attribute_id = self.env.company.fsc_format_attribute_id.id
 

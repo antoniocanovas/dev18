@@ -12,9 +12,10 @@
                 <page string="FSC" name="fsc" invisible="not wood_tracking">
                     <group>
                         <field name="material_id"/>
+                        <field name="material_type"/>
                         <field name="wood_tracking" invisible="1"/>
-                        <field name="is_cites" invisible="not wood_tracking"/>
-                        <field name="is_fsc" invisible="not wood_tracking"/>
+                        <field name="is_cites" invisible="material_type != 'wood' or not wood_tracking"/>
+                        <field name="is_fsc" invisible="material_type != 'wood' or not wood_tracking"/>
                         <field name="fsc_format_attribute_id" invisible="1"/>
                         <field name="fsc_format_value_id"
                                domain="[('attribute_id','=',fsc_format_attribute_id)]"
@@ -24,7 +25,7 @@
                         <field name="fsc_mix_percentage"
                                invisible="not is_fsc or fsc_type not in ['mix_credit','mix_recycled']"
                         />
-                        <field name="raw_efficiency_pt" invisible="is_product_variant or not wood_tracking"/>
+                        <field name="raw_efficiency_pt" invisible="material_type != 'wood' or is_product_variant or not wood_tracking"/>
                     </group>
                     <group name="eutr" string="EUTR">
                         <field name="intrastat_code_id"  options="{'no_quick_create':1, 'no_create_edit':1}"/>

@@ -12,3 +12,4 @@ class ProductMaterial(models.Model):
     alias = fields.Char('Alias', translate=True)
     image = fields.Binary('Image', copy=False)
     comment = fields.Html('Comments',  copy=False , translate=True)
+    type = fields.Selection([('wood','Wood'),('metal','Metal'),('plastic','Plastic')])

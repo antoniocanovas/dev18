@@ -9,6 +9,8 @@ class StockLot(models.Model):
 
     wood_tracking = fields.Boolean(related='product_id.wood_tracking')
     material_id = fields.Many2one(related='product_id.material_id')
+    material_type = fields.Selection(related='product_id.material_type')
+
     is_fsc = fields.Boolean(related='product_id.is_fsc')
     is_cites = fields.Boolean(related='product_id.is_cites')
 
@@ -37,6 +39,22 @@ class StockLot(models.Model):
         compute='_get_fsc_lot_type',
         help='FSC Type computed from FSC percentage and FSC product type.',
     )
+
+
+
+    # Para el informe FSC:
+    fsc_format_value_id = fields.Many2one(related='product_id.fsc_format_value_id')
+    # "W" de compra original por defecto para COMPRAS, será cambiado al FABRICAR:
+    fsc_origin_format_value_id = fields.Many2one('product.attribute.value', string='Origin format',
+                                                 store=True, compute='_get_default_fsc_origin_format_value')
+    @api.depends('create_date')
+    def _get_default_fsc_origin_format_value(self):
+        format = False
+        if not self.fsc_origin_format_value_id and self.product_id.fsc_format_value_id:
+            format = self.product_id.fsc_format_value_id.id
+        self.fsc_origin_format_value_id = format
+
+
 
     @api.depends('fsc_percentage','product_id')
     def _get_fsc_lot_type(self):

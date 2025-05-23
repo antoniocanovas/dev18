@@ -41,6 +41,7 @@
                     </h1>
                     <group>
                         <group>
+                            <field name="type"/>
                             <field name="alias" placeholder="Technical or alias name"/>
                             <field name="comment" placeholder="Notes"/>
                         </group>
@@ -66,6 +67,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="type"/>
             </list>
         </field>
         <field name="groups_id" eval="[(6, 0, [])]"/>

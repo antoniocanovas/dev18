@@ -10,9 +10,10 @@ class MrpProduction(models.Model):
 
     # Para control de purezo FSC hay que revisar materiales de entrada y asignar % a la orden de producción.
     # Si el material viene de otra orden => el de la orden; si es comprado hay tres opciones:
-        # a) 100% si type es FSC,
-        # b) Porcentaje directo del producto si es type MIX y el material no es por porcentaje fijo.
+    # a) 100% si type es FSC,
+    # b) Porcentaje directo del producto si es type MIX y el material no es por porcentaje fijo.
     fsc_percentage = fields.Float('FSC percentage')
+    fsc_origin_format_value_id = fields.Many2one('product.attribute.value', string='Origin format', store=True)
 
     def _get_fsc_efficiency_and_percentage(self):
         for record in self:
@@ -72,6 +73,19 @@ class MrpProduction(models.Model):
                 # Actualizar datos de eficiencia:
                 rec._get_fsc_efficiency_and_percentage()
 
+                # Chequear en productos de entrada similar formato FSC ("W"), requerido para AUDITORÍA FSC:
+                if rec.state not in 'draft':
+                    materials, format = set(), set()
+                    for sml in rec.move_raw_ids.move_line_ids:
+                        if sml.product_id.material_type == 'wood':
+                            materials.add(sml.product_id.material_id.id)
+                        if sml.product_id.is_fsc:
+                            format.add(sml.product_id.fsc_format_value_id.id)
+
+                    if len(format) > 1 or len(materials) > 1:
+                        raise UserError('Para la trazabilidad FSC, todos los productos origen en su compra han de ser'
+                                        'del mismo MATERIAL y FORMATO W, haga distintas órdenes de producción.')
+
                 # Chequear si los productos finales son 100% FSC y los de entrada son también 100%:
                 if rec.state == 'done' and rec.fsc_percentage < 100:
                     products = rec.finished_move_line_ids.product_id
@@ -81,3 +95,10 @@ class MrpProduction(models.Model):
                             product_names += "[" + product.name + "] "
                     if product_names != "":
                         raise UserError('Los productos a fabricar ' + product_names + ' requieren que todos materiales sean FSC 100%')
+
+                # Actualizar el W original en producción y cada lote producido (producidos previstos y subproductos):
+                if rec.state == 'done' and  len(format) == 1:
+                    rec.write({'fsc_origin_format_value_id':format})
+                    for sml in rec.finished_move_line_ids:
+                        if sml.lot_id:
+                            sml.lot_id.write({'fsc_origin_format_value_id':format})

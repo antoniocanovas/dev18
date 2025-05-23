@@ -9,19 +9,23 @@
         <field name="arch" type="xml">
 
             <xpath expr="//group[@name='main_group']" position="after">
-                <group name="wood_tracking" string="Wood tracking" invisible="not wood_tracking">
+                <group name="wood_tracking" string="Wood tracking"
+                       invisible="material_type != 'wood' or not wood_tracking">
                     <group>
                         <field name="material_id"/>
                         <field name="wood_tracking"/>
                         <field name="is_fsc" invisible="not wood_tracking"/>
                         <field name="is_cites" invisible="not wood_tracking"/>
                         <field name="fsc_efficiency"/>
+                        <field name="fsc_format_value_id"/>
+                        <field name="material_type" invisible="1"/>
                     </group>
                     <group>
                         <field name="fsc_lot_type"/>
                         <field name="fsc_percentage"/>
                         <field name="raw_efficiency"/>
                         <field name="initial_received_quantity_computed"/>
+                        <field name="fsc_origin_format_value_id" readonly="1"/>
                         <field name="descendant_lot_ids" widget="many2many_tags"/>
                     </group>
                 </group>
