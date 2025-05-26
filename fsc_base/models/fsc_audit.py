@@ -26,66 +26,150 @@ class FscAudit(models.Model):
     line_ids = fields.One2many('fsc.audit.line','fsc_audit_id', string='Lines')
 
     def compute_fsc_audit(self):
-        self.line_ids.unlink()
         # Objetivo es conseguir el rendimiento por MATERIAL COMPRADO indicando formato origen:
+        self.line_ids.unlink()
+        # Materiales que tienen trazabidad FSC:
         fsc_products = self.env['product.product'].search([('wood_tracking','=',True),('is_fsc','=',True)])
         fsc_materials = fsc_products.material_id
 
-        for mat in fsc_materials:
-            # Buscar los formatos de los productos vendidos de cada material, que sean de origen FSC (sml):
-            sml_sold = self.env['stock.move.line'].search([
-                ('location_dest_id.usage','=','customer'),
-                ('lot_id.material_id','=', mat.id,),
-                ('product_id','in',fsc_products.ids),
+        # 1. Creación de líneas de informe consolidadas:
+        for material in fsc_materials:
+            self.env['fsc.audit.line'].create({
+                'fsc_audit_id': self.id,
+                'material_id':  material.id,
+            })
+
+        # 2. Creación de líneas de detalle fsc.audit.product (cada una es un MATERIAL distinto):
+        for li in self.line_ids:
+            # Productos de este material con trazabilidad FSC:
+            products = self.env['product.product'].search([
+                ('material_id','=',li.material_id.id),
+                ('wood_tracking','=',True),
+                ('is_fsc','=',True),
             ])
-            sml_products = sml_sold.product_id
-            sml_fsc_values = sml_products.fsc_format_value_id
-            for value in sml_fsc_values:
-                sml_lots = sml_sold.lot_id
-                sml_origin_values = sml_lots.fsc_origin_format_value_id
-                for origin_value in sml_origin_values:
-                    # Para cada valor de formato origen y destino una línea principal vacía:
-                    new_audit_line = self.env['fsc.audit.line'].create({
-                        'material_id': mat.id,
-                        'fsc_audit_id': self.id,
-                        'raw_fsc_format_id': origin_value.id,
-                        'final_fsc_format_id': value.id,
-                    })
-                    # Busco los productos vendidos con origin_value de este bucle:
-                    products_origin_value = set()
-                    for lot in sml_lots:
-                        if lot.fsc_origin_format_value_id == origin_value:
-                            products_origin_value.add(lot.product_id)
 
-                    for pov in products_origin_value:
-                        # calcular volumen vendido desde los lotes anteriores:
-                        volume = 0
-                        for sml_pov in sml_sold:
-                            if sml_pov.product_id == pov:
-                                volume += sml_pov.qty_done * sml_pov.product_id.volume
+            for prod in products:
+                # Crear línea de producto para stock_start_vol: tipo stock_start, volume:
+                stock_start_vol = prod.with_context(to_date=self.date_from).qty_available * prod.volume
+                self.env['fsc.audit.product'].create({
+                    'fsc_audit_line_id': li.id,
+                    'product_id': prod.id,
+                    'volume': stock_start_vol,
+                    'type': 'stock_start',
+                })
 
-                        # Crear fsc.audit.product(s) y completar la unificada anterior en fsc.audit.line:
-                        self.env['fsc.audit.product'].create({
-                            'fsc_audit_line_id': new_audit_line.id,
-                            'product_id': pov.id,
-                            'volume_sold': volume,
-                            #'purchase_qty': ,
-                            #'stock_start_qty':,
-                            #'stock_final_qty':,
-                            'fsc_format_id': value.id,
-                        })
-                    # Incrementar valores para tras el bucle completar new_audit_line (o hacerlos computados)
-                    new_audit_line.write({
-                        # 'fsc_audit_product_ids': ,
-                        # 'raw_product_qty': ,
-                        # 'raw_consumed' = fields.Float('Raw consumed')
-                        # 'raw_stock' = fields.Float('Raw stock')
-                        # 'final_fsc_format_id' = fields.Char('Final group')
-                        # 'final_sold_qty' = fields.Float('Sold')
-                        # 'final_no_tracking' = fields.Float('No tracking')
-                        # 'final_efficiency'
-                    })
+                # Crear línea de producto para stock_final_vol: tipo stock_final, volume
+                stock_final_vol = prod.with_context(to_date=self.date_to).qty_available * prod.volume
+                self.env['fsc.audit.product'].create({
+                    'fsc_audit_line_id': li.id,
+                    'product_id': prod.id,
+                    'volume': stock_final_vol,
+                    'type': 'stock_final',
+                })
 
-                    #raise UserError(products_origin_value)
+                # Crear línea de producto para purchase_vol (considerar devoluciones): tipo purchase, volume
+                # Primero las compras:
+                sml_purchases = self.env['stock.move.line'].search([
+                    ('product_id','=',prod.id),
+                    ('location_id.usage','=','supplier'),
+                    ('date','>=', self.date_from),
+                    ('date', '<=', self.date_to),
+                ])
+                sml_purchases_vol = sum(sml_purchases.mapped('quantity')) * prod.volume
+                # Ahora las devoluciones:
+                sml_purchases_return = self.env['stock.move.line'].search([
+                    ('product_id', '=', prod.id),
+                    ('location_dest_id.usage', '=', 'supplier'),
+                    ('date', '>=', self.date_from),
+                    ('date', '<=', self.date_to),
+                ])
+                sml_purchases_return_vol = sum(sml_purchases_return.mapped('quantity')) * prod.volume
+                self.env['fsc.audit.product'].create({
+                    'fsc_audit_line_id': li.id,
+                    'product_id': prod.id,
+                    'volume': sml_purchases_vol - sml_purchases_return_vol,
+                    'type': 'purchase',
+                })
 
-        return True
+                # Crear línea de producto para sale_vol (considerar devoluciones): tipo sale, volume
+                sml_sales = self.env['stock.move.line'].search([
+                    ('product_id','=',prod.id),
+                    ('location_dest_id.usage','=','customer'),
+                    ('date','>=', self.date_from),
+                    ('date', '<=', self.date_to),
+                ])
+                sml_sales_vol = sum(sml_sales.mapped('quantity')) * prod.volume
+                # Ahora las devoluciones:
+                sml_sales_return = self.env['stock.move.line'].search([
+                    ('product_id', '=', prod.id),
+                    ('location_id.usage', '=', 'customer'),
+                    ('date', '>=', self.date_from),
+                    ('date', '<=', self.date_to),
+                ])
+                sml_sales_return_vol = sum(sml_sales_return.mapped('quantity')) * prod.volume
+                self.env['fsc.audit.product'].create({
+                    'fsc_audit_line_id': li.id,
+                    'product_id': prod.id,
+                    'volume': sml_sales_vol - sml_sales_return_vol,
+                    'type': 'sale',
+                })
+
+        # 2. Creación de líneas de detalle fsc.audit.product (cada una es un MATERIAL distinto):
+        for li in self.line_ids:
+            stock_start_vol, stock_final_vol, purchase_vol, sale_vol, efficiency = 0, 0, 0, 0, 100
+
+            # STOCK_START_VOL:
+            fsc_audit_product_stock_start_vol = self.env['fsc.audit.product'].search([
+                ('material_id','=',li.material_id.id),
+                ('type','=','stock_start'),
+            ])
+            if fsc_audit_product_stock_start_vol.ids:
+                stock_start_vol = sum(fsc_audit_product_stock_start_vol.mapped('volume'))
+
+            # STOCK_FINAL_VOL:
+            fsc_audit_product_stock_final_vol = self.env['fsc.audit.product'].search([
+                ('material_id','=',li.material_id.id),
+                ('type','=','stock_final'),
+            ])
+            if fsc_audit_product_stock_final_vol.ids:
+                stock_final_vol = sum(fsc_audit_product_stock_final_vol.mapped('volume'))
+
+            # PURCHASE_VOL:
+            fsc_audit_product_purchase_vol = self.env['fsc.audit.product'].search([
+                ('material_id','=',li.material_id.id),
+                ('type','=','purchase'),
+            ])
+            if fsc_audit_product_purchase_vol.ids:
+                purchase_vol = sum(fsc_audit_product_purchase_vol.mapped('volume'))
+
+            # SALE_VOL:
+            fsc_audit_product_sale_vol = self.env['fsc.audit.product'].search([
+                ('material_id','=',li.material_id.id),
+                ('type','=','sale'),
+            ])
+            if fsc_audit_product_sale_vol.ids:
+                sale_vol = sum(fsc_audit_product_sale_vol.mapped('volume'))
+
+            # EFFICIENCY:
+            if purchase_vol + stock_start_vol > 0:
+                efficiency = (sale_vol + stock_final_vol) / (purchase_vol + stock_start_vol)
+
+            li.write({
+                'stock_start_vol': stock_start_vol,
+                'stock_final_vol': stock_final_vol,
+                'purchase_vol': purchase_vol,
+                'sale_vol': sale_vol,
+                'efficiency': efficiency,
+            })
+
+    # ----------- CAMPOS PARA LOS BOTONES O2M DEL FORMULARIO: ----------------
+    fsc_audit_product_line_count = fields.Integer(
+        compute='_compute_fsc_audit_product_line_count',
+        string="Stock" # Etiqueta que se puede usar en el botón
+    )
+    @api.depends('line_ids.fsc_audit_product_ids')
+    def _compute_fsc_audit_product_line_count(self):
+        for record in self:
+            lines = self.env['fsc.audit.product'].search([('fsc_audit_id','=',record.id)])
+            record.fsc_audit_product_line_count = len(lines)
+

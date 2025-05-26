@@ -15,7 +15,7 @@ class EutrAuditLine(models.Model):
 
     intrastat_code_id = fields.Many2one(related='product_id.intrastat_code_id', string='Intrastat')
     eutr_nc_code = fields.Char('NC', related='product_id.eutr_nc_code')
-    qty      = fields.Float('Quantity (TM)')
+    volume = fields.Float('Quantity (TM)')
     state_id = fields.Many2one('res.country.state', string='State')
     country_id = fields.Many2one('res.country', string='Country')
     eutr_cdc = fields.Boolean('CDC', help='Custody chain')

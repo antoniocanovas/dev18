@@ -18,6 +18,23 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <!-- fsc.audit.product (botón o2m): -->
+    <record id="fsc_audit_products_act_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{'search_default_group_fsc_material': 1}</field>
+        <field name="domain">[('fsc_audit_id','=',active_id)]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">FSC Audit products</field>
+        <field name="res_model">fsc.audit.product</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+
     <!-- CONFIG MENU: -->
     <record id="fsc_audit_menu" model="ir.ui.menu">
         <field name="action" ref="action_fsc_audit"/>
@@ -44,6 +61,11 @@
                     </button>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(fsc_base.fsc_audit_products_act_window)d" type="action" icon="fa-bars">
+                            <field string="Moves" name="fsc_audit_product_line_count" widget="statinfo"/>
+                        </button>
+                    </div>
                     <h1>
                         <field name="name" required="1" placeholder="e.g. Audit #..." />
                     </h1>
@@ -60,17 +82,14 @@
                     <field name="line_ids">
                         <list>
                             <field name="material_id"/>
-                            <field name="fsc_audit_product_ids" widget="many2many_tags"/>
-                            <field name="raw_purchase_vol"/>
-                            <field name="raw_fsc_format_id"/>
-                            <field name="name" optional="show"/>
-                            <field name="raw_consumed_vol"/>
-                            <field name="raw_stock_start_vol"/>
-                            <field name="raw_stock_final_vol"/>
-                            <field name="final_fsc_format_id"/>
-                            <field name="final_sale_vol"/>
-                            <field name="final_no_tracking_vol"/>
-                            <field name="final_efficiency"/>
+                            <field name="fsc_audit_product_ids" widget="many2many_tags" optional="hide"/>
+                            <field name="name" optional="hide"/>
+                            <field name="stock_start_vol"/>
+                            <field name="stock_final_vol"/>
+                            <field name="purchase_vol"/>
+                            <field name="sale_vol"/>
+                            <field name="efficiency"/>
+                            <field name="is_hidden"/>
                         </list>
                     </field>
                     <notebook>
@@ -110,5 +129,6 @@
         <field name="priority">16</field>
         <field name="type">list</field>
     </record>
+
 
 </odoo>

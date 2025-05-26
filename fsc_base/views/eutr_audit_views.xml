@@ -60,7 +60,7 @@
                             <field name="product_id"/>
                             <field name="eutr_nc_code"/>
                             <field name="name"/>
-                            <field name="qty"/>
+                            <field name="volume"/>
                             <field name="state_id"/>
                             <field name="country_id"/>
                             <field name="eutr_cdc"/>
