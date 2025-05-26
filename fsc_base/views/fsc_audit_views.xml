@@ -54,15 +54,21 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                     <button name="compute_fsc_audit"
                             icon="fa-delicious" class="oe_stat_button"
-                            type="object" string="Compute">
+                            type="object" string="Compute"
+                            invisible="state in ['done','cancel']"
+                    >
                     </button>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="%(fsc_base.fsc_audit_products_act_window)d" type="action" icon="fa-bars">
+                        <button class="oe_stat_button"
+                                name="%(fsc_base.fsc_audit_products_act_window)d"
+                                type="action" icon="fa-bars"
+                                invisible="not line_ids"
+                        >
                             <field string="Moves" name="fsc_audit_product_line_count" widget="statinfo"/>
                         </button>
                     </div>
@@ -71,15 +77,15 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="date_from" required="1"/>
-                            <field name="date_to" required="1"/>
+                            <field name="date_from" required="1" readonly="state in ['done']"/>
+                            <field name="date_to" required="1" readonly="state in ['done']"/>
                         </group>
                         <group>
                             <field name="auditor_id"/>
                             <field name="audit_date"/>
                         </group>
                     </group>
-                    <field name="line_ids">
+                    <field name="line_ids" readonly="1">
                         <list>
                             <field name="material_id"/>
                             <field name="fsc_audit_product_ids" widget="many2many_tags" optional="hide"/>

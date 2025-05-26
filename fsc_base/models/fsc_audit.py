@@ -28,6 +28,7 @@ class FscAudit(models.Model):
     def compute_fsc_audit(self):
         # Objetivo es conseguir el rendimiento por MATERIAL COMPRADO indicando formato origen:
         self.line_ids.unlink()
+        self.state = 'in_progress'
         # Materiales que tienen trazabidad FSC:
         fsc_products = self.env['product.product'].search([('wood_tracking','=',True),('is_fsc','=',True)])
         fsc_materials = fsc_products.material_id
@@ -74,6 +75,7 @@ class FscAudit(models.Model):
                     ('location_id.usage','=','supplier'),
                     ('date','>=', self.date_from),
                     ('date', '<=', self.date_to),
+                    ('state', '=', 'done'),
                 ])
                 sml_purchases_vol = sum(sml_purchases.mapped('quantity')) * prod.volume
                 # Ahora las devoluciones:
@@ -82,6 +84,7 @@ class FscAudit(models.Model):
                     ('location_dest_id.usage', '=', 'supplier'),
                     ('date', '>=', self.date_from),
                     ('date', '<=', self.date_to),
+                    ('state', '=', 'done'),
                 ])
                 sml_purchases_return_vol = sum(sml_purchases_return.mapped('quantity')) * prod.volume
                 self.env['fsc.audit.product'].create({
@@ -97,6 +100,7 @@ class FscAudit(models.Model):
                     ('location_dest_id.usage','=','customer'),
                     ('date','>=', self.date_from),
                     ('date', '<=', self.date_to),
+                    ('state', '=', 'done'),
                 ])
                 sml_sales_vol = sum(sml_sales.mapped('quantity')) * prod.volume
                 # Ahora las devoluciones:
@@ -105,6 +109,7 @@ class FscAudit(models.Model):
                     ('location_id.usage', '=', 'customer'),
                     ('date', '>=', self.date_from),
                     ('date', '<=', self.date_to),
+                    ('state', '=', 'done'),
                 ])
                 sml_sales_return_vol = sum(sml_sales_return.mapped('quantity')) * prod.volume
                 self.env['fsc.audit.product'].create({

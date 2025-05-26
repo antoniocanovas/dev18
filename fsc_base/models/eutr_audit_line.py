@@ -11,12 +11,12 @@ class EutrAuditLine(models.Model):
 
     product_id = fields.Many2one('product.product', string='Product')
     name = fields.Char('Name' , related='product_id.material_id.alias')
-    eutr_audit_id = fields.Many2one('eutr.audit', string='EUTR Audit')
+    eutr_audit_id = fields.Many2one('eutr.audit', string='EUTR Audit', ondelete='cascade')
 
     intrastat_code_id = fields.Many2one(related='product_id.intrastat_code_id', string='Intrastat')
     eutr_nc_code = fields.Char('NC', related='product_id.eutr_nc_code')
     volume = fields.Float('Quantity (TM)')
     state_id = fields.Many2one('res.country.state', string='State')
-    country_id = fields.Many2one('res.country', string='Country')
-    eutr_cdc = fields.Boolean('CDC', help='Custody chain')
+    country_id = fields.Many2one(related='state_id.country_id')
+    eutr_cdc = fields.Boolean('CDC', help='FSC Custody chain')
     eutr_cl  = fields.Boolean('CL', help='Legal control')
