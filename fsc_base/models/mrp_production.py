@@ -67,7 +67,7 @@ class MrpProduction(models.Model):
                 efficiency = producedvolume / rawvolume * 100
             record.write({'fsc_efficiency': round(efficiency,2), 'fsc_percentage':round(fsc_percentage,2)})
 
-    def _fsc_update_mrp_update(self):
+    def _fsc_update_mrp_production(self):
         for rec in self:
             if rec.state not in ['draft'] and rec.wood_tracking:
                 # Actualizar datos de eficiencia:

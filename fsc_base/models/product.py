@@ -75,6 +75,7 @@ class ProductTemplate(models.Model):
 
     @api.depends('intrastat_code_id')
     def _get_eutr_nc_code(self):
-        code = ""
-        if self.intrastat_code_id.id: code = self.intrastat_code_id.code[:4]
-        self.eutr_nc_code = code
+        for record in self:
+            code = ""
+            if record.intrastat_code_id.id: code = record.intrastat_code_id.code[:4]
+            record['eutr_nc_code'] = code
