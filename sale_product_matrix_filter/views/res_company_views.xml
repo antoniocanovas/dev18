@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_product_matrix_filter_company_form" model="ir.ui.view">
+        <field name="name">sale.product.matrix.filter.company.form</field>
+        <field name="model">res.company</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//group[last()]" position="after">
+                <group string="Sale Product Matrix Filter" name="sale_matrix_filter_group">
+                    <field name="sale_filter_attribute_id"/>
+                    <field name="default_sale_filter_value_ids" 
+                           widget="many2many_tags"
+                           domain="[('attribute_id','=',sale_filter_attribute_id)]"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
