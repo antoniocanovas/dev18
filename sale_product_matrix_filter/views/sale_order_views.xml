@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agregar campo de filtro en el formulario de pedido de venta -->
+    <record id="view_order_form_matrix_filter" model="ir.ui.view">
+        <field name="name">sale.order.form.matrix.filter</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="value_filter_ids" 
+                       string="Filtros de Variante"
+                       help="Selecciona valores de atributo para filtrar la matriz de productos"
+                       domain="[('attribute_id.create_variant', 'in', ['always', 'dynamic'])]"
+                       widget="many2many_tags"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

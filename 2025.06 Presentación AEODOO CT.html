@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potenciando Odoo con IA y Webhooks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals (Slate, Indigo, Teal) -->
+    <!-- Application Structure Plan: La aplicación se ha diseñado como un panel de control temático. Se divide en secciones lógicas (Conceptos Clave, Ventajas, Tecnologías IA, Plataformas Clave, Flujo Interactivo, Consideraciones) accesibles vía navegación fija. Esta estructura no lineal facilita la exploración. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Conceptos clave (Odoo, Webhooks, IA) -> Goal: Informar/Relacionar -> Viz/Method: Diagrama de Torta (Chart.js) y descripción textual -> Interaction: Hover en gráfico -> Justification: Sinergia visual.
+        - Report Info: Ventajas y Casos de Uso -> Goal: Organizar/Explorar -> Viz/Method: Rejilla de tarjetas filtrable (HTML/Tailwind/JS) -> Interaction: Clic en botones de filtro -> Justification: Permite personalización de la exploración.
+        - Report Info: Tecnologías de IA -> Goal: Organizar/Informar -> Viz/Method: Interfaz de pestañas (HTML/Tailwind/JS) -> Interaction: Clic en pestañas -> Justification: Organiza información técnica densa.
+        - Report Info: Plataformas (Botpress, n8n, Make) -> Goal: Informar/Comparar -> Viz/Method: Rejilla de tarjetas descriptivas (HTML/Tailwind) -> Interaction: Ninguna (informativa) -> Justification: Presenta de forma concisa las herramientas relevantes.
+        - Report Info: Ejemplo Práctico Detallado -> Goal: Explicar Proceso -> Viz/Method: Diagrama de flujo horizontal interactivo (HTML/Tailwind/JS) -> Interaction: Clic en cada paso -> Justification: Transforma lista estática en aprendizaje autodirigido. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+        .filter-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .filter-btn.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .step-connector {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            width: 5rem;
+            height: 2px;
+            background-color: #cbd5e1;
+        }
+        .flow-step-content {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .flow-step-content.active {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .platform-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-800">Odoo + IA</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#concepts" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Conceptos</a>
+                        <a href="#advantages" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Ventajas</a>
+                        <a href="#technologies" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Tecnologías IA</a>
+                        <a href="#platforms" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Plataformas Clave</a>
+                        <a href="#flow" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Ejemplo Práctico</a>
+                        <a href="#considerations" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Consideraciones</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="hero" class="text-center mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Potenciando Odoo con Inteligencia Artificial</h2>
+            <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">Una sinergia estratégica a través de Webhooks para crear procesos de negocio más inteligentes, rápidos y eficientes.</p>
+        </section>
+
+        <section id="concepts" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Los Tres Pilares de la Sinergia</h3>
+                <p class="text-lg text-slate-600">Comprende cómo Odoo, los Webhooks y la Inteligencia Artificial se combinan para crear un ecosistema automatizado y reactivo.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="chart-container">
+                    <canvas id="synergyChart"></canvas>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4 p-4 rounded-lg bg-white shadow-sm">
+                        <div class="flex-shrink-0 bg-indigo-100 text-indigo-600 rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">1</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-lg">Odoo: El Núcleo del Negocio</h4>
+                            <p class="text-sm text-slate-500">Actúa como la fuente de verdad, generando eventos (nuevo pedido, ticket creado) que inician el flujo de datos e interacciones.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4 p-4 rounded-lg bg-white shadow-sm">
+                        <div class="flex-shrink-0 bg-teal-100 text-teal-600 rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">2</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-lg">Webhooks: El Mensajero Instantáneo</h4>
+                            <p class="text-sm text-slate-500">Notifica a sistemas externos en tiempo real cuando un evento ocurre en Odoo, actuando como el puente de comunicación eficiente y reactivo.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4 p-4 rounded-lg bg-white shadow-sm">
+                        <div class="flex-shrink-0 bg-amber-100 text-amber-600 rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">3</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-lg">Inteligencia Artificial: El Cerebro Externo</h4>
+                            <p class="text-sm text-slate-500">Recibe los datos, los procesa (analiza, predice, clasifica) y devuelve una respuesta inteligente para enriquecer o automatizar procesos dentro de Odoo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-20 border-slate-200">
+
+        <section id="advantages" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Ventajas y Casos de Uso Estratégicos</h3>
+                <p class="text-lg text-slate-600">Explora cómo esta integración transforma diferentes áreas de negocio. Filtra por departamento para ver los ejemplos más relevantes.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8" id="filter-container">
+                <button class="filter-btn active px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-600 shadow-sm border border-slate-200" data-filter="all">Todos</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-600 shadow-sm border border-slate-200" data-filter="crm">CRM y Ventas</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-600 shadow-sm border border-slate-200" data-filter="support">Soporte</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-600 shadow-sm border border-slate-200" data-filter="inventory">Inventario</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-600 shadow-sm border border-slate-200" data-filter="operations">Operaciones</button>
+            </div>
+            <div id="use-cases-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="crm">
+                    <h4 class="font-bold text-indigo-600 mb-2">Lead Scoring Inteligente</h4>
+                    <p class="text-sm text-slate-600">Un webhook envía datos de un nuevo lead a una IA, que lo puntúa según su probabilidad de conversión. El lead se actualiza en Odoo con la puntuación y registra el porqué, permitiendo a los comerciales priorizar sus esfuerzos.</p>
+                </div>
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="support">
+                    <h4 class="font-bold text-teal-600 mb-2">Clasificación Automática de Tickets</h4>
+                    <p class="text-sm text-slate-600">Un nuevo ticket de soporte dispara un webhook. Una IA analiza el texto, determina su urgencia y categoría, y lo asigna automáticamente al equipo o agente correcto.</p>
+                </div>
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="inventory">
+                    <h4 class="font-bold text-amber-600 mb-2">Predicción de Demanda</h4>
+                    <p class="text-sm text-slate-600">Los datos de ventas y movimientos de stock se envían vía webhook a un modelo de Machine Learning para predecir la demanda futura, ayudando a optimizar el inventario y evitar roturas de stock.</p>
+                </div>
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="crm">
+                    <h4 class="font-bold text-indigo-600 mb-2">Predicción de Abandono de Clientes</h4>
+                    <p class="text-sm text-slate-600">La actividad (o inactividad) de un cliente notificada por un webhook alimenta un modelo de IA que predice el riesgo de abandono. Si el riesgo es alto, se crea automáticamente una tarea de retención en Odoo.</p>
+                </div>
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="support">
+                    <h4 class="font-bold text-teal-600 mb-2">Respuestas Sugeridas por IA</h4>
+                    <p class="text-sm text-slate-600">La consulta de un cliente se envía a una IA que genera un borrador de respuesta basado en la base de conocimiento (RAG + Fuentes externas). Este borrador aparece como sugerencia para el agente de soporte en Odoo, agilizando la resolución.</p>
+                </div>
+
+                <div class="use-case-card bg-white p-6 rounded-lg shadow-sm" data-category="operations">
+                    <h4 class="font-bold text-rose-600 mb-2">Extracción de Datos ¿sólo facturas?</h4>
+                    <p class="text-sm text-slate-600">Al adjuntar una factura o cualquier otro documento, un webhook la envía a un servicio de IA (OCR + NLP) que extrae los datos clave y rellena automáticamente los campos en Odoo, o los deja en formato JSON.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-20 border-slate-200">
+
+        <section id="technologies" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Tecnologías de IA Relevantes</h3>
+                <p class="text-lg text-slate-600">Descubre las herramientas de IA que hacen posible esta integración. Haz clic en cada pestaña para ver los detalles.</p>
+            </div>
+            <div>
+                <div class="mb-4 border-b border-slate-200">
+                    <nav class="-mb-px flex space-x-8" id="tech-tabs-container" aria-label="Tecnologías de IA">
+                        <button class="tech-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-indigo-600 border-indigo-500" data-target="nlp" role="tab" aria-selected="true">Procesamiento de Lenguaje Natural (NLP)</button>
+                        <button class="tech-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300" data-target="mlaas" role="tab" aria-selected="false">Machine Learning (MLaaS)</button>
+                        <button class="tech-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300" data-target="vision" role="tab" aria-selected="false">Visión por Computadora</button>
+                    </nav>
+                </div>
+                <div id="tech-content">
+                    <div class="tech-content-panel" id="tech-nlp" role="tabpanel">
+                        <h4 class="font-semibold text-lg text-slate-800 mb-2">Entendiendo el lenguaje humano</h4>
+                        <p class="text-slate-600 mb-4">Permite a las máquinas leer, comprender e interpretar el lenguaje humano. Ideal para analizar emails, tickets de soporte, descripciones de productos y documentos.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li><span class="font-semibold">Casos de Uso con Webhooks:</span> Análisis de sentimiento de feedback de clientes, clasificación automática de correos/tickets, chatbots inteligentes integrados con Odoo, extracción de entidades de texto para rellenar campos.</li>
+                            <li><span class="font-semibold">Servicios Populares:</span> OpenAI (Modelos GPT), Google Cloud Natural Language AI, Azure AI Language.</li>
+                        </ul>
+                    </div>
+                    <div class="tech-content-panel hidden" id="tech-mlaas" role="tabpanel">
+                        <h4 class="font-semibold text-lg text-slate-800 mb-2">Aprendizaje automático a partir de datos</h4>
+                        <p class="text-slate-600 mb-4">Utiliza algoritmos para que los sistemas aprendan de los datos históricos de Odoo (ventas, comportamiento del cliente, etc.) y hagan predicciones o tomen decisiones.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li><span class="font-semibold">Casos de Uso con Webhooks:</span> Modelos predictivos (predicción de ventas, demanda de inventario, churn de clientes), sistemas de recomendación de productos en eCommerce, detección de fraude en transacciones.</li>
+                            <li><span class="font-semibold">Servicios Populares:</span> Google Vertex AI, Amazon SageMaker, Azure Machine Learning.</li>
+                        </ul>
+                    </div>
+                    <div class="tech-content-panel hidden" id="tech-vision" role="tabpanel">
+                        <h4 class="font-semibold text-lg text-slate-800 mb-2">Interpretando el mundo visual</h4>
+                        <p class="text-slate-600 mb-4">Permite a las aplicaciones analizar imágenes y vídeos para identificar objetos, personas, texto y realizar controles de calidad visuales.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li><span class="font-semibold">Casos de Uso con Webhooks:</span> Control de calidad de productos en la línea de producción (imagen enviada vía webhook -> IA analiza -> actualiza estado en Odoo), reconocimiento de productos en almacén mediante imágenes, extracción de datos de documentos escaneados.</li>
+                            <li><span class="font-semibold">Servicios Populares:</span> Google Cloud Vision AI, Amazon Rekognition, Azure AI Vision.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-20 border-slate-200">
+
+        <section id="platforms" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Plataformas Clave de Integración e IA Conversacional</h3>
+                <p class="text-lg text-slate-600">Herramientas que facilitan la creación de flujos automatizados y la implementación de IA en tus procesos de negocio con Odoo.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="platform-card">
+                    <h4 class="text-xl font-bold text-indigo-700 mb-3">Botpress</h4>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Evolución:</span> Ha evolucionado de un framework de chatbot a una plataforma completa de IA conversacional, con un fuerte enfoque en NLU/NLP avanzado y herramientas de desarrollo visuales.</p>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Estrategias:</span> Democratizar la creación de chatbots sofisticados, facilitar la integración con sistemas externos (como Odoo) mediante APIs y webhooks, y potenciar la IA generativa para conversaciones más naturales y eficientes.</p>
+                    <p class="text-sm text-slate-600"><span class="font-semibold">Rol en Integración con Odoo:</span> Actúa como el "cerebro conversacional". Un webhook desde Odoo puede iniciar un flujo en Botpress (ej. para un chat de soporte avanzado), y Botpress puede llamar a webhooks de Odoo para consultar o actualizar datos (ej. estado de un pedido).</p>
+                </div>
+                <div class="platform-card">
+                    <h4 class="text-xl font-bold text-teal-700 mb-3">n8n</h4>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Evolución:</span> Se ha consolidado como una potente herramienta de automatización de flujos de trabajo ("workflow automation") con un enfoque visual basado en nodos. Destaca por su flexibilidad y opciones de auto-hospedaje.</p>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Estrategias:</span> Ofrecer una alternativa open-source (código justo) y extensible para la interconexión de APIs y servicios. Ampliar continuamente su biblioteca de nodos de integración y facilitar la creación de flujos complejos que pueden incluir llamadas a servicios de IA y la gestión de webhooks (tanto como disparadores como acciones).</p>
+                    <p class="text-sm text-slate-600"><span class="font-semibold">Rol en Integración con Odoo:</span> Funciona como un "director de orquesta" o middleware. Un webhook de Odoo puede disparar un flujo en n8n, que a su vez puede llamar a una API de IA, procesar la respuesta y luego actualizar Odoo mediante su API (o viceversa), todo de forma visual.</p>
+                </div>
+                <div class="platform-card">
+                    <h4 class="text-xl font-bold text-amber-700 mb-3">Make</h4>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Evolución:</span> Se ha posicionado como una plataforma de integración como servicio (iPaaS) líder, reconocida por su interfaz visual intuitiva y una vasta cantidad de conectores pre-construidos para diversas aplicaciones.</p>
+                    <p class="text-sm text-slate-600 mb-2"><span class="font-semibold">Estrategias:</span> Proporcionar una solución integral y escalable para la automatización de procesos de negocio complejos. Ofrecer funcionalidades avanzadas de enrutamiento de datos, transformación y manejo de errores, facilitando la integración con servicios de IA y la gestión de webhooks como parte de escenarios de automatización sofisticados.</p>
+                    <p class="text-sm text-slate-600"><span class="font-semibold">Rol en Integración con Odoo:</span> Similar a n8n, actúa como un potente middleware visual para conectar Odoo con servicios de IA. Permite diseñar flujos de trabajo que reaccionan a webhooks de Odoo, interactúan con APIs de IA y actualizan Odoo, optimizando procesos sin necesidad de código extenso.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-20 border-slate-200">
+
+        <section id="flow" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Ejemplo Práctico Interactivo: Flujo de IA</h3>
+                <p class="text-lg text-slate-600">Sigue el flujo de datos paso a paso para la clasificación automática de un email en Odoo. Haz clic en cada paso para ver los detalles.</p>
+            </div>
+            <div class="relative w-full overflow-x-auto pb-8">
+                <div class="flex items-start justify-between min-w-[800px] md:min-w-[900px] lg:min-w-[1000px]">
+                    <div class="flow-step flex-1 text-center relative px-2 cursor-pointer" data-step="1">
+                        <div class="mx-auto bg-white border-2 border-slate-300 rounded-full h-16 w-16 md:h-20 md:w-20 flex items-center justify-center">
+                            <span class="text-2xl md:text-3xl font-bold text-slate-500">1</span>
+                        </div>
+                        <p class="mt-2 font-semibold text-sm md:text-base">Evento en Odoo</p>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="flow-step flex-1 text-center relative px-2 cursor-pointer" data-step="2">
+                        <div class="mx-auto bg-white border-2 border-slate-300 rounded-full h-16 w-16 md:h-20 md:w-20 flex items-center justify-center">
+                            <span class="text-2xl md:text-3xl font-bold text-slate-500">2</span>
+                        </div>
+                        <p class="mt-2 font-semibold text-sm md:text-base">Webhook se Activa</p>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="flow-step flex-1 text-center relative px-2 cursor-pointer" data-step="3">
+                        <div class="mx-auto bg-white border-2 border-slate-300 rounded-full h-16 w-16 md:h-20 md:w-20 flex items-center justify-center">
+                            <span class="text-2xl md:text-3xl font-bold text-slate-500">3</span>
+                        </div>
+                        <p class="mt-2 font-semibold text-sm md:text-base">Proceso por IA</p>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="flow-step flex-1 text-center relative px-2" data-step="4">
+                        <div class="mx-auto bg-white border-2 border-slate-300 rounded-full h-16 w-16 md:h-20 md:w-20 flex items-center justify-center cursor-pointer">
+                            <span class="text-2xl md:text-3xl font-bold text-slate-500">4</span>
+                        </div>
+                        <p class="mt-2 font-semibold text-sm md:text-base">Acción en Odoo</p>
+                    </div>
+                </div>
+            </div>
+            <div id="flow-details" class="mt-8 bg-white p-6 rounded-lg shadow-sm min-h-[150px]">
+                <div class="flow-step-content" data-content="1">
+                    <h4 class="font-bold text-lg text-slate-800 mb-2">Paso 1: Evento en Odoo</h4>
+                    <p class="text-slate-600">Un nuevo email llega al buzón de soporte configurado en el sistema Odoo. Este es el disparador (trigger) que inicia toda la automatización. Podría ser también una nueva venta, una actualización de inventario, etc.</p>
+                </div>
+                <div class="flow-step-content" data-content="2">
+                    <h4 class="font-bold text-lg text-slate-800 mb-2">Paso 2: Webhook se Activa</h4>
+                    <p class="text-slate-600">Odoo envía automáticamente una notificación (webhook) a un endpoint predefinido (ej. en n8n, Make, o una función serverless). Este mensaje contiene el "payload": datos relevantes del evento, como el asunto, cuerpo y remitente del email.</p>
+                </div>
+                <div class="flow-step-content" data-content="3">
+                    <h4 class="font-bold text-lg text-slate-800 mb-2">Paso 3: Procesamiento por IA</h4>
+                    <p class="text-slate-600">El endpoint recibe los datos y los envía a una API de Inteligencia Artificial (ej. OpenAI para NLP). La IA analiza el texto, lo clasifica (ej. "Consulta de Ventas", "Soporte Urgente") y/o extrae información clave (ej. "problema con el producto X", "interés en servicio Y").</p>
+                </div>
+                <div class="flow-step-content" data-content="4">
+                    <h4 class="font-bold text-lg text-slate-800 mb-2">Paso 4: Acción en Odoo</h4>
+                    <p class="text-slate-600">Con la respuesta de la IA, el endpoint (o la plataforma de automatización) utiliza la API de Odoo para realizar una acción: crear una nueva tarea, actualizar un lead, asignar un ticket, añadir etiquetas, etc. El resultado: un proceso manual ahora es más rápido, inteligente y eficiente.</p>
+                </div>
+                <p id="flow-placeholder" class="text-slate-500 italic">Haz clic en un número del flujo para ver los detalles de ese paso.</p>
+            </div>
+        </section>
+
+        <hr class="my-20 border-slate-200">
+
+        <section id="considerations" class="scroll-mt-20">
+             <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Consideraciones Clave para la Implementación</h3>
+                <p class="text-lg text-slate-600">Aspectos importantes a tener en cuenta antes de implementar estas soluciones de IA y Webhooks con Odoo.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Seguridad de Datos</h4>
+                    <p class="text-sm text-slate-600">Validar la firma de los webhooks y usar HTTPS es crucial. Gestiona las claves API de forma segura y considera el cifrado de datos sensibles.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Costes Asociados</h4>
+                    <p class="text-sm text-slate-600">Ten en cuenta los costes de las APIs de IA (generalmente por uso), la infraestructura intermediaria (si aplica) y el tiempo de desarrollo/mantenimiento.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Calidad de los Datos</h4>
+                    <p class="text-sm text-slate-600">La precisión y efectividad de la IA dependen directamente de la calidad y consistencia de los datos en Odoo. "Basura entra, basura sale" (GIGO).</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Manejo de Errores y Resiliencia</h4>
+                    <p class="text-sm text-slate-600">Implementa lógicas de reintentos, colas de mensajes y monitorización robusta para gestionar fallos en los servicios de IA o en la comunicación.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Empezar Pequeño y Escalar</h4>
+                    <p class="text-sm text-slate-600">Identifica un caso de uso de alto impacto y baja complejidad para un proyecto piloto. Aprende de la experiencia y escala progresivamente.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-slate-800 mb-2">Privacidad y Cumplimiento (GDPR)</h4>
+                    <p class="text-sm text-slate-600">Asegúrate de cumplir con las normativas de protección de datos (como GDPR) al enviar datos de clientes o información sensible a servicios externos de IA.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 mt-20">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>Aplicación interactiva diseñada para explorar la sinergia entre Odoo, Webhooks e Inteligencia Artificial.</p>
+            <p>&copy; 2025 Antonio Cánoivas / Punt Sistemes SL. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const synergyChartCtx = document.getElementById('synergyChart').getContext('2d');
+            if (synergyChartCtx) {
+                new Chart(synergyChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Odoo (ERP)', 'Webhooks (Conector)', 'IA (Inteligencia)'],
+                        datasets: [{
+                            label: 'Componentes de la Sinergia',
+                            data: [33.3, 33.3, 33.3],
+                            backgroundColor: [
+                                'rgba(79, 70, 229, 0.7)',  // Indigo
+                                'rgba(13, 148, 136, 0.7)', // Teal
+                                'rgba(217, 119, 6, 0.7)'   // Amber
+                            ],
+                            borderColor: [
+                                '#4f46e5',
+                                '#0d9488',
+                                '#d97706'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            const filterContainer = document.getElementById('filter-container');
+            const useCases = document.querySelectorAll('.use-case-card');
+
+            if (filterContainer) {
+                filterContainer.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        const filter = e.target.dataset.filter;
+                        const currentActive = filterContainer.querySelector('.active');
+                        if(currentActive) currentActive.classList.remove('active');
+                        e.target.classList.add('active');
+
+                        useCases.forEach(card => {
+                            if (filter === 'all' || card.dataset.category === filter) {
+                                card.style.display = 'block'; // Reverted from flex to block as Gemini buttons are removed
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            }
+
+            const tabsContainer = document.getElementById('tech-tabs-container');
+            const contentPanels = document.querySelectorAll('.tech-content-panel');
+
+            if (tabsContainer) {
+                tabsContainer.addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON' && e.target.classList.contains('tech-tab')) {
+                        const targetId = e.target.dataset.target;
+
+                        tabsContainer.querySelectorAll('.tech-tab').forEach(tab => {
+                            tab.classList.remove('text-indigo-600', 'border-indigo-500');
+                            tab.classList.add('text-slate-500', 'border-transparent');
+                            tab.setAttribute('aria-selected', 'false');
+                        });
+
+                        e.target.classList.add('text-indigo-600', 'border-indigo-500');
+                        e.target.classList.remove('text-slate-500', 'border-transparent');
+                        e.target.setAttribute('aria-selected', 'true');
+
+                        contentPanels.forEach(panel => {
+                            if (panel.id === `tech-${targetId}`) {
+                                panel.classList.remove('hidden');
+                            } else {
+                                panel.classList.add('hidden');
+                            }
+                        });
+                    }
+                });
+            }
+
+            const flowSteps = document.querySelectorAll('.flow-step');
+            const flowContents = document.querySelectorAll('.flow-step-content');
+            const flowPlaceholder = document.getElementById('flow-placeholder');
+
+            if (flowSteps.length > 0) {
+                flowSteps.forEach(step => {
+                    step.addEventListener('click', () => {
+                        const stepNumber = step.dataset.step;
+
+                        if(flowPlaceholder) flowPlaceholder.style.display = 'none';
+
+                        flowSteps.forEach(s => {
+                            const circle = s.querySelector('div:first-child');
+                            const textSpan = circle.querySelector('span');
+                            if(s.dataset.step === stepNumber) {
+                                circle.classList.remove('border-slate-300');
+                                circle.classList.add('border-indigo-500', 'scale-110');
+                                if(textSpan) textSpan.classList.add('text-indigo-600');
+                            } else {
+                                 circle.classList.add('border-slate-300');
+                                 circle.classList.remove('border-indigo-500', 'scale-110');
+                                 if(textSpan) textSpan.classList.remove('text-indigo-600');
+                            }
+                        });
+
+                        flowContents.forEach(content => {
+                            if (content.dataset.content === stepNumber) {
+                                content.classList.add('active');
+                            } else {
+                                content.classList.remove('active');
+                            }
+                        });
+                    });
+                });
+            }
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
