@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Purchase Link MTO</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { background: #875A7B; color: white; padding: 20px; text-align: center; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #875A7B; }
+        .code { background: #f5f5f5; padding: 10px; font-family: monospace; }
+        .example { background: #e8f4f8; padding: 10px; border: 1px solid #b3d9ff; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sale Purchase Link MTO</h1>
+        <p>Módulo para vincular órdenes de venta con órdenes de compra en modo Make to Order</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Descripción</h2>
+        <p>Este módulo permite vincular automáticamente las órdenes de venta con las órdenes de compra correspondientes cuando se utiliza la estrategia MTO (Make to Order), facilitando el seguimiento y control de la cadena de suministro.</p>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Instalación</h2>
+        <h3>1. Copiar el módulo</h3>
+        <div class="code">
+            cp -r sale_purchase_link_mto /path/to/odoo/addons/
+        </div>
+        
+        <h3>2. Actualizar lista de aplicaciones</h3>
+        <div class="code">
+            # En Odoo: Aplicaciones → Actualizar lista de aplicaciones
+        </div>
+        
+        <h3>3. Instalar</h3>
+        <div class="code">
+            # Buscar "Sale Purchase Link MTO" e instalar
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Uso</h2>
+        
+        <h3>Configuración básica:</h3>
+        <div class="example">
+            <strong>1. Producto MTO:</strong><br>
+            • Ir a Inventario → Productos<br>
+            • Seleccionar producto → pestaña Inventario<br>
+            • Ruta: "Make to Order"
+br>
+            <strong>2. Crear orden de venta:</strong><br>
+            • Ventas → Órdenes → Crear<br>
+            • Añadir producto MTO<br>
+            • Confirmar orden
+        </div>
+
+        <h3>Funcionalidades principales:</h3>
+        <ul>
+            <li><strong>Vínculo automático:</strong> Al confirmar venta MTO se crea enlace con compra</li>
+            <li><strong>Seguimiento:</strong> Vista de órdenes vinculadas en ambos formularios</li>
+            <li><strong>Estados sincronizados:</strong> Actualización automática de estados</li>
+        </ul>
+
+        <h3>Ejemplo de uso:</h3>
+        <div class="code">
+# Crear venta → Automáticamente vincula compra
+sale_order = self.env['sale.order'].create({
+    'partner_id': customer_id,
+    'order_line': [(0, 0, {
+        'product_id': mto_product_id,
+        'product_uom_qty': 5
+    })]
+})
+sale_order.action_confirm()  # Crea vínculo automático
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Campos añadidos</h2>
+        <ul>
+            <li><strong>sale.order:</strong> linked_purchases_count, linked_purchase_ids</li>
+            <li><strong>purchase.order:</strong> linked_sales_count, linked_sale_ids</li>
+            <li><strong>Botones inteligentes:</strong> Acceso rápido entre órdenes vinculadas</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Dependencias</h2>
+        <div class="code">
+            'depends': ['sale', 'purchase', 'stock']
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📞 Soporte</h2>
+        <p>Para dudas o problemas, contactar al equipo de desarrollo.</p>
+    </div>
+</body>
+</html>
