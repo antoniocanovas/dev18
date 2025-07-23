@@ -27,7 +27,6 @@ during the sales process, such as filtering by size, color, or any other
 product attribute.
 
 Version History:
-* v18.0.1.0.1: Fixed matrix header filtering to hide non-matching attribute columns completely
 * v18.0.1.0.0: Complete implementation with smart filter inheritance (Partner → Company defaults)
     """,
     'author': 'Antonio Canovas Pedreno',
