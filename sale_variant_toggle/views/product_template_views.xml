@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista simple heredada del formulario de product.template -->
+    <record id="product_template_form_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.variant.toggle</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Agregar después de sheet -->
+            <xpath expr="//sheet" position="inside">
+                <group name="variant_toggle_group" 
+                       string="Variant Selection Configuration" 
+                       invisible="not attribute_line_ids">
+                    <field name="variant_selection_mode"/>
+                    <div class="alert alert-info mt-2" 
+                         invisible="variant_selection_mode != 'toggle'">
+                        <p class="mb-1">
+                            <i class="fa fa-info-circle text-info"/> 
+                            <strong>Allow Toggle Activado:</strong>
+                        </p>
+                        <p class="mb-2">
+                            Los usuarios podrán elegir entre formato configurador o matriz 
+                            al agregar este producto a las líneas de venta.
+                        </p>
+                        <button name="action_test_variant_toggle" 
+                                type="object" 
+                                string="Probar Configuración" 
+                                class="btn btn-sm btn-outline-primary"/>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    
+</odoo>

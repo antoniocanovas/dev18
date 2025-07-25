@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Template for configurator mode selector -->
+    <t t-name="sale_product_matrix_configurator.ConfiguratorModeSelector" owl="1">
+        <div class="o_configurator_mode_selector">
+            <select t-model="props.value" class="form-select">
+                <option value="matrix">Matrix Grid</option>
+                <option value="configurator">Product Configurator</option>
+            </select>
+        </div>
+    </t>
+
+    <!-- Extended Sale Product Field Template -->
+    <t t-name="sale_product_matrix_configurator.SaleProductField" t-inherit="sale.SaleProductField" owl="1">
+        
+        <!-- Add configurator mode indication -->
+        <xpath expr="//div[hasclass('o_field_widget')]" position="inside">
+            <div t-if="record.data.configurator_mode and record.data.product_template_id and record.data.product_template_id[2] and record.data.product_template_id[2].attribute_line_ids and record.data.product_template_id[2].attribute_line_ids.length > 0" 
+                 class="o_configurator_mode_badge">
+                <small class="text-muted">
+                    <i class="fa fa-cogs" t-if="record.data.configurator_mode === 'configurator'"/>
+                    <i class="fa fa-th" t-if="record.data.configurator_mode === 'matrix'"/>
+                    <t t-if="record.data.configurator_mode === 'configurator'">Configurator</t>
+                    <t t-if="record.data.configurator_mode === 'matrix'">Matrix</t>
+                </small>
+            </div>
+        </xpath>
+        
+    </t>
+
+</templates>

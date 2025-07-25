@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista simplificada heredada de sale.order -->
+    <record id="sale_order_view_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.variant.toggle</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar context para líneas de pedido -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="context">{
+                    'default_order_id': id,
+                    'variant_toggle_enabled': True
+                }</attribute>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Wizard de selección de formato de variantes -->
+    <record id="view_variant_selector_wizard_form" model="ir.ui.view">
+        <field name="name">variant.selector.wizard.form</field>
+        <field name="model">variant.selector.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Seleccionar Formato de Variantes">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="product_name" readonly="1"/>
+                        </h1>
+                        <p class="text-muted">
+                            Selecciona cómo quieres agregar las variantes de este producto:
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <field name="product_template_id" invisible="1"/>
+                        <field name="order_id" invisible="1"/>
+                        <field name="mode" widget="radio" invisible="not order_id"/>
+                    </group>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-body text-center p-4">
+                                    <i class="fa fa-list-alt fa-3x text-primary mb-3"/>
+                                    <h5 class="card-title">Configurador</h5>
+                                    <p class="card-text text-muted">
+                                        Selección paso a paso de variantes, 
+                                        ideal para productos complejos.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body text-center p-4">
+                                    <i class="fa fa-th fa-3x text-success mb-3"/>
+                                    <h5 class="card-title">Matriz</h5>
+                                    <p class="card-text text-muted">
+                                        Vista de cuadrícula para selección 
+                                        rápida de múltiples variantes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <small class="text-muted">
+                                <i class="fa fa-info-circle"></i>
+                                Puedes cambiar esta configuración en la ficha del producto
+                            </small>
+                        </div>
+                    </div>
+                </sheet>
+                
+                <footer>
+                    <button name="action_use_configurator" 
+                            type="object" 
+                            string="Usar Configurador" 
+                            class="btn-primary"/>
+                    <button name="action_use_matrix" 
+                            type="object" 
+                            string="Usar Matriz" 
+                            class="btn-success"/>
+                    <button string="Cancelar" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Acción para el wizard -->
+    <record id="action_variant_selector_wizard" model="ir.actions.act_window">
+        <field name="name">Seleccionar Formato de Variantes</field>
+        <field name="res_model">variant.selector.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_variant_selector_wizard_form"/>
+    </record>
+    
+</odoo>
