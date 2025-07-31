@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Extend Sale Order Form View to add configurator mode -->
+    <!-- Add configurator mode to sale order form view -->
     <record id="view_order_form_configurator_mode" model="ir.ui.view">
         <field name="name">sale.order.form.configurator.mode</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale_product_matrix.view_order_form_with_variant_grid"/>
         <field name="arch" type="xml">
-            
-            <!-- Add configurator_mode field after product_add_mode -->
-            <xpath expr="//list/field[@name='product_add_mode']" position="after">
-                <field name="configurator_mode" 
-                       column_invisible="not parent.state in ['draft', 'sent'] or not product_template_id or not product_template_id.attribute_line_ids"
-                       readonly="parent.state not in ['draft', 'sent']"/>
+            <xpath expr="//field[@name='product_template_id']" position="before">
+                <field name="configurator_mode_manual" column_invisible="True"/>
+                <field name="configurator_mode" optional="show"/>
             </xpath>
-            
-            <!-- Add configurator button -->
-            <xpath expr="//list/field[@name='configurator_mode']" position="after">
-                <button name="action_open_product_configurator" 
-                        type="object" 
-                        icon="fa-cogs" 
-                        title="Open Product Configurator"
-                        column_invisible="not parent.state in ['draft', 'sent']"
-                        invisible="configurator_mode != 'configurator' or not product_template_id or not product_template_id.attribute_line_ids"
-                        class="btn-link"/>
+        </field>
+    </record>
+
+    <!-- Add configurator mode to order line tree view -->
+    <record id="view_order_line_tree_configurator_mode" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.configurator.mode</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_subtotal']" position="after">
+                <field name="configurator_mode" optional="hide"/>
             </xpath>
-            
         </field>
     </record>
 

@@ -4,241 +4,301 @@ import { patch } from "@web/core/utils/patch";
 import { SaleOrderLineProductField } from '@sale/js/sale_product_field';
 import { ProductMatrixDialog } from "@product_matrix/js/product_matrix_dialog";
 import { ProductConfiguratorDialog } from "@sale/js/product_configurator_dialog/product_configurator_dialog";
+import { WarningDialog } from "@web/core/errors/error_dialogs";
+import { serializeDateTime } from "@web/core/l10n/dates";
+import { x2ManyCommands } from "@web/core/orm_service";
 import { useService } from "@web/core/utils/hooks";
+import { getSelectedCustomPtav } from "@sale/js/sale_utils";
 
 patch(SaleOrderLineProductField.prototype, {
 
     setup() {
         super.setup(...arguments);
         this.dialog = useService("dialog");
+        this.notification = useService("notification");
     },
 
     /**
-     * Check if matrix should be shown based on configurator_mode
+     * Override _onProductTemplateUpdate to respect user's configurator_mode choice
      */
-    get shouldShowMatrix() {
+    async _onProductTemplateUpdate() {
         const record = this.props.record;
         const configuratorMode = record.data.configurator_mode;
-        const productAddMode = record.data.product_add_mode;
-        const hasAttributes = record.data.product_template_id && 
-                            record.data.product_template_id[0] &&
-                            record.data.product_template_id[2] &&
-                            record.data.product_template_id[2].attribute_line_ids &&
-                            record.data.product_template_id[2].attribute_line_ids.length > 0;
+        const configuratorModeManual = record.data.configurator_mode_manual;
         
-        // Show matrix only if:
-        // 1. Mode is explicitly set to matrix
-        // 2. Product supports matrix mode
-        // 3. Product has attributes
-        return (
-            configuratorMode === 'matrix' && 
-            productAddMode === 'matrix' && 
-            hasAttributes
+        const result = await this.orm.call(
+            'product.template',
+            'get_single_product_variant',
+            [record.data.product_template_id[0]],
+            { context: this.context }
         );
+
+        if (result && result.product_id) {
+            if (record.data.product_id != result.product_id.id) {
+                if (result.is_combo) {
+                    await record.update({
+                        product_id: [result.product_id, result.product_name],
+                    });
+                    this._openComboConfigurator();
+                } else if (result.has_optional_products) {
+                    this._openProductConfigurator();
+                } else {
+                    await record.update({
+                        product_id: [result.product_id, result.product_name],
+                    });
+                    this._onProductUpdate();
+                    
+                    // Only auto-open if user explicitly chose configurator mode
+                    if (configuratorModeManual && 
+                        configuratorMode === 'configurator' && 
+                        record.data.product_template_id[2]?.attribute_line_ids?.length) {
+                        this._openProductConfigurator();
+                    }
+                }
+            }
+        } else {
+            this._handleProductWarnings(result, record);
+            
+            if (configuratorModeManual) {
+                this._openConfiguratorByMode(configuratorMode);
+            } else {
+                this._openDefaultConfigurator(result);
+            }
+        }
     },
 
     /**
-     * Override the original _openProductConfigurator to consider configurator_mode
+     * Handle product warnings
      */
-    async _openProductConfigurator(edit=false) {
-        const record = this.props.record;
-        const configuratorMode = record.data.configurator_mode;
-        const productAddMode = record.data.product_add_mode;
+    _handleProductWarnings(result, record) {
+        if (result?.sale_warning) {
+            const { type, title, message } = result.sale_warning;
+            if (type === 'block') {
+                this.dialog.add(WarningDialog, { title, message });
+                record.update({ 'product_template_id': false });
+                return;
+            } else if (type === 'warning') {
+                this.notification.add(message, { title, type: "warning" });
+            }
+        }
+    },
 
-        // If mode is explicitly set to configurator, always open the configurator
+    /**
+     * Open configurator based on user's mode choice
+     */
+    _openConfiguratorByMode(configuratorMode) {
+        if (configuratorMode === 'configurator') {
+            this._openProductConfigurator();
+        } else if (configuratorMode === 'matrix' && typeof this._openGridConfigurator === 'function') {
+            this._openGridConfigurator();
+        } else {
+            this._openProductConfigurator();
+        }
+    },
+
+    /**
+     * Open default configurator when user hasn't made a choice
+     */
+    _openDefaultConfigurator(result) {
+        if (!result.mode || result.mode === 'configurator') {
+            this._openProductConfigurator();
+        } else if (typeof this._openGridConfigurator === 'function') {
+            this._openGridConfigurator();
+        } else {
+            this._openProductConfigurator();
+        }
+    },
+
+    /**
+     * Override _openProductConfigurator to consider configurator_mode
+     */
+    async _openProductConfigurator(edit = false) {
+        const configuratorMode = this.props.record.data.configurator_mode;
+        const productAddMode = this.props.record.data.product_add_mode;
+
         if (configuratorMode === 'configurator') {
             await this._openConfiguratorDialog(edit);
-        } 
-        // If mode is matrix and product supports it, open matrix
-        else if (configuratorMode === 'matrix' && productAddMode === 'matrix') {
+        } else if (configuratorMode === 'matrix' && productAddMode === 'matrix') {
             await this._openGridConfigurator(edit);
-        }
-        // Fallback to parent behavior
-        else {
+        } else {
             await super._openProductConfigurator(edit);
-        }
-    },
-
-    /**
-     * Open the matrix configurator
-     */
-    async _openGridConfigurator(edit=false) {
-        const saleOrderRecord = this.props.record.model.root;
-
-        // Fetch matrix information from server
-        await saleOrderRecord.update({
-            grid_product_tmpl_id: this.props.record.data.product_template_id,
-        });
-
-        let updatedLineAttributes = [];
-        if (edit) {
-            // Provide attributes of edited line to automatically focus on matching cell
-            for (let ptnvav of this.props.record.data.product_no_variant_attribute_value_ids.records) {
-                updatedLineAttributes.push(ptnvav.resId);
-            }
-            for (let ptav of this.props.record.data.product_template_attribute_value_ids.records) {
-                updatedLineAttributes.push(ptav.resId);
-            }
-            updatedLineAttributes.sort((a, b) => { return a - b; });
-        }
-
-        this._openMatrixConfigurator(
-            saleOrderRecord.data.grid,
-            this.props.record.data.product_template_id[0],
-            updatedLineAttributes,
-        );
-
-        if (!edit) {
-            // Remove new line used to open the matrix
-            saleOrderRecord.data.order_line.delete(this.props.record);
         }
     },
 
     /**
      * Open the product configurator dialog
      */
-    async _openConfiguratorDialog(edit=false) {
-        const record = this.props.record;
-        const saleOrderRecord = record.model.root;
+    async _openConfiguratorDialog(edit = false) {
+        const saleOrderRecord = this.props.record.model.root;
+        const saleOrderLine = this.props.record.data;
         
-        if (!record.data.product_template_id) {
-            return;
+        if (!saleOrderLine.product_template_id) return;
+
+        let ptavIds = this._getVariantPtavIds(saleOrderLine);
+        let customPtavs = [];
+
+        if (edit) {
+            ptavIds.push(...this._getNoVariantPtavIds(saleOrderLine));
+            customPtavs = await this._getCustomPtavs(saleOrderLine);
         }
 
-        const productTemplateId = record.data.product_template_id[0];
-        const quantity = record.data.product_uom_qty || 1.0;
-        const currencyId = saleOrderRecord.data.currency_id[0];
-        const pricelistId = saleOrderRecord.data.pricelist_id ? saleOrderRecord.data.pricelist_id[0] : false;
-        const soDate = saleOrderRecord.data.date_order;
-        const companyId = saleOrderRecord.data.company_id[0];
-        const productUomId = record.data.product_uom ? record.data.product_uom[0] : false;
-        const ptavIds = record.data.product_template_attribute_value_ids.records.map(r => r.resId);
-
-        this.dialog.add(ProductConfiguratorDialog, {
-            productTemplateId: productTemplateId,
+        // Build props object dynamically to avoid passing invalid values
+        const dialogProps = {
+            productTemplateId: saleOrderLine.product_template_id[0],
             ptavIds: ptavIds,
-            customPtavs: [], // TODO: Handle custom PTAVs if needed
-            quantity: quantity,
-            productUOMId: productUomId,
-            companyId: companyId,
-            pricelistId: pricelistId,
-            currencyId: currencyId,
-            soDate: soDate,
+            customPtavs: customPtavs,
+            quantity: saleOrderLine.product_uom_qty || 1.0,
+            companyId: saleOrderRecord.data.company_id[0],
+            currencyId: saleOrderLine.currency_id?.[0] || saleOrderRecord.data.currency_id[0],
+            soDate: serializeDateTime(saleOrderRecord.data.date_order),
             edit: edit,
-            save: async (mainProduct, optionalProducts, options) => {
-                await this._saveConfiguredProduct(mainProduct, optionalProducts, options, edit);
+            save: async (mainProduct, optionalProducts) => {
+                // Use the exact same pattern as the standard Odoo core
+                await this._applyProduct(this.props.record, mainProduct);
+
+                // Apply optional products
+                for (const product of optionalProducts) {
+                    const line = await saleOrderRecord.data.order_line.addNewRecord({
+                        position: 'bottom', mode: 'readonly'
+                    });
+                    await this._applyProduct(line, product);
+                }
+
+                this._onProductUpdate();
+                saleOrderRecord.data.order_line.leaveEditMode();
             },
             discard: () => {
                 if (!edit) {
-                    // Remove the line if it's a new line
-                    saleOrderRecord.data.order_line.delete(record);
+                    saleOrderRecord.data.order_line.delete(this.props.record);
                 }
             },
-        });
-    },
-
-    /**
-     * Save the configured product
-     */
-    async _saveConfiguredProduct(mainProduct, optionalProducts = [], options = {}, edit = false) {
-        const record = this.props.record;
-        
-        // Apply the main product configuration
-        if (mainProduct) {
-            await this._applyProductConfiguration(record, mainProduct);
-        }
-
-        // Handle optional products
-        if (optionalProducts && optionalProducts.length > 0) {
-            const saleOrderRecord = record.model.root;
-            for (const optionalProduct of optionalProducts) {
-                // Create new line for each optional product
-                const newLineData = {
-                    product_id: [optionalProduct.id, optionalProduct.display_name],
-                    product_uom_qty: optionalProduct.quantity,
-                    // Add other necessary fields
-                };
-                await saleOrderRecord.data.order_line.create(newLineData);
-            }
-        }
-    },
-
-    /**
-     * Apply product configuration to a record
-     */
-    async _applyProductConfiguration(record, product) {
-        const updates = {
-            product_id: [product.id, product.display_name],
-            product_uom_qty: product.quantity,
         };
 
-        // Handle attribute values
-        if (product.attribute_lines) {
-            const noVariantPTAVIds = [];
-            const customAttributesCommands = [];
-
-            for (const ptal of product.attribute_lines) {
-                if (ptal.create_variant === "no_variant") {
-                    noVariantPTAVIds.push(...ptal.selected_attribute_value_ids);
-                }
-                
-                // Handle custom values
-                const selectedCustomPTAV = ptal.attribute_values.find(
-                    ptav => ptal.selected_attribute_value_ids.includes(ptav.id) && ptav.is_custom
-                );
-                if (selectedCustomPTAV && ptal.customValue) {
-                    customAttributesCommands.push([0, 0, {
-                        custom_product_template_attribute_value_id: selectedCustomPTAV.id,
-                        custom_value: ptal.customValue,
-                    }]);
-                }
-            }
-
-            if (noVariantPTAVIds.length > 0) {
-                updates.product_no_variant_attribute_value_ids = [[6, 0, noVariantPTAVIds]];
-            }
-            
-            if (customAttributesCommands.length > 0) {
-                updates.product_custom_attribute_value_ids = [[5, 0, 0], ...customAttributesCommands];
-            }
+        // Only add optional props if they have valid values
+        if (saleOrderLine.product_uom && saleOrderLine.product_uom[0]) {
+            dialogProps.productUOMId = saleOrderLine.product_uom[0];
+        }
+        
+        if (saleOrderRecord.data.pricelist_id && saleOrderRecord.data.pricelist_id[0]) {
+            dialogProps.pricelistId = saleOrderRecord.data.pricelist_id[0];
         }
 
-        await record.update(updates);
+        this.dialog.add(ProductConfiguratorDialog, dialogProps);
     },
 
     /**
-     * Open Matrix Dialog - copied from sale_product_matrix
+     * Apply product configuration to record - EXACT same pattern as Odoo core
      */
-    _openMatrixConfigurator(jsonInfo, productTemplateId, editedCellAttributes) {
-        const infos = JSON.parse(jsonInfo);
-        this.dialog.add(ProductMatrixDialog, {
-            header: infos.header,
-            rows: infos.matrix,
-            editedCellAttributes: editedCellAttributes.toString(),
-            product_template_id: productTemplateId,
-            record: this.props.record.model.root,
+    async _applyProduct(record, product) {
+        // Handle custom values & no variants - COPY of core implementation
+        const customAttributesCommands = [
+            x2ManyCommands.set([]),  // Command.clear isn't supported in static_list/_applyCommands
+        ];
+        
+        for (const ptal of product.attribute_lines) {
+            const selectedCustomPTAV = getSelectedCustomPtav(ptal);
+            if (selectedCustomPTAV) {
+                customAttributesCommands.push(
+                    x2ManyCommands.create(undefined, {
+                        custom_product_template_attribute_value_id: [selectedCustomPTAV.id, "we don't care"],
+                        custom_value: ptal.customValue,
+                    })
+                );
+            }
+        }
+
+        const noVariantPTAVIds = product.attribute_lines.filter(
+            ptal => ptal.create_variant === "no_variant"
+        ).flatMap(ptal => ptal.selected_attribute_value_ids);
+
+        // We use `_update` (not locked) instead of `update` (locked) so that multiple records can be
+        // updated in parallel (for performance).
+        await record._update({
+            product_id: [product.id, product.display_name],
+            product_uom_qty: product.quantity,
+            product_no_variant_attribute_value_ids: [x2ManyCommands.set(noVariantPTAVIds)],
+            product_custom_attribute_value_ids: customAttributesCommands,
         });
     },
 
     /**
-     * Override _onProductTemplateUpdate to consider configurator_mode
+     * Open the matrix configurator
      */
-    async _onProductTemplateUpdate() {
-        const record = this.props.record;
-        const configuratorMode = record.data.configurator_mode;
-        
-        // If configurator mode is set to configurator, open it directly
-        if (configuratorMode === 'configurator' && 
-            record.data.product_template_id && 
-            record.data.product_template_id[2] &&
-            record.data.product_template_id[2].attribute_line_ids &&
-            record.data.product_template_id[2].attribute_line_ids.length > 0) {
-            
-            await this._openConfiguratorDialog(false);
-            return;
+    async _openGridConfigurator(edit = false) {
+        const saleOrderRecord = this.props.record.model.root;
+
+        await saleOrderRecord.update({
+            grid_product_tmpl_id: this.props.record.data.product_template_id,
+        });
+
+        let updatedLineAttributes = [];
+        if (edit) {
+            const records = [
+                ...this.props.record.data.product_no_variant_attribute_value_ids.records,
+                ...this.props.record.data.product_template_attribute_value_ids.records
+            ];
+            updatedLineAttributes = records.map(r => r.resId).sort((a, b) => a - b);
+        }
+
+        if (saleOrderRecord.data.grid) {
+            const infos = JSON.parse(saleOrderRecord.data.grid);
+            this.dialog.add(ProductMatrixDialog, {
+                header: infos.header,
+                rows: infos.matrix,
+                editedCellAttributes: updatedLineAttributes.toString(),
+                product_template_id: this.props.record.data.product_template_id[0],
+                record: saleOrderRecord,
+            });
+        }
+
+        if (!edit) {
+            saleOrderRecord.data.order_line.delete(this.props.record);
+        }
+    },
+
+    // Helper methods
+    _getVariantPtavIds(saleOrderLine) {
+        return saleOrderLine.product_template_attribute_value_ids?.records?.map(r => r.resId) || [];
+    },
+
+    _getNoVariantPtavIds(saleOrderLine) {
+        return saleOrderLine.product_no_variant_attribute_value_ids?.records?.map(r => r.resId) || [];
+    },
+
+    async _getCustomPtavs(saleOrderLine) {
+        const customPtavIds = saleOrderLine.product_custom_attribute_value_ids;
+        if (!customPtavIds?.records?.length && !customPtavIds?.currentIds?.length) {
+            return [];
         }
         
-        // Otherwise, use parent behavior
-        await super._onProductTemplateUpdate();
+        let customPtavs = [];
+        
+        if (customPtavIds.records?.length && customPtavIds.records[0]?.isNew) {
+            // Handle new records - extract data directly
+            customPtavs = customPtavIds.records.map(record => {
+                const data = record.data || record._values || record;
+                return {
+                    id: Array.isArray(data.custom_product_template_attribute_value_id) 
+                        ? data.custom_product_template_attribute_value_id[0]
+                        : data.custom_product_template_attribute_value_id,
+                    value: data.custom_value || '',
+                };
+            }).filter(ptav => ptav.id);
+        } else if (customPtavIds.currentIds?.length) {
+            // Handle existing records - read from database
+            const records = await this.orm.read(
+                'product.attribute.custom.value',
+                customPtavIds.currentIds,
+                ['custom_product_template_attribute_value_id', 'custom_value']
+            );
+            customPtavs = records.map(record => ({
+                id: Array.isArray(record.custom_product_template_attribute_value_id)
+                    ? record.custom_product_template_attribute_value_id[0]
+                    : record.custom_product_template_attribute_value_id,
+                value: record.custom_value || '',
+            }));
+        }
+        
+        return customPtavs;
     },
 });

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit Partner Form View to add Innovalis Tab -->
+        <record id="view_partner_form_innovalis" model="ir.ui.view">
+            <field name="name">res.partner.form.innovalis</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page name="innovalis" string="Innovalis">
+                        <group>
+                            <!-- Grupo PNT (Información adicional) -->
+                            <group string="Gestión" name="pnt_additional_info_group">
+                                <field name="currency_id" options="{'no_create': True}" invisible="1"/>
+                                <field name="pnt_employee_qty"/>
+                                <field name="pnt_limit_contract_date"/>
+                                <field name="pnt_end_date"/>
+                                <field name="pnt_end_subject"/>
+                                <field name="pnt_director"/>
+                                <field name="pnt_auditor"/>
+                                <field name="pnt_catastro"/>
+                                <field name="pnt_km"/>
+                            </group>
+                            <group string="Financiera">
+                                <field name="pnt_anhodisponible"/>
+                                <field name="pnt_active_amount"/>
+                                <field name="pnt_ebit"/>
+                                <field name="pnt_sale_amount"/>
+                                <field name="pnt_resultadoantesimpuesto"/>
+                                <field name="pnt_impuestosociedades"/>
+                                <field name="pnt_group_company_qty"/>
+                            </group>
+                        </group>
+                        <group>
+                            <!-- Grupo MIG (Migration/Management) -->
+                            <group string="Datos de migración" name="mig_group">
+                                <field name="mig_cuentacontable"/>
+                                <field name="mig_cuentacontableproveedor"/>
+                                <field name="mig_prefijocuentacontable"/>
+                                <field name="mig_cnae"/>
+                                <field name="mig_responsable"/>
+                                <field name="mig_estado"/>
+                                <field name="mig_formadepago"/>
+                                <field name="mig_retencion"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

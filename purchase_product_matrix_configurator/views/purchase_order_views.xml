@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Add configurator mode to purchase order form view -->
+    <record id="view_purchase_order_form_configurator_mode" model="ir.ui.view">
+        <field name="name">purchase.order.form.configurator.mode</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase_product_matrix.purchase_order_form_matrix"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_template_id']" position="before">
+                <field name="configurator_mode_manual" column_invisible="True"/>
+                <field name="configurator_mode" optional="show"/>
+            </xpath>
+            <!-- Add variable value fields after price_unit -->
+            <xpath expr="//field[@name='price_unit']" position="after">
+                <field name="variable_value" optional="hide" 
+                    string="Variable" 
+                    attrs="{'invisible': [('variable_value', '=', 0)]}"/>
+                <field name="variable_cost" optional="hide" 
+                    attrs="{'invisible': [('variable_cost', '=', 0)]}"/>
+            </xpath>
+            <!-- Add total with variable after price_subtotal -->
+            <xpath expr="//field[@name='price_subtotal']" position="after">
+                <field name="price_total_with_variable" optional="hide" 
+                    attrs="{'invisible': [('variable_value', '=', 0)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add variable fields to purchase order line tree view -->
+    <record id="view_purchase_order_line_tree_configurator_mode" model="ir.ui.view">
+        <field name="name">purchase.order.line.tree.configurator.mode</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_subtotal']" position="after">
+                <field name="configurator_mode" optional="hide"/>
+                <field name="variable_value" optional="hide" string="Variable"/>
+                <field name="price_total_with_variable" optional="hide" string="Total+Var"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form view for editing purchase order line -->
+    <record id="view_purchase_order_line_form_variable" model="ir.ui.view">
+        <field name="name">purchase.order.line.form.variable</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_form"/>
+        <field name="arch" type="xml">
+            <!-- Add variable fields group -->
+            <xpath expr="//group[@name='price_details']" position="after">
+                <group string="Variable Values" name="variable_details">
+                    <field name="variable_value"/>
+                    <field name="variable_percentage"/>
+                    <field name="variable_cost"/>
+                    <field name="price_total_with_variable" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

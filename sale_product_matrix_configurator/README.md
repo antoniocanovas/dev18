@@ -1,55 +1,63 @@
 # Sale Product Matrix Configurator
 
-Este módulo extiende la funcionalidad de `sale_product_matrix` para permitir alternar entre el modo matriz y el modo configurador de productos en las líneas de pedido de venta.
+## Description
 
-## Características
+Module that allows choosing the configuration mode (Matrix Grid or Product Configurator) before selecting products in sale order lines.
 
-- **Campo de selección de modo**: Cada línea de pedido tiene un campo `configurator_mode` que permite elegir entre "Matrix Grid" y "Product Configurator"
-- **Detección automática**: El modo se establece automáticamente según la configuración del producto
-- **Botón configurador**: Aparece un botón para abrir el configurador cuando el modo está establecido en "configurator"
-- **Compatibilidad total**: Mantiene toda la funcionalidad existente del módulo `sale_product_matrix`
+## Features
 
-## Uso
+* Configuration mode selector appears before product selection
+* Respects user choice and doesn't auto-open unwanted configurators
+* Compatible with existing sale_product_matrix functionality
+* Works with both matrix and configurator products
+* Preserves custom attribute values for text-type attributes
 
-### En líneas de pedido de venta:
+## Installation
 
-1. **Seleccionar producto**: Al seleccionar un producto con atributos, el campo `configurator_mode` aparecerá
-2. **Cambiar modo**: Puedes alternar entre:
-   - **Matrix Grid**: Usa la interfaz de matriz tradicional
-   - **Product Configurator**: Usa el diálogo paso a paso del configurador
-3. **Configurar producto**: 
-   - En modo Matrix: Se mostrará la grilla si el producto la soporta
-   - En modo Configurator: Aparecerá un botón "Configure Product" que abre el diálogo
+1. Copy the module to the addons directory
+2. Update module list: `./odoo-bin -u sale_product_matrix_configurator`
+3. Install the module "Sale Product Matrix Configurator"
 
-### Comportamiento automático:
+## Usage
 
-- Los productos configurados como "matrix" establecerán automáticamente el modo "Matrix Grid"
-- Los productos configurados como "configurator" establecerán automáticamente el modo "Product Configurator"
-- El usuario puede cambiar manualmente el modo según sus preferencias
+1. In a sale order line, the "Config Mode" field appears before product selection
+2. Choose between "Matrix Grid" or "Product Configurator"
+3. Select the product template
+4. The configurator will open according to the chosen mode
+5. Custom attribute values (including free text fields) will be preserved correctly
 
-## Instalación
+## Module Structure
 
-1. Copiar el módulo a la carpeta de addons
-2. Actualizar lista de aplicaciones
-3. Instalar el módulo "Sale Product Matrix Configurator"
+```
+sale_product_matrix_configurator/
+├── __manifest__.py                     # Module manifest
+├── README.md                           # This documentation
+├── .gitignore                          # Git exclusions
+├── __init__.py                         # Module initialization
+├── models/
+│   ├── __init__.py
+│   └── sale_order_line.py             # Extended models
+├── static/src/js/
+│   └── sale_product_field_configurator.js  # JavaScript configurator
+└── views/
+    └── sale_order_views.xml           # UI views
+```
 
-## Dependencias
+## Dependencies
 
-- `sale`
-- `sale_product_matrix`
-- `product_matrix`
+- `sale`: Base sales module
+- `sale_product_matrix`: Product matrix functionality  
+- `product`: Product and attribute models
 
-## Compatibilidad
+## Compatibility
 
 - Odoo 18.0
-- Compatible con todos los módulos que extienden `sale_product_matrix`
+- Compatible with existing product configuration modules
+- Does not interfere with standard sale_product_matrix behavior
+- No additional security permissions required (inherits from core models)
 
-## Notas técnicas
+## Author
 
-- El campo `configurator_mode` es editable solo en estado 'draft' y 'sent'
-- La funcionalidad JavaScript extiende `SaleOrderLineProductField` sin romper la compatibilidad
-- Se mantiene toda la lógica de exclusiones y validaciones de atributos
-
-## Autor
-
-Antonio Canovas Pedreno
+**Antonio Canovas Pedreno**  
+📧 [GitHub](https://github.com/antoniocanovas)  
+📜 License: LGPL-3
