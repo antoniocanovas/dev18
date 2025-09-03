@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú raíz -->
+    <menuitem id="menu_product_search_root"
+              name="🔍 Búsqueda Inteligente"
+              sequence="50"/>
+    
+    <!-- Menú para búsquedas -->
+    <menuitem id="menu_product_search"
+              name="Búsquedas de Productos"
+              parent="menu_product_search_root"
+              action="action_product_search"
+              sequence="10"/>
+              
+    <!-- Menú para nueva búsqueda -->
+    <menuitem id="menu_new_product_search"
+              name="Nueva Búsqueda"
+              parent="menu_product_search_root"
+              action="action_product_search"
+              sequence="5"/>
+
+    <!-- Menú para patrones de aprendizaje -->
+    <menuitem id="menu_product_search_learning"
+              name="🧠 Patrones de Aprendizaje"
+              parent="menu_product_search_root"
+              action="action_product_search_learning_pattern"
+              sequence="20"
+              groups="sales_team.group_sale_manager"/>
+
+    <!-- También agregar en el menú de ventas si se desea -->
+    <menuitem id="menu_product_search_sales"
+              name="Búsqueda de Productos"
+              parent="sale.sale_menu_root"
+              action="action_product_search"
+              sequence="99"
+              groups="sales_team.group_sale_salesman"/>
+</odoo>

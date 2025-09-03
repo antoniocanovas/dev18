@@ -1,0 +1,361 @@
+# ============================================
+# .gitignore para Módulo Odoo - Búsqueda Inteligente
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ============================================
+# Odoo específico
+# ============================================
+
+# Archivos de configuración locales
+*.conf
+config/local_settings.py
+
+# Logs de Odoo
+odoo.log
+odoo.log.*
+*.log
+
+# Base de datos local
+filestore/
+sessions/
+
+# Archivos de backup
+*.dump
+*.backup
+*.bak
+backups/
+*.sql
+*.gz
+
+# Archivos temporales de Odoo
+.odoo_*
+/tmp/
+
+# Archivos de traducción generados
+i18n/*.pot
+
+# ============================================
+# IDE y Editores
+# ============================================
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*~
+*.swp
+*.swo
+*~
+.*.sw*
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Atom
+.atom/
+
+# ============================================
+# Sistema Operativo
+# ============================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# Desarrollo y Testing
+# ============================================
+
+# Archivos de test locales
+test_*.py
+*_test.py
+test_data/
+test_results/
+
+# Archivos de desarrollo temporal
+dev_*
+temp_*
+tmp_*
+scratch_*
+
+# Métricas y reportes
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Profiling
+*.prof
+*.pstats
+
+# ============================================
+# Deployment y Producción
+# ============================================
+
+# Archivos de deployment
+deploy/
+deployment/
+*.deployment
+
+# Certificados y claves
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+.secrets
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# ============================================
+# Assets y Media
+# ============================================
+
+# Archivos compilados CSS/JS
+/static/src/css/*.min.css
+/static/src/js/*.min.js
+node_modules/
+package-lock.json
+yarn.lock
+
+# Imágenes temporales
+*.tmp
+temp_images/
+
+# ============================================
+# Documentación
+# ============================================
+
+# Archivos temporales de documentación
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.nav
+*.snm
+*.vrb
+
+# ============================================
+# Específico del proyecto
+# ============================================
+
+# Archivos de métricas locales
+deployment_metrics.csv
+deployment_report_*.txt
+
+# Archivos de configuración local
+local_config.ini
+custom_brands.json
+custom_categories.json
+
+# Datos de prueba privados
+private_test_data/
+customer_data/
+
+# Scripts personalizados temporales
+custom_*.py
+local_*.py
+
+# Archivos de migración temporales
+migration_*.sql
+migration_backup/
+
+# Cache personalizado
+.product_search_cache/
+*.cache
+
+# Archivos de análisis
+analytics_data/
+performance_reports/
+
+# ============================================
+# Comentarios útiles
+# ============================================
+
+# Para incluir archivos específicos que normalmente serían ignorados:
+# !importante.log
+
+# Para ignorar todo un directorio excepto un archivo:
+# directorio/*
+# !directorio/archivo_importante.txt
+
+# Para ignorar archivos con patrones específicos:
+# *.extension
+# prefix_*
+# *_suffix.*

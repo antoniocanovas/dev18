@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Datos de demostración: Búsquedas de ejemplo -->
+        <record id="demo_search_laptop_hp" model="product.search">
+            <field name="query_text">Laptop HP para gaming con buena tarjeta gráfica</field>
+            <field name="detected_brand">HP</field>
+            <field name="detected_category">Gaming</field>
+            <field name="state">done</field>
+            <field name="search_performed">True</field>
+        </record>
+
+        <record id="demo_search_phone_samsung" model="product.search">
+            <field name="query_text">Teléfono Samsung con cámara de alta resolución</field>
+            <field name="detected_brand">Samsung</field>
+            <field name="detected_category">Teléfono</field>
+            <field name="state">done</field>
+            <field name="search_performed">True</field>
+        </record>
+
+        <record id="demo_search_monitor_generic" model="product.search">
+            <field name="query_text">Monitor grande para diseño</field>
+            <field name="detected_category">Monitor</field>
+            <field name="state">done</field>
+            <field name="search_performed">True</field>
+        </record>
+
+        <record id="demo_search_vague" model="product.search">
+            <field name="query_text">Algo para trabajar desde casa</field>
+            <field name="state">waiting_interaction</field>
+            <field name="needs_interaction">True</field>
+        </record>
+
+        <!-- Patrones de aprendizaje de ejemplo -->
+        <record id="demo_pattern_gaming" model="product.search.learning.pattern">
+            <field name="query_keywords">laptop gaming juegos</field>
+            <field name="detected_brand">HP</field>
+            <field name="detected_category">Gaming</field>
+            <field name="learning_data">{"preferred_brand": "HP", "preferred_category": "Gaming"}</field>
+            <field name="usage_count">5</field>
+            <field name="success_rate">92.5</field>
+        </record>
+
+        <record id="demo_pattern_office" model="product.search.learning.pattern">
+            <field name="query_keywords">oficina trabajo productividad</field>
+            <field name="detected_brand">Dell</field>
+            <field name="detected_category">Oficina</field>
+            <field name="learning_data">{"preferred_brand": "Dell", "preferred_category": "Oficina"}</field>
+            <field name="usage_count">8</field>
+            <field name="success_rate">88.0</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,385 @@
+/* ============================================
+   Estilos para Búsqueda Inteligente de Productos
+   ============================================ */
+
+/* === Estilos generales === */
+.product-search-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+    color: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.search-query-box {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.search-query-box:focus {
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* === Sistema conversacional === */
+.conversation-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.bot-question {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 18px 18px 18px 5px;
+    margin: 10px 0;
+    max-width: 80%;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.user-answer {
+    background: #007bff;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 18px 18px 5px 18px;
+    margin: 10px 0 10px auto;
+    max-width: 80%;
+    text-align: right;
+    box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+    animation: slideInRight 0.5s ease-out;
+}
+
+.question-answered {
+    opacity: 0.7;
+    margin-bottom: 15px;
+}
+
+.current-question {
+    border-left: 4px solid #ffc107;
+    padding-left: 15px;
+}
+
+.typing {
+    background: #e9ecef;
+    color: #6c757d;
+    padding: 8px 15px;
+    border-radius: 15px;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+}
+
+/* === Barra de progreso === */
+.progress-bar-modern {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    height: 8px;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* === Resultados de búsqueda === */
+.search-result-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    border-color: #007bff;
+}
+
+.relevance-perfect {
+    border-left: 5px solid #28a745;
+    background: linear-gradient(90deg, rgba(40,167,69,0.1) 0%, rgba(255,255,255,1) 20%);
+}
+
+.relevance-high {
+    border-left: 5px solid #17a2b8;
+    background: linear-gradient(90deg, rgba(23,162,184,0.1) 0%, rgba(255,255,255,1) 20%);
+}
+
+.relevance-medium {
+    border-left: 5px solid #ffc107;
+    background: linear-gradient(90deg, rgba(255,193,7,0.1) 0%, rgba(255,255,255,1) 20%);
+}
+
+.relevance-low {
+    border-left: 5px solid #6c757d;
+    background: linear-gradient(90deg, rgba(108,117,125,0.1) 0%, rgba(255,255,255,1) 20%);
+}
+
+/* === Badges de estado === */
+.state-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.state-draft {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.state-searching {
+    background: linear-gradient(45deg, #ffc107, #fd7e14);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.state-waiting {
+    background: linear-gradient(45deg, #17a2b8, #20c997);
+    color: white;
+}
+
+.state-done {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+}
+
+.state-no-results {
+    background: linear-gradient(45deg, #dc3545, #fd7e14);
+    color: white;
+}
+
+/* === Botones personalizados === */
+.btn-search {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 25px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-conversation {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-conversation:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* === Animaciones === */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* === Wizard conversacional === */
+.wizard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    text-align: center;
+}
+
+.wizard-question-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+    margin: 20px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    position: relative;
+}
+
+.wizard-question-container::before {
+    content: "🤖";
+    font-size: 30px;
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.answer-options {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.radio-option:hover {
+    background: rgba(0, 123, 255, 0.1);
+    border-color: #007bff;
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 12px;
+    transform: scale(1.2);
+}
+
+/* === Indicadores de relevancia === */
+.relevance-indicator {
+    width: 50px;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #e9ecef;
+    position: relative;
+}
+
+.relevance-fill {
+    height: 100%;
+    transition: width 0.8s ease-in-out;
+}
+
+.relevance-perfect .relevance-fill {
+    background: linear-gradient(90deg, #28a745, #20c997);
+    width: 100%;
+}
+
+.relevance-high .relevance-fill {
+    background: linear-gradient(90deg, #17a2b8, #007bff);
+    width: 75%;
+}
+
+.relevance-medium .relevance-fill {
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+    width: 50%;
+}
+
+.relevance-low .relevance-fill {
+    background: linear-gradient(90deg, #6c757d, #495057);
+    width: 25%;
+}
+
+/* === Responsive design === */
+@media (max-width: 768px) {
+    .product-search-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .bot-question,
+    .user-answer {
+        max-width: 90%;
+        font-size: 14px;
+    }
+    
+    .wizard-question-container {
+        padding: 20px;
+    }
+    
+    .search-result-card {
+        margin: 5px 0;
+        padding: 12px;
+    }
+}
+
+/* === Efectos especiales === */
+.glassmorphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.neon-glow {
+    box-shadow: 
+        0 0 5px rgba(102, 126, 234, 0.4),
+        0 0 10px rgba(102, 126, 234, 0.3),
+        0 0 15px rgba(102, 126, 234, 0.2);
+}
+
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}

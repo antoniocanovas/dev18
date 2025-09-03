@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_search_user,product.search.user,model_product_search,base.group_user,1,1,1,1
+access_product_search_result_user,product.search.result.user,model_product_search_result,base.group_user,1,1,1,1
+access_product_search_interaction_user,product.search.interaction.user,model_product_search_interaction,base.group_user,1,1,1,1
+access_product_search_learning_pattern_user,product.search.learning.pattern.user,model_product_search_learning_pattern,base.group_user,1,1,1,0
+access_product_search_manager,product.search.manager,model_product_search,sales_team.group_sale_manager,1,1,1,1
+access_product_search_result_manager,product.search.result.manager,model_product_search_result,sales_team.group_sale_manager,1,1,1,1
+access_product_search_interaction_manager,product.search.interaction.manager,model_product_search_interaction,sales_team.group_sale_manager,1,1,1,1
+access_product_search_learning_pattern_manager,product.search.learning.pattern.manager,model_product_search_learning_pattern,sales_team.group_sale_manager,1,1,1,1

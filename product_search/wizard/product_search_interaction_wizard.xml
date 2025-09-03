@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_search_interaction_wizard" model="ir.ui.view">
+        <field name="name">product.search.interaction.wizard.form</field>
+        <field name="model">product.search.interaction.wizard</field>
+        <field name="arch" type="xml">
+            <form string="🤖 Búsqueda Conversacional">
+                <header>
+                    <!-- Barra de progreso -->
+                    <div class="o_form_statusbar" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 5px; margin-bottom: 15px;">
+                        <div style="flex: 1; margin-right: 15px;">
+                            <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: #007bff; height: 100%; transition: width 0.3s ease; width: 0%;"></div>
+                            </div>
+                        </div>
+                        <span style="font-size: 12px; color: #6c757d; white-space: nowrap;">
+                            <field name="current_question_number"/> de <field name="total_questions"/> preguntas
+                        </span>
+                    </div>
+                </header>
+                
+                <sheet>
+                    <!-- Título principal -->
+                    <div class="oe_title" style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #495057; margin-bottom: 5px;">
+                            🤖 Ayúdame a encontrar lo que buscas
+                        </h2>
+                        <p style="color: #6c757d; font-size: 14px;">
+                            Responde unas preguntas para mejorar tu búsqueda
+                        </p>
+                    </div>
+                    
+                    <!-- Búsqueda original -->
+                    <div class="alert alert-light" style="border-left: 4px solid #007bff;">
+                        <strong>🔍 Búsqueda original:</strong> 
+                        "<span style="font-style: italic;"><field name="search_id" readonly="1" invisible="1"/></span>"
+                    </div>
+                    
+                    <!-- Pregunta actual -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                color: white; 
+                                padding: 20px; 
+                                border-radius: 10px; 
+                                margin: 20px 0;
+                                box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="font-size: 24px; margin-right: 15px; margin-top: 5px;">🤖</div>
+                            <div style="flex: 1;">
+                                <field name="current_question" 
+                                       style="background: transparent; border: none; color: white; font-size: 16px; line-height: 1.5;"
+                                       readonly="1"/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Área de respuesta -->
+                    <div style="background: #f8f9fa; 
+                                padding: 25px; 
+                                border-radius: 10px; 
+                                border: 2px solid #e9ecef;">
+                        <h4 style="color: #495057; margin-bottom: 20px; display: flex; align-items: center;">
+                            <span style="margin-right: 10px;">👤</span> Tu respuesta:
+                        </h4>
+                        
+                        <!-- Campos ocultos -->
+                        <field name="current_question_type" invisible="1"/>
+                        <field name="current_interaction_id" invisible="1"/>
+                        <field name="progress_percentage" invisible="1"/>
+                        
+                        <!-- Respuesta para marca -->
+                        <div invisible="current_question_type != 'brand'">
+                            <field name="brand_answer" 
+                                   widget="radio"
+                                   options="{'horizontal': true}"
+                                   style="margin: 10px 0;"/>
+                        </div>
+                        
+                        <!-- Respuesta para categoría -->
+                        <div invisible="current_question_type != 'category'">
+                            <field name="category_answer" 
+                                   widget="radio"
+                                   options="{'horizontal': true}"
+                                   style="margin: 10px 0;"/>
+                        </div>
+                        
+                        <!-- Respuesta para precio -->
+                        <div invisible="current_question_type != 'price_range'">
+                            <field name="price_range_answer" 
+                                   widget="radio"
+                                   options="{'horizontal': true}"
+                                   style="margin: 10px 0;"/>
+                        </div>
+                        
+                        <!-- Respuesta para uso -->
+                        <div invisible="current_question_type != 'usage'">
+                            <field name="usage_answer" 
+                                   widget="radio"
+                                   options="{'horizontal': true}"
+                                   style="margin: 10px 0;"/>
+                        </div>
+                        
+                        <!-- Respuesta de texto libre -->
+                        <div invisible="current_question_type in ['brand', 'category', 'price_range', 'usage']">
+                            <field name="text_answer" 
+                                   widget="text"
+                                   placeholder="Escribe aquí tu respuesta..."
+                                   style="min-height: 80px;"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Historial de conversación -->
+                    <div invisible="conversation_log == False" style="margin-top: 30px;">
+                        <h5 style="color: #6c757d; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                            💬 Conversación anterior
+                        </h5>
+                        <field name="conversation_log" widget="html" readonly="1"/>
+                    </div>
+                </sheet>
+                
+                <footer>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div>
+                            <button name="action_skip_question" 
+                                    string="⏭️ Omitir Pregunta" 
+                                    type="object" 
+                                    class="btn btn-link"
+                                    style="color: #6c757d;"/>
+                        </div>
+                        <div>
+                            <button name="action_finish_early" 
+                                    string="🏁 Buscar con Respuestas Actuales" 
+                                    type="object" 
+                                    class="btn btn-warning"
+                                    style="margin-right: 10px;"/>
+                            <button name="action_answer_question" 
+                                    string="✅ Continuar" 
+                                    type="object" 
+                                    class="btn btn-primary btn-lg"
+                                    style="padding: 10px 25px;"/>
+                        </div>
+                        <div>
+                            <button string="❌ Cancelar" 
+                                    class="btn btn-secondary" 
+                                    special="cancel"/>
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

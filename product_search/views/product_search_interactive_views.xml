@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Tree para interacciones -->
+    <record id="view_product_search_interaction_tree" model="ir.ui.view">
+        <field name="name">product.search.interaction.tree</field>
+        <field name="model">product.search.interaction</field>
+        <field name="arch" type="xml">
+            <tree string="Interacciones Conversacionales" 
+                  decoration-success="is_answered == True"
+                  decoration-muted="is_answered == False">
+                <field name="sequence"/>
+                <field name="question_type" widget="badge"/>
+                <field name="question_text"/>
+                <field name="user_answer"/>
+                <field name="is_answered" widget="boolean_toggle"/>
+                <field name="confidence_score"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista para patrones de aprendizaje -->
+    <record id="view_product_search_learning_pattern_tree" model="ir.ui.view">
+        <field name="name">product.search.learning.pattern.tree</field>
+        <field name="model">product.search.learning.pattern</field>
+        <field name="arch" type="xml">
+            <tree string="Patrones de Aprendizaje">
+                <field name="query_keywords"/>
+                <field name="detected_brand"/>
+                <field name="detected_category"/>
+                <field name="usage_count"/>
+                <field name="success_rate" widget="percentage"/>
+                <field name="last_used"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_product_search_learning_pattern_form" model="ir.ui.view">
+        <field name="name">product.search.learning.pattern.form</field>
+        <field name="model">product.search.learning.pattern</field>
+        <field name="arch" type="xml">
+            <form string="Patrón de Aprendizaje">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="query_keywords"/>
+                            <field name="usage_count"/>
+                            <field name="success_rate"/>
+                        </group>
+                        <group>
+                            <field name="detected_brand"/>
+                            <field name="detected_category"/>
+                            <field name="last_used"/>
+                        </group>
+                    </group>
+                    <group string="Datos de Aprendizaje">
+                        <field name="learning_data" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para patrones de aprendizaje -->
+    <record id="action_product_search_learning_pattern" model="ir.actions.act_window">
+        <field name="name">Patrones de Aprendizaje</field>
+        <field name="res_model">product.search.learning.pattern</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                🧠 Patrones de Aprendizaje
+            </p>
+            <p>
+                El sistema aprende de las interacciones para mejorar futuras búsquedas.
+            </p>
+        </field>
+    </record>
+</odoo>

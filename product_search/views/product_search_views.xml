@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Form para Búsqueda de Productos -->
+    <record id="view_product_search_form" model="ir.ui.view">
+        <field name="name">product.search.form</field>
+        <field name="model">product.search</field>
+        <field name="arch" type="xml">
+            <form string="Búsqueda de Productos">
+                <header>
+                    <button name="action_search_products" 
+                            string="🔍 Buscar Productos" 
+                            type="object" 
+                            class="oe_highlight"
+                            confirm="¿Desea ejecutar la búsqueda con el texto actual?"
+                            invisible="state == 'waiting_interaction'"/>
+                    <button name="action_process_interactions" 
+                            string="🔄 Aplicar Respuestas" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible="state != 'waiting_interaction' or not interaction_completed"/>
+                    <button name="action_clear_search" 
+                            string="🗑️ Limpiar" 
+                            type="object"
+                            confirm="¿Está seguro de que desea limpiar la búsqueda y sus resultados?"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,searching,waiting_interaction,done,no_results"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nueva Búsqueda de Productos"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Consulta">
+                            <field name="query_text" 
+                                   widget="text" 
+                                   placeholder="Ejemplo: Laptop HP para gaming, Teléfono Samsung económico, Monitor 4K para diseño..."
+                                   options="{'resizable': true}"/>
+                        </group>
+                        <group string="Detección Automática">
+                            <field name="detected_brand" readonly="1"/>
+                            <field name="detected_category" readonly="1"/>
+                            <field name="result_count" readonly="1"/>
+                            <field name="search_performed" invisible="1"/>
+                            <field name="needs_interaction" invisible="1"/>
+                            <field name="interaction_completed" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="📋 Resultados de Búsqueda" name="results">
+                            <field name="result_ids" 
+                                   widget="one2many" 
+                                   context="{'default_search_id': active_id}"
+                                   options="{'no_create': true, 'no_edit': true}">
+                                <tree string="Productos Encontrados" 
+                                      decoration-success="relevance_level == 'perfect'"
+                                      decoration-info="relevance_level == 'high'"
+                                      decoration-warning="relevance_level == 'medium'"
+                                      decoration-muted="relevance_level == 'low'">
+                                    
+                                    <field name="product_image" widget="image" width="50px" height="50px"/>
+                                    <field name="product_name" string="Producto"/>
+                                    <field name="product_code" string="Código"/>
+                                    <field name="product_category" string="Categoría"/>
+                                    <field name="product_price" string="Precio" widget="monetary"/>
+                                    <field name="relevance_score" string="Puntuación"/>
+                                    <field name="relevance_level" string="Relevancia" widget="badge"
+                                           decoration-success="relevance_level == 'perfect'"
+                                           decoration-info="relevance_level == 'high'"
+                                           decoration-warning="relevance_level == 'medium'"
+                                           decoration-secondary="relevance_level == 'low'"/>
+                                    
+                                    <!-- Botones de acción -->
+                                    <button name="action_open_product" 
+                                            string="Ver Producto" 
+                                            type="object" 
+                                            icon="fa-eye"
+                                            class="btn-primary"/>
+                                    <button name="action_add_to_sale_order" 
+                                            string="Seleccionar" 
+                                            type="object" 
+                                            icon="fa-plus-circle"
+                                            class="btn-success"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="💬 Conversación" name="conversation" 
+                              invisible="not interaction_ids">
+                            
+                            <div class="alert alert-info" role="alert" invisible="not needs_interaction">
+                                <strong>💬 Búsqueda Conversacional:</strong> 
+                                El sistema necesita más información para mejorar los resultados.
+                                Las preguntas han sido generadas automáticamente.
+                            </div>
+                            
+                            <div class="alert alert-success" role="alert" 
+                                 invisible="needs_interaction or not interaction_completed">
+                                <strong>✅ Conversación Completada:</strong> 
+                                Se ha aplicado la información adicional a la búsqueda.
+                            </div>
+                            
+                            <field name="interaction_ids" 
+                                   widget="one2many" 
+                                   readonly="1">
+                                <tree string="Conversación" 
+                                      decoration-success="is_answered == True"
+                                      decoration-muted="is_answered == False">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="question_type" 
+                                           string="Tipo"
+                                           widget="badge"
+                                           decoration-info="question_type == 'brand'"
+                                           decoration-warning="question_type == 'category'"
+                                           decoration-success="question_type == 'price_range'"
+                                           decoration-primary="question_type == 'usage'"/>
+                                    <field name="question_text" string="Pregunta"/>
+                                    <field name="user_answer" string="Tu Respuesta"/>
+                                    <field name="is_answered" string="✓" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="📊 Análisis de Resultados" name="analysis" invisible="result_count == 0">
+                            <group>
+                                <group string="Estadísticas">
+                                    <field name="result_count" readonly="1"/>
+                                    <field name="detected_brand" readonly="1"/>
+                                    <field name="detected_category" readonly="1"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Gráfico de relevancia (opcional) -->
+                            <div class="o_form_sheet_bg">
+                                <div class="alert alert-info" role="alert" invisible="result_count > 0">
+                                    <strong>ℹ️ Sin resultados:</strong> No se encontraron productos que coincidan con su consulta. 
+                                    Intente con términos más generales o verifique la ortografía.
+                                </div>
+                                
+                                <div class="alert alert-success" role="alert" invisible="result_count == 0">
+                                    <strong>✅ Búsqueda completada:</strong> Se encontraron <field name="result_count"/> producto(s) 
+                                    que coinciden con su consulta.
+                                </div>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista Tree/List -->
+    <record id="view_product_search_tree" model="ir.ui.view">
+        <field name="name">product.search.tree</field>
+        <field name="model">product.search</field>
+        <field name="arch" type="xml">
+            <tree string="Búsquedas de Productos" 
+                  decoration-success="state == 'done'"
+                  decoration-warning="state == 'no_results'"
+                  decoration-info="state == 'searching'"
+                  decoration-primary="state == 'waiting_interaction'">
+                
+                <field name="name" string="Consulta"/>
+                <field name="detected_brand" string="Marca"/>
+                <field name="detected_category" string="Categoría"/>
+                <field name="result_count" string="Resultados"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'no_results'"
+                       decoration-info="state == 'searching'"
+                       decoration-primary="state == 'waiting_interaction'"
+                       decoration-muted="state == 'draft'"/>
+                <field name="create_date" string="Fecha"/>
+                <field name="create_uid" string="Usuario"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista Search -->
+    <record id="view_product_search_search" model="ir.ui.view">
+        <field name="name">product.search.search</field>
+        <field name="model">product.search</field>
+        <field name="arch" type="xml">
+            <search string="Buscar en Consultas">
+                <field name="name" string="Consulta" 
+                       filter_domain="[('query_text','ilike',self)]"/>
+                <field name="detected_brand"/>
+                <field name="detected_category"/>
+                <field name="create_uid"/>
+                
+                <separator/>
+                <filter string="Con Resultados" name="with_results" 
+                        domain="[('result_count', '>', 0)]"/>
+                <filter string="Sin Resultados" name="no_results" 
+                        domain="[('result_count', '=', 0)]"/>
+                <filter string="Con Conversación" name="with_interaction" 
+                        domain="[('interaction_ids', '!=', False)]"/>
+                        
+                <separator/>
+                <filter string="Hoy" name="today" 
+                        domain="[('create_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter string="Esta Semana" name="this_week" 
+                        domain="[('create_date', '>=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="1" string="Agrupar Por">
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Marca Detectada" name="group_brand" context="{'group_by': 'detected_brand'}"/>
+                    <filter string="Categoría" name="group_category" context="{'group_by': 'detected_category'}"/>
+                    <filter string="Fecha" name="group_date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista para resultados individuales -->
+    <record id="view_product_search_result_tree" model="ir.ui.view">
+        <field name="name">product.search.result.tree</field>
+        <field name="model">product.search.result</field>
+        <field name="arch" type="xml">
+            <tree string="Resultados de Búsqueda" create="false" edit="false">
+                <field name="product_image" widget="image" width="50px" height="50px"/>
+                <field name="product_name"/>
+                <field name="product_code"/>
+                <field name="product_category"/>
+                <field name="product_price" widget="monetary"/>
+                <field name="relevance_score"/>
+                <field name="relevance_level" widget="badge"/>
+                <field name="match_details" widget="text"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Acción para el modelo principal -->
+    <record id="action_product_search" model="ir.actions.act_window">
+        <field name="name">Búsqueda de Productos</field>
+        <field name="res_model">product.search</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                🔍 Crear nueva búsqueda de productos
+            </p>
+            <p>
+                Utilice esta herramienta para buscar productos mediante texto libre.
+                Escriba su consulta y el sistema detectará automáticamente marcas y categorías
+                para mostrarle los productos más relevantes.
+            </p>
+        </field>
+    </record>
+</odoo>
