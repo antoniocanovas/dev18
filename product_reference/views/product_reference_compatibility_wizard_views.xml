@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Reference Compatibility Wizard Form View -->
+    <record id="view_product_reference_compatibility_wizard_form" model="ir.ui.view">
+        <field name="name">product.reference.compatibility.wizard.form</field>
+        <field name="model">product.reference.compatibility.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Gestionar Compatibilidades">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="reference_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                        <h3>Gestión de Compatibilidades</h3>
+                    </div>
+                    
+                    <group>
+                        <field name="mode" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Compatibilidades Actuales" name="current">
+                            <field name="current_compatible_ids" nolabel="1" readonly="1">
+                                <tree string="Referencias Compatibles Actuales">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Selección de Referencias" name="selection">
+                            <group>
+                                <div class="alert alert-info" role="alert" invisible="mode != 'replace'">
+                                    <strong>Modo Reemplazar:</strong> Las referencias seleccionadas serán las únicas compatibles. 
+                                    Las compatibilidades existentes que no estén seleccionadas se eliminarán.
+                                </div>
+                                <div class="alert alert-success" role="alert" invisible="mode != 'add'">
+                                    <strong>Modo Añadir:</strong> Las referencias seleccionadas se añadirán a las compatibilidades existentes.
+                                </div>
+                                <div class="alert alert-warning" role="alert" invisible="mode != 'remove'">
+                                    <strong>Modo Eliminar:</strong> Las referencias seleccionadas se eliminarán de las compatibilidades existentes.
+                                </div>
+                            </group>
+                            
+                            <field name="new_compatible_ids" nolabel="1" widget="many2many_checkboxes">
+                                <tree string="Seleccionar Referencias">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="Vista Previa" 
+                            name="action_preview_changes" 
+                            type="object" 
+                            class="btn-secondary"/>
+                    <button string="Aplicar Cambios" 
+                            name="action_update_compatibility" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancelar" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_product_reference_compatibility_wizard" model="ir.actions.act_window">
+        <field name="name">Gestionar Compatibilidades</field>
+        <field name="res_model">product.reference.compatibility.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

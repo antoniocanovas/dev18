@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Reference Tree View -->
+    <record id="view_product_reference_tree" model="ir.ui.view">
+        <field name="name">product.reference.tree</field>
+        <field name="model">product.reference</field>
+        <field name="arch" type="xml">
+            <tree string="Referencias de Producto">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="compatible_count"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product Reference Form View -->
+    <record id="view_product_reference_form" model="ir.ui.view">
+        <field name="name">product.reference.form</field>
+        <field name="model">product.reference</field>
+        <field name="arch" type="xml">
+            <form string="Referencia de Producto">
+                <header>
+                    <button name="action_manage_compatibility" 
+                            type="object" 
+                            string="Gestionar Compatibilidades" 
+                            class="btn-primary"
+                            groups="base.group_user"/>
+                    <button name="action_view_compatibilities" 
+                            type="object" 
+                            string="Ver Compatibilidades" 
+                            class="btn-secondary"
+                            groups="base.group_user"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_compatibilities"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-link">
+                            <field name="compatible_count" widget="statinfo" string="Compatibles"/>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archivado" bg_color="bg-danger" invisible="active"/>
+                    
+                    <group>
+                        <group>
+                            <field name="name" placeholder="Ej: REF001, PART-A123, etc."/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="compatible_count" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Descripción">
+                        <field name="description" nolabel="1" placeholder="Descripción detallada de la referencia..."/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Referencias Compatibles" name="compatibles">
+                            <field name="all_compatible_ids" nolabel="1" readonly="1">
+                                <tree string="Referencias Compatibles">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                    <button name="action_manage_compatibility" 
+                                            type="object" 
+                                            string="Gestionar" 
+                                            icon="fa-cog"
+                                            class="btn-secondary btn-sm"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Compatibilidades Directas" name="direct_compatibilities">
+                            <field name="compatibility_ids" nolabel="1" readonly="1">
+                                <tree string="Compatibilidades Directas">
+                                    <field name="compatible_id"/>
+                                    <field name="notes"/>
+                                    <field name="active"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Compatibilidades Inversas" name="inverse_compatibilities">
+                            <field name="inverse_compatibility_ids" nolabel="1" readonly="1">
+                                <tree string="Compatibilidades Inversas">
+                                    <field name="reference_id"/>
+                                    <field name="notes"/>
+                                    <field name="active"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Product Reference Search View -->
+    <record id="view_product_reference_search" model="ir.ui.view">
+        <field name="name">product.reference.search</field>
+        <field name="model">product.reference</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Referencias">
+                <field name="name" string="Nombre" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="description" string="Descripción"/>
+                
+                <filter string="Activas" name="filter_active" domain="[('active', '=', True)]"/>
+                <filter string="Archivadas" name="filter_archived" domain="[('active', '=', False)]"/>
+                
+                <separator/>
+                <filter string="Con Compatibilidades" name="filter_with_compatibilities" 
+                        domain="[('compatible_count', '>', 0)]"/>
+                <filter string="Sin Compatibilidades" name="filter_without_compatibilities" 
+                        domain="[('compatible_count', '=', 0)]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado" name="group_active" context="{'group_by': 'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Product Reference Compatibility Tree View -->
+    <record id="view_product_reference_compatibility_tree" model="ir.ui.view">
+        <field name="name">product.reference.compatibility.tree</field>
+        <field name="model">product.reference.compatibility</field>
+        <field name="arch" type="xml">
+            <tree string="Compatibilidades">
+                <field name="reference_id"/>
+                <field name="compatible_id"/>
+                <field name="notes"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product Reference Compatibility Form View -->
+    <record id="view_product_reference_compatibility_form" model="ir.ui.view">
+        <field name="name">product.reference.compatibility.form</field>
+        <field name="model">product.reference.compatibility</field>
+        <field name="arch" type="xml">
+            <form string="Compatibilidad de Referencias">
+                <sheet>
+                    <widget name="web_ribbon" title="Inactivo" bg_color="bg-danger" invisible="active"/>
+                    
+                    <group>
+                        <group>
+                            <field name="reference_id"/>
+                            <field name="compatible_id"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Notas">
+                        <field name="notes" nolabel="1" placeholder="Notas adicionales sobre la compatibilidad..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_product_reference" model="ir.actions.act_window">
+        <field name="name">Referencias de Producto</field>
+        <field name="res_model">product.reference</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Crea tu primera referencia de producto!
+            </p>
+            <p>
+                Las referencias de producto te permiten gestionar compatibilidades
+                entre diferentes componentes o productos de forma simétrica.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_product_reference_compatibility" model="ir.actions.act_window">
+        <field name="name">Compatibilidades</field>
+        <field name="res_model">product.reference.compatibility</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay compatibilidades definidas!
+            </p>
+            <p>
+                Las compatibilidades se crean automáticamente cuando usas el wizard
+                de gestión desde las referencias de producto.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_product_reference_root"
+              name="Referencias de Producto"
+              sequence="100"/>
+
+    <menuitem id="menu_product_reference"
+              name="Referencias"
+              parent="menu_product_reference_root"
+              action="action_product_reference"
+              sequence="10"/>
+
+    <menuitem id="menu_product_reference_compatibility"
+              name="Compatibilidades"
+              parent="menu_product_reference_root"
+              action="action_product_reference_compatibility"
+              sequence="20"/>
+
+</odoo>

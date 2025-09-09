@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Referencias de Producto de Ejemplo -->
+        <record id="product_reference_ref001" model="product.reference">
+            <field name="name">REF001</field>
+            <field name="description">Referencia principal tipo A - Compatible con serie B</field>
+        </record>
+
+        <record id="product_reference_ref002" model="product.reference">
+            <field name="name">REF002</field>
+            <field name="description">Referencia tipo B - Compatible con REF001 y REF003</field>
+        </record>
+
+        <record id="product_reference_ref003" model="product.reference">
+            <field name="name">REF003</field>
+            <field name="description">Referencia tipo C - Compatible con REF002</field>
+        </record>
+
+        <record id="product_reference_ref004" model="product.reference">
+            <field name="name">REF004</field>
+            <field name="description">Referencia especial - Sin compatibilidades iniciales</field>
+        </record>
+
+        <record id="product_reference_ref005" model="product.reference">
+            <field name="name">REF005</field>
+            <field name="description">Referencia universal - Compatible con múltiples referencias</field>
+        </record>
+
+        <!-- Compatibilidades de Ejemplo -->
+        <!-- REF001 ↔ REF002 -->
+        <record id="compatibility_ref001_ref002" model="product.reference.compatibility">
+            <field name="reference_id" ref="product_reference_ref001"/>
+            <field name="compatible_id" ref="product_reference_ref002"/>
+            <field name="notes">Compatibilidad principal - Serie A con Serie B</field>
+        </record>
+
+        <!-- REF002 ↔ REF003 -->
+        <record id="compatibility_ref002_ref003" model="product.reference.compatibility">
+            <field name="reference_id" ref="product_reference_ref002"/>
+            <field name="compatible_id" ref="product_reference_ref003"/>
+            <field name="notes">Compatibilidad Serie B con Serie C</field>
+        </record>
+
+        <!-- REF005 ↔ REF001 -->
+        <record id="compatibility_ref005_ref001" model="product.reference.compatibility">
+            <field name="reference_id" ref="product_reference_ref005"/>
+            <field name="compatible_id" ref="product_reference_ref001"/>
+            <field name="notes">Referencia universal compatible con REF001</field>
+        </record>
+
+        <!-- REF005 ↔ REF003 -->
+        <record id="compatibility_ref005_ref003" model="product.reference.compatibility">
+            <field name="reference_id" ref="product_reference_ref005"/>
+            <field name="compatible_id" ref="product_reference_ref003"/>
+            <field name="notes">Referencia universal compatible con REF003</field>
+        </record>
+
+    </data>
+</odoo>

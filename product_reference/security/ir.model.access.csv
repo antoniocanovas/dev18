@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_reference_user,access_product_reference_user,model_product_reference,base.group_user,1,1,1,1
+access_product_reference_compatibility_user,access_product_reference_compatibility_user,model_product_reference_compatibility,base.group_user,1,1,1,1
+access_product_reference_compatibility_wizard_user,access_product_reference_compatibility_wizard_user,model_product_reference_compatibility_wizard,base.group_user,1,1,1,1
