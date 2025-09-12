@@ -2,11 +2,14 @@
 
 ## Descripción
 
-Módulo para **Odoo 18 Enterprise** que permite crear y pre-asignar números de serie/lotes en pedidos de compra antes de la recepción del producto. Facilita la coordinación con fabricantes externos para que asignen los lotes deseados y valida en la recepción que coincidan con lo esperado.
+Módulo para **Odoo 18 Enterprise** que permite crear y pre-asignar números de serie/lotes en pedidos de compra antes de
+la recepción del producto. Facilita la coordinación con fabricantes externos para que asignen los lotes deseados y
+valida en la recepción que coincidan con lo esperado.
 
 ## Características Principales
 
 ### 🎯 **Funcionalidades Core**
+
 - **Generación Automática**: Botón "Generate Lots" crea lotes pre-asignados desde el pedido de compra
 - **Gestión Completa**: Tabla de lotes por producto y línea de compra con estados (Draft → Confirmed → Received)
 - **Validación Inteligente**: Control configurable de lotes en recepción (estricto o suave)
@@ -14,14 +17,18 @@ Módulo para **Odoo 18 Enterprise** que permite crear y pre-asignar números de 
 - **Compatible Odoo 18**: Sin warnings de deprecación, usa @api.model_create_multi
 
 ### 🔧 **Nuevas Funciones v1.0.0**
+
+- **Secuencia Estándar Odoo**: Usa la secuencia nativa `stock.lot.serial` (Serial Numbers)
 - **Campo "Preassigned Lots"**: Boolean en albaranes para controlar validación
 - **Validación Estricta**: Solo acepta lotes pre-asignados cuando está activado
 - **Validación Suave**: Permite cualquier lote con warnings cuando está desactivado
 - **Mensajes Informativos**: Errores detallados con opciones de solución
+- **Configuración Nativa**: Numeración configurable desde Configuración → Secuencias
 
 ## Instalación
 
 ### Requisitos
+
 - **Odoo 18 Enterprise**
 - Módulos base: `purchase`, `stock`, `purchase_stock`
 
@@ -51,56 +58,71 @@ Módulo para **Odoo 18 Enterprise** que permite crear y pre-asignar números de 
 ## Uso Rápido
 
 ### 1. Configurar Productos
+
 Asegurar que los productos tengan **trazabilidad configurada**:
+
 - Ir a producto → pestaña **Inventario**
 - **Tracking**: Seleccionar "By Lots" o "By Unique Serial Number"
 
 ### 2. Crear Lotes Pre-asignados
+
 1. Crear pedido de compra con productos que tengan trazabilidad
 2. **Confirmar pedido** (estado = 'purchase')
 3. Hacer clic en **"Generate Lots"**
 4. El sistema crea automáticamente lotes/números de serie
 
 ### 3. Validar en Recepción
+
 1. Abrir albarán de recepción
 2. Verificar campo **"Preassigned Lots"**:
-   - ✅ **Marcado (default)**: Solo acepta lotes pre-asignados
-   - ⚪ **Desmarcado**: Acepta cualquier lote (warnings)
+    - ✅ **Marcado (default)**: Solo acepta lotes pre-asignados
+    - ⚪ **Desmarcado**: Acepta cualquier lote (warnings)
 3. Proceder con recepción normal
 
-## Ejemplos de Nomenclatura
+## Nomenclatura de Lotes/Series
 
-### Números de Serie
+### Secuencia Estándar de Odoo (por defecto)
+
 ```
-Producto: ESP32-WROOM
-Pedido: PO0001
-Generados: ESP32-PO0001-SN0001, ESP32-PO0001-SN0002, ESP32-PO0001-SN0003...
+Formato estándar: SN00001, SN00002, SN00003...
+Secuencia usada: stock.lot.serial (Serial Numbers)
+Configurable desde: Configuración → Técnico → Secuencias
 ```
 
-### Lotes
+### Personalización de Formato
+
+Los administradores pueden configurar el formato desde Odoo:
+
 ```
-Producto: ANTIBIOTIC-500MG  
-Pedido: PO0123
-Generados: ANTIBIOTIC-PO0123-L001, ANTIBIOTIC-PO0123-L002, ANTIBIOTIC-PO0123-L003...
+Ejemplos configurables:
+- LOT-2025-00001
+- SERIE-EMPRESA-00001  
+- NS-{YYYY}-{MM}-00001
 ```
+
+**Configuración:** Configuración → Técnico → Secuencias e Identificadores → Buscar "Serial Numbers"
 
 ## Flujo de Trabajo Completo
 
 ### Fase 1: Preparación
+
 1. **Crear pedido** con productos trazables
 2. **Confirmar pedido** (botón "Generate Lots" aparece)
 3. **Generar lotes** automáticamente
 4. **Comunicar lista** al proveedor
 
 ### Fase 2: Recepción
+
 1. **Albarán automático** con "Preassigned Lots" = True
 2. **Recibir productos** con lotes específicos
 3. **Validación automática**:
-   - ✅ Lotes coinciden → Continúa
-   - ❌ Lotes no coinciden → Error informativo
+    - ✅ Lotes coinciden → Continúa
+    - ❌ Lotes no coinciden → Error informativo
 
 ### Fase 3: Resolución de Conflictos
+
 Si hay lotes no esperados:
+
 1. **Opción A**: Desmarcar "Preassigned Lots" (acepta cualquier lote)
 2. **Opción B**: Ir al pedido → "View Lots" → Añadir lotes manualmente
 3. **Opción C**: Regenerar lotes desde pedido
@@ -108,12 +130,14 @@ Si hay lotes no esperados:
 ## Validación de Lotes
 
 ### 🔒 Validación Estricta (Preassigned Lots = ✅)
+
 - **Solo acepta** lotes de la lista pre-asignada
 - **Bloquea validación** si hay lotes no esperados
 - **Error detallado** con opciones de solución
 - **Ideal para**: Industrias reguladas, control de calidad estricto
 
 ### 📝 Validación Suave (Preassigned Lots = ⚪)
+
 - **Acepta cualquier lote** o número de serie
 - **Warnings en chatter** para lotes inesperados
 - **No bloquea** la validación
@@ -122,16 +146,19 @@ Si hay lotes no esperados:
 ## Casos de Uso Empresariales
 
 ### 🏥 **Industria Farmacéutica**
+
 - Control estricto por regulaciones
 - Trazabilidad completa obligatoria
 - Validación estricta recomendada
 
 ### 🔧 **Manufactura de Precisión**
+
 - Coordinación con proveedores
 - Control de calidad desde origen
 - Trazabilidad proactiva
 
 ### 📦 **Distribución General**
+
 - Flexibilidad con diferentes proveedores
 - Warnings informativos suficientes
 - Validación suave según necesidades
@@ -153,23 +180,32 @@ purchase_lot_preassignment/
 │   └── stock_picking_views.xml        # Campo validación
 ├── security/
 │   └── ir.model.access.csv            # Permisos
-├── README.md                           # Esta documentación
-└── ONLY_PREASSIGNED_LOTS_EXAMPLES.md # Ejemplos detallados
+└── README.md                           # Esta documentación
 ```
 
 ## Personalización
 
-### Nomenclatura de Lotes
-Modificar `_generate_lot_name()` en `models/purchase_order.py`:
-```python
-def _generate_lot_name(self, line, sequence):
-    # Personalizar formato aquí
-    product_code = line.product_id.default_code or 'PROD'
-    return f"CUSTOM-{product_code}-{sequence:05d}"
+### Configuración de Numeración
+
+El módulo usa la **secuencia estándar de Odoo** `stock.lot.serial`. Para personalizar la numeración:
+
+1. **Ir a:** Configuración → Técnico → Secuencias e Identificadores → Secuencias
+2. **Buscar:** "Serial Numbers" o código `stock.lot.serial`
+3. **Configurar:** Prefijo, sufijo, padding, etc.
+
+```
+Ejemplos de configuración:
+- Prefijo: "LOT-", Sufijo: "-2025" → LOT-00001-2025
+- Prefijo: "SN", Padding: 6 → SN000001
+- Usar fecha: "NS-%(year)s-" → NS-2025-00001
 ```
 
+**Ventaja:** Sin modificar código, configurable desde interfaz de Odoo.
+
 ### Tamaño de Lotes
+
 Personalizar `_get_lot_size()` para usar configuración del producto:
+
 ```python
 def _get_lot_size(self, line):
     return line.product_id.lot_size or 100.0
@@ -178,19 +214,25 @@ def _get_lot_size(self, line):
 ## Solución de Problemas
 
 ### ❌ "Lot not in preassigned list"
+
 **Soluciones**:
+
 1. Desmarcar "Preassigned Lots" en albarán
 2. Ir al pedido → "View Lots" → Añadir lote manualmente
 3. Regenerar lotes: Pedido → "Generate Lots"
 
 ### ❌ "No preassigned lots found"
+
 **Verificar**:
+
 1. Producto tiene trazabilidad (lot/serial) configurada
 2. Pedido está confirmado (estado 'purchase')
 3. Ejecutar "Generate Lots" desde pedido
 
 ### ❌ Campo "Preassigned Lots" no visible
+
 **Verificar**:
+
 1. Albarán es de tipo "incoming" (recepción)
 2. Tiene pedido de compra asociado
 3. Actualizar módulo si es necesario
@@ -214,10 +256,11 @@ Este módulo está bajo **licencia LGPL-3**.
 
 ## Soporte
 
-Para documentación detallada y ejemplos específicos, consultar:
-- `ONLY_PREASSIGNED_LOTS_EXAMPLES.md` - Casos de uso detallados
-- Logs de Odoo para debugging
+Para soporte técnico:
+
+- Revisar logs de Odoo para debugging
 - Verificar permisos de usuario
+- Documentación completa incluida en este README
 
 ---
 

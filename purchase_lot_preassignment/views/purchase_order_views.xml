@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
+
     <!-- Purchase Order Form View Extension -->
     <record id="view_purchase_order_form" model="ir.ui.view">
         <field name="name">purchase.order.form.lot.preassignment</field>
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
-            
+
             <!-- Add button in header -->
             <xpath expr="//button[@name='button_confirm']" position="before">
                 <button name="action_generate_lot_preassignments"
@@ -23,7 +23,7 @@
                         help="View preassigned lots"
                         invisible="not lot_preassignment_count"/>
             </xpath>
-            
+
             <!-- Add smart button -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button type="object"
@@ -31,17 +31,17 @@
                         class="oe_stat_button"
                         icon="fa-barcode"
                         invisible="not lot_preassignment_count">
-                    <field name="lot_preassignment_count" widget="statinfo" 
+                    <field name="lot_preassignment_count" widget="statinfo"
                            string="Preassigned Lots"/>
                 </button>
             </xpath>
-            
+
             <!-- Add notebook page for lot preassignments -->
             <xpath expr="//notebook" position="inside">
-                <page string="Lot Preassignments" 
+                <page string="Lot Preassignments"
                       invisible="not lot_preassignment_count"
                       name="lot_preassignments">
-                    <field name="lot_preassignment_ids" 
+                    <field name="lot_preassignment_ids"
                            readonly="state != 'draft'">
                         <list editable="bottom" create="false" delete="false">
                             <field name="purchase_line_id" readonly="1"/>
@@ -50,7 +50,7 @@
                             <field name="product_qty" readonly="tracking == 'serial'"/>
                             <field name="tracking" column_invisible="1"/>
                             <field name="sequence"/>
-                            <field name="state" 
+                            <field name="state"
                                    widget="badge"
                                    decoration-success="state == 'confirmed'"
                                    decoration-info="state == 'draft'"
@@ -60,43 +60,43 @@
                     </field>
                 </page>
             </xpath>
-            
+
             <!-- Add fields to form -->
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="has_lot_tracking_lines" invisible="1"/>
                 <field name="lot_preassignment_count" invisible="1"/>
             </xpath>
-            
+
         </field>
     </record>
-    
+
     <!-- Purchase Order Line Form View Extension -->
     <record id="view_purchase_order_line_form" model="ir.ui.view">
         <field name="name">purchase.order.line.form.lot.preassignment</field>
         <field name="model">purchase.order.line</field>
         <field name="inherit_id" ref="purchase.purchase_order_line_form2"/>
         <field name="arch" type="xml">
-            
+
             <xpath expr="//field[@name='price_unit']" position="after">
-                <field name="expected_lot_names" 
+                <field name="expected_lot_names"
                        readonly="1"
                        invisible="not expected_lot_names"/>
             </xpath>
-            
+
         </field>
     </record>
-    
+
     <!-- Purchase Order Tree View Extension -->
     <record id="view_purchase_order_tree" model="ir.ui.view">
         <field name="name">purchase.order.tree.lot.preassignment</field>
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_tree"/>
         <field name="arch" type="xml">
-            
+
             <xpath expr="//field[@name='amount_total']" position="after">
                 <field name="lot_preassignment_count" string="Preassigned Lots" optional="hide"/>
             </xpath>
-            
+
         </field>
     </record>
 

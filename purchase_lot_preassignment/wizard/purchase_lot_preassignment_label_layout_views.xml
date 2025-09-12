@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Purchase Lot Preassignment Label Layout Wizard -->
+        <record id="purchase_lot_preassignment_label_layout_view" model="ir.ui.view">
+            <field name="name">purchase.lot.preassignment.label.layout.form</field>
+            <field name="model">purchase.lot.preassignment.label.layout</field>
+            <field name="arch" type="xml">
+                <form string="Choose Labels Layout">
+                    <group>
+                        <field name="preassignment_ids" invisible="1"/>
+                        <field name="print_format" widget="radio"/>
+                        <field name="label_quantity" widget="radio"/>
+                    </group>
+                    <footer>
+                        <button string="Print" name="process" type="object" class="btn-primary" data-hotkey="q"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action to open the wizard -->
+        <record id="action_purchase_lot_preassignment_label_layout" model="ir.actions.act_window">
+            <field name="name">Print Labels</field>
+            <field name="res_model">purchase.lot.preassignment.label.layout</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_purchase_lot_preassignment"/>
+            <field name="binding_view_types">list</field>
+        </record>
+    </data>
+</odoo>

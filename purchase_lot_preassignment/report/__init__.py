@@ -1,0 +1,1 @@
+from . import purchase_lot_preassignment_label_report

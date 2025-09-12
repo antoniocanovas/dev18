@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
+
     <!-- Purchase Lot Preassignment List View -->
     <record id="view_purchase_lot_preassignment_list" model="ir.ui.view">
         <field name="name">purchase.lot.preassignment.list</field>
@@ -11,6 +11,13 @@
                   decoration-info="state == 'draft'"
                   decoration-warning="state == 'received'"
                   decoration-muted="state == 'canceled'">
+                <header>
+                    <button name="action_open_label_layout"
+                            type="object"
+                            string="Print Labels"
+                            class="btn-primary"
+                            icon="fa-print"/>
+                </header>
                 <field name="sequence"/>
                 <field name="purchase_order_id"/>
                 <field name="purchase_line_id"/>
@@ -24,7 +31,7 @@
             </list>
         </field>
     </record>
-    
+
     <!-- Purchase Lot Preassignment Form View -->
     <record id="view_purchase_lot_preassignment_form" model="ir.ui.view">
         <field name="name">purchase.lot.preassignment.form</field>
@@ -32,16 +39,21 @@
         <field name="arch" type="xml">
             <form string="Lot Preassignment">
                 <header>
-                    <button name="action_confirm" 
-                            type="object" 
-                            string="Confirm" 
+                    <button name="action_confirm"
+                            type="object"
+                            string="Confirm"
                             class="oe_highlight"
                             invisible="state != 'draft'"/>
-                    <button name="action_create_stock_lot" 
-                            type="object" 
-                            string="Create Stock Lot" 
+                    <button name="action_create_stock_lot"
+                            type="object"
+                            string="Create Stock Lot"
                             class="btn-secondary"
                             invisible="stock_lot_id or state == 'canceled'"/>
+                    <button name="action_open_label_layout"
+                            type="object"
+                            string="Print Labels"
+                            class="btn-secondary"
+                            icon="fa-print"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,received"/>
                 </header>
                 <sheet>
@@ -56,7 +68,7 @@
                             </div>
                         </button>
                     </div>
-                    
+
                     <group>
                         <group>
                             <field name="name"/>
@@ -71,11 +83,11 @@
                             <field name="sequence"/>
                         </group>
                     </group>
-                    
+
                     <group>
                         <field name="notes" placeholder="Additional notes..."/>
                     </group>
-                    
+
                     <group string="Dates" groups="base.group_no_one">
                         <group>
                             <field name="date_created" readonly="1"/>
@@ -89,7 +101,7 @@
             </form>
         </field>
     </record>
-    
+
     <!-- Purchase Lot Preassignment Search View -->
     <record id="view_purchase_lot_preassignment_search" model="ir.ui.view">
         <field name="name">purchase.lot.preassignment.search</field>
@@ -100,29 +112,29 @@
                 <field name="product_id"/>
                 <field name="purchase_order_id"/>
                 <field name="purchase_line_id"/>
-                
+
                 <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
                 <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter name="received" string="Received" domain="[('state', '=', 'received')]"/>
-                
+
                 <separator/>
                 <filter name="serial" string="Serial Numbers" domain="[('tracking', '=', 'serial')]"/>
                 <filter name="lot" string="Lots" domain="[('tracking', '=', 'lot')]"/>
-                
+
                 <group expand="0" string="Group By">
-                    <filter name="group_purchase_order" string="Purchase Order" 
+                    <filter name="group_purchase_order" string="Purchase Order"
                             context="{'group_by': 'purchase_order_id'}"/>
-                    <filter name="group_product" string="Product" 
+                    <filter name="group_product" string="Product"
                             context="{'group_by': 'product_id'}"/>
-                    <filter name="group_state" string="Status" 
+                    <filter name="group_state" string="Status"
                             context="{'group_by': 'state'}"/>
-                    <filter name="group_tracking" string="Tracking Type" 
+                    <filter name="group_tracking" string="Tracking Type"
                             context="{'group_by': 'tracking'}"/>
                 </group>
             </search>
         </field>
     </record>
-    
+
     <!-- Purchase Lot Preassignment Action -->
     <record id="action_purchase_lot_preassignment" model="ir.actions.act_window">
         <field name="name">Lot Preassignments</field>
@@ -139,7 +151,7 @@
             </p>
         </field>
     </record>
-    
+
     <!-- Menu Item -->
     <menuitem id="menu_purchase_lot_preassignment"
               name="Lot Preassignments"

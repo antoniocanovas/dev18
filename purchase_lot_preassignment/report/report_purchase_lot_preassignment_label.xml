@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Base Template: 4x12 Lot Preassignment Label Cell -->
+        <template id="preassignment_label_4x12">
+            <t t-set="barcode_size" t-value="'width:30mm;height:4mm'"/>
+            <t t-set="table_style"
+               t-value="'position:relative; border: 1px solid %s;' % (o.env.user.company_id.primary_color or 'black')"/>
+            <t t-set="table_style" t-value="'width:43mm;height:19mm;' + table_style"/>
+            <div class="o_label_full o_label_small_text" t-att-style="table_style">
+                <!-- Product Code -->
+                <div class="o_label_4x12" t-if="o.product_id.default_code"
+                     style="font-size: 8px; font-weight: bold;">[<t t-out="o.product_id.default_code"/>]
+                </div>
+
+                <!-- Product Name -->
+                <div class="o_label_4x12" t-field="o.product_id.name"
+                     style="font-size: 9px; height: 4mm; overflow: hidden;">Demo Product
+                </div>
+
+                <!-- Lot/Serial Number -->
+                <div class="o_label_4x12" name="lot_name"
+                     style="font-size: 10px; font-weight: bold; color: #0066cc;">
+                    L/S:
+                    <t t-out="o.name"/>
+                </div>
+
+                <!-- Purchase Order Info -->
+                <div class="o_label_4x12" style="font-size: 7px; color: #666;">
+                    PO:
+                    <t t-out="o.purchase_order_id.name"/>
+                </div>
+
+                <!-- State Badge -->
+                <div class="o_label_4x12"
+                     style="font-size: 6px; position: absolute; top: 1px; right: 2px;">
+                    <span t-if="o.state == 'draft'"
+                          style="background: #ffc107; padding: 1px 3px; border-radius: 2px; color: white;">
+                        DRAFT
+                    </span>
+                    <span t-elif="o.state == 'confirmed'"
+                          style="background: #28a745; padding: 1px 3px; border-radius: 2px; color: white;">
+                        CONF
+                    </span>
+                    <span t-elif="o.state == 'received'"
+                          style="background: #007bff; padding: 1px 3px; border-radius: 2px; color: white;">
+                        RCV
+                    </span>
+                    <span t-elif="o.state == 'canceled'"
+                          style="background: #dc3545; padding: 1px 3px; border-radius: 2px; color: white;">
+                        CANC
+                    </span>
+                </div>
+
+                <!-- Quantity if more than 1 -->
+                <div t-if="o.product_qty > 1" class="o_label_4x12"
+                     style="font-size: 8px; color: #333;">
+                    Qty:
+                    <t t-out="o.product_qty"/>
+                </div>
+
+                <!-- Barcode -->
+                <div style="position: absolute; bottom: 1px; left: 30%; transform: translateX(-50%); width: 90%;">
+                    <span t-field="o.name" t-options="{'widget': 'barcode', 'img_style': barcode_size}">
+                        Demo Lot/SN
+                    </span>
+                </div>
+            </div>
+        </template>
+
+        <!-- Base Template: 2x7 Lot Preassignment Label Cell -->
+        <template id="preassignment_label_2x7">
+            <t t-set="barcode_size" t-value="'width:60mm;height:8mm'"/>
+            <t t-set="table_style"
+               t-value="'position:relative; border: 1px solid %s;' % (o.env.user.company_id.primary_color or 'black')"/>
+            <t t-set="table_style" t-value="'width:99mm;height:38mm;' + table_style"/>
+            <div class="o_label_full" t-att-style="table_style">
+                <!-- Product Code -->
+                <div t-if="o.product_id.default_code" style="font-size: 12px; font-weight: bold; margin-bottom: 2px;">
+                    [<t t-out="o.product_id.default_code"/>]
+                </div>
+
+                <!-- Product Name -->
+                <div t-field="o.product_id.name"
+                     style="font-size: 14px; height: 6mm; overflow: hidden; margin-bottom: 2px;">
+                    Demo Product
+                </div>
+
+                <!-- Lot/Serial Number -->
+                <div name="lot_name" style="font-size: 16px; font-weight: bold; color: #0066cc; margin-bottom: 2px;">
+                    L/S:
+                    <t t-out="o.name"/>
+                </div>
+
+                <!-- Purchase Order and State in same line -->
+                <div style="font-size: 10px; color: #666; margin-bottom: 2px;">
+                    PO:
+                    <t t-out="o.purchase_order_id.name"/>
+                    |
+                    <span t-if="o.state == 'draft'" style="color: #ffc107;">DRAFT</span>
+                    <span t-elif="o.state == 'confirmed'" style="color: #28a745;">CONFIRMED</span>
+                    <span t-elif="o.state == 'received'" style="color: #007bff;">RECEIVED</span>
+                    <span t-elif="o.state == 'canceled'" style="color: #dc3545;">CANCELED</span>
+                    <span t-if="o.product_qty > 1">| Qty:
+                        <t t-out="o.product_qty"/>
+                    </span>
+                </div>
+
+                <!-- Barcode -->
+                <div style="position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 90%;">
+                    <span t-field="o.name" t-options="{'widget': 'barcode', 'img_style': barcode_size}">
+                        Demo Lot/SN
+                    </span>
+                </div>
+            </div>
+        </template>
+
+        <!-- Base Template: 4x7 Lot Preassignment Label Cell -->
+        <template id="preassignment_label_4x7">
+            <t t-set="barcode_size" t-value="'width:30mm;height:6mm'"/>
+            <t t-set="table_style"
+               t-value="'position:relative; border: 1px solid %s;' % (o.env.user.company_id.primary_color or 'black')"/>
+            <t t-set="table_style" t-value="'width:43mm;height:38mm;' + table_style"/>
+            <div class="o_label_full o_label_small_text" t-att-style="table_style">
+                <!-- Product Code -->
+                <div t-if="o.product_id.default_code" style="font-size: 10px; font-weight: bold;">
+                    [<t t-out="o.product_id.default_code"/>]
+                </div>
+
+                <!-- Product Name -->
+                <div t-field="o.product_id.name" style="font-size: 11px; height: 6mm; overflow: hidden;">
+                    Demo Product
+                </div>
+
+                <!-- Lot/Serial Number -->
+                <div name="lot_name" style="font-size: 12px; font-weight: bold; color: #0066cc;">
+                    L/S:
+                    <t t-out="o.name"/>
+                </div>
+
+                <!-- Purchase Order Info -->
+                <div style="font-size: 8px; color: #666;">
+                    PO:
+                    <t t-out="o.purchase_order_id.name"/>
+                </div>
+
+                <!-- State and Quantity -->
+                <div style="font-size: 7px;">
+                    <span t-if="o.state == 'draft'" style="color: #ffc107;">DRAFT</span>
+                    <span t-elif="o.state == 'confirmed'" style="color: #28a745;">CONF</span>
+                    <span t-elif="o.state == 'received'" style="color: #007bff;">RCV</span>
+                    <span t-elif="o.state == 'canceled'" style="color: #dc3545;">CANC</span>
+                    <span t-if="o.product_qty > 1">| Qty:
+                        <t t-out="o.product_qty"/>
+                    </span>
+                </div>
+
+                <!-- Barcode -->
+                <div style="position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); width: 90%;">
+                    <span t-field="o.name" t-options="{'widget': 'barcode', 'img_style': barcode_size}">
+                        Demo Lot/SN
+                    </span>
+                </div>
+            </div>
+        </template>
+
+        <!-- Layout Templates -->
+        <template id="report_preassignment_label_4x12">
+            <t t-call="purchase_lot_preassignment.preassignment_label_master">
+                <t t-set="columns" t-value="4"/>
+                <t t-set="rows" t-value="12"/>
+                <t t-set="label_template" t-value="'purchase_lot_preassignment.preassignment_label_4x12'"/>
+            </t>
+        </template>
+
+        <template id="report_preassignment_label_2x7">
+            <t t-call="purchase_lot_preassignment.preassignment_label_master">
+                <t t-set="columns" t-value="2"/>
+                <t t-set="rows" t-value="7"/>
+                <t t-set="label_template" t-value="'purchase_lot_preassignment.preassignment_label_2x7'"/>
+            </t>
+        </template>
+
+        <template id="report_preassignment_label_4x7">
+            <t t-call="purchase_lot_preassignment.preassignment_label_master">
+                <t t-set="columns" t-value="4"/>
+                <t t-set="rows" t-value="7"/>
+                <t t-set="label_template" t-value="'purchase_lot_preassignment.preassignment_label_4x7'"/>
+            </t>
+        </template>
+
+        <!-- Master Layout Engine -->
+        <template id="preassignment_label_master">
+            <div t-call="web.html_container">
+                <t t-call="web.basic_layout">
+
+                        <t t-if="columns and rows">
+                            <t t-if="columns == 2 and rows == 7">
+                                <t t-set="padding_page" t-value="'padding: 14mm 3mm'"/>
+                                <t t-set="report_to_call" t-value="'2x7'"/>
+                            </t>
+                            <t t-if="columns == 4 and rows == 7">
+                                <t t-set="padding_page" t-value="'padding: 14mm 3mm'"/>
+                                <t t-set="report_to_call" t-value="'4x7'"/>
+                            </t>
+                            <t t-if="columns == 4 and rows == 12">
+                                <t t-set="padding_page" t-value="'padding: 5mm 3mm'"/>
+                                <t t-set="report_to_call" t-value="'4x12'"/>
+                            </t>
+                            <t t-set="page_size" t-value="columns * rows"/>
+                            <t t-set="page_numbers" t-value="(len(docs) + page_size - 1) // page_size"/>
+                            <t t-set="doc_index" t-value="0"/>
+                            <t t-foreach="range(page_numbers)" t-as="page">
+                                <div class="o_label_sheet" t-att-style="padding_page">
+                                    <table class="my-0 table table-sm table-borderless">
+                                        <t t-foreach="range(rows)" t-as="row">
+                                            <tr>
+                                                <t t-foreach="range(columns)" t-as="column">
+                                                    <t t-set="label_index" t-value="row * columns + column"/>
+                                                    <t t-set="doc_pos" t-value="page * page_size + label_index"/>
+                                                    <t t-if="doc_pos &lt; len(docs)">
+                                                        <t t-set="o" t-value="docs[doc_pos]"/>
+                                                        <td>
+                                                            <t t-if="report_to_call == '2x7'">
+                                                                <t t-call="purchase_lot_preassignment.preassignment_label_2x7"/>
+                                                            </t>
+                                                            <t t-elif="report_to_call == '4x7'">
+                                                                <t t-call="purchase_lot_preassignment.preassignment_label_4x7"/>
+                                                            </t>
+                                                            <t t-elif="report_to_call == '4x12'">
+                                                                <t t-call="purchase_lot_preassignment.preassignment_label_4x12"/>
+                                                            </t>
+                                                        </td>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <td style="visibility:hidden;"></td>
+                                                    </t>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                </div>
+                            </t>
+                        </t>
+
+                </t>
+
+            </div>
+        </template>
+
+        <!-- Legacy Template (backwards compatibility) -->
+        <template id="report_preassignment_label">
+            <t t-call="purchase_lot_preassignment.report_preassignment_label_4x12"/>
+        </template>
+
+    </data>
+</odoo>
