@@ -40,24 +40,47 @@ class StockPicking(models.Model):
                 self._validate_move_lots(move)
 
     def _validate_move_lots(self, move: models.Model) -> None:
-        """Validate lots for a specific move"""
-        # Get expected lots for this product from purchase order (any valid state)
+        """Validate lots for a specific move - only for received quantities"""
+        # Only validate products that are actually being received (qty_done > 0)
+        received_lines = move.move_line_ids.filtered(lambda ml: ml.qty_done > 0)
+        
+        if not received_lines:
+            return  # No quantities received, skip validation
+            
+        # Get expected lots for this product from purchase order
+        # Include 'received' state to handle lots that might have been marked as received
         expected_lots = self.env["purchase.lot.preassignment"].search(
             [
                 ("purchase_order_id", "=", self.purchase_id.id),
                 ("product_id", "=", move.product_id.id),
-                ("state", "in", ["draft", "confirmed"]),
+                ("state", "in", ["draft", "confirmed", "received"]),
             ]
         )
-        # Get received lots
+        
+        # Get received lots only from lines with qty_done > 0
         received_lots = []
-        for line in move.move_line_ids:
+        received_qty = 0
+        for line in received_lines:
+            received_qty += line.qty_done
             if line.lot_id:
                 received_lots.append(line.lot_id.name)
             elif line.lot_name:
                 received_lots.append(line.lot_name)
+                
         if not received_lots:
             return  # No lots received, nothing to validate
+            
+        # For serial tracking, validate that received qty matches number of serials
+        if move.product_id.tracking == "serial":
+            if len(received_lots) != received_qty:
+                raise ValidationError(
+                    _(
+                        "Product %s with serial tracking requires one serial number "
+                        "per unit received. Received quantity: %s, Serial numbers provided: %s"
+                    )
+                    % (move.product_id.display_name, int(received_qty), len(received_lots))
+                )
+        
         # If only_preassigned_lots is True, enforce strict validation
         if self.only_preassigned_lots:
             if not expected_lots:
@@ -72,11 +95,54 @@ class StockPicking(models.Model):
                 )
             expected_names = expected_lots.mapped("name")
             invalid_lots = set(received_lots) - set(expected_names)
+            
+            # Check for duplicate receptions (lots already marked as received)
+            already_received = expected_lots.filtered(
+                lambda l: l.name in received_lots and l.state == 'received'
+            )
+            
+            # For partial deliveries, allow "resetting" lots that were prematurely marked as received
+            # if they're not actually in a completed stock move
+            if already_received:
+                # Check if these lots are really in completed stock moves
+                really_received = []
+                for lot_rec in already_received:
+                    # Search for completed stock moves with this lot
+                    completed_moves = self.env['stock.move.line'].search([
+                        ('lot_id.name', '=', lot_rec.name),
+                        ('product_id', '=', move.product_id.id),
+                        ('state', '=', 'done'),
+                        ('picking_id.purchase_id', '=', self.purchase_id.id)
+                    ])
+                    if completed_moves:
+                        really_received.append(lot_rec.name)
+                    else:
+                        # Reset lot state if it's not really in a completed move
+                        lot_rec.write({'state': 'confirmed'})
+                        
+                if really_received:
+                    raise ValidationError(
+                        _(
+                            "The following lot/serial numbers for product %s were already "
+                            "received and processed in completed deliveries: %s\n\n"
+                            "Available lots for reception: %s\n\n"
+                            "Please use different lot/serial numbers."
+                        )
+                        % (
+                            move.product_id.display_name,
+                            ", ".join(really_received),
+                            ", ".join(expected_lots.filtered(lambda l: l.state != 'received').mapped('name')) or "None available",
+                        )
+                    )
+            
             if invalid_lots:
+                # Get available (non-received) lots for better error message
+                available_lots = expected_lots.filtered(lambda l: l.state in ['draft', 'confirmed'])
                 raise ValidationError(
                     _(
                         "The following lot/serial numbers are not in the preassigned "
-                        "list for product %s: %s\n\nExpected lots: %s\n\nTo receive "
+                        "list for product %s: %s\n\nExpected lots: %s\n\n"
+                        "Available lots (not yet received): %s\n\nTo receive "
                         'these lots, either:\n- Disable "Preassigned Lots" option\n- '
                         "Add these lots to the preassigned list in the purchase order"
                     )
@@ -84,6 +150,7 @@ class StockPicking(models.Model):
                         move.product_id.display_name,
                         ", ".join(invalid_lots),
                         ", ".join(expected_names) if expected_names else "None",
+                        ", ".join(available_lots.mapped('name')) if available_lots else "All lots already received",
                     )
                 )
         # If only_preassigned_lots is False, just log warnings (existing behavior)
@@ -91,17 +158,16 @@ class StockPicking(models.Model):
             if not expected_lots:
                 return  # No expected lots, skip validation
             expected_names = expected_lots.mapped("name")
-            missing_lots = set(expected_names) - set(received_lots)
-            extra_lots = set(received_lots) - set(expected_names)
+            # Only warn about missing lots that were supposed to be received
+            received_expected = set(received_lots) & set(expected_names) 
+            missing_from_received = set(received_lots) - set(expected_names)
+            
             warnings = []
-            if missing_lots:
+            if missing_from_received:
                 warnings.append(
-                    _("Missing expected lots: %s") % ", ".join(missing_lots)
+                    _("Unexpected lots received: %s") % ", ".join(missing_from_received)
                 )
-            if extra_lots:
-                warnings.append(
-                    _("Unexpected lots received: %s") % ", ".join(extra_lots)
-                )
+            
             if warnings:
                 message = _("Lot validation warnings for product %s:\n%s") % (
                     move.product_id.display_name,
@@ -133,13 +199,17 @@ class StockPicking(models.Model):
                 self._mark_move_lots_received(move)
 
     def _mark_move_lots_received(self, move: models.Model) -> None:
-        """Mark lots as received for a specific move"""
+        """Mark lots as received for a specific move - only for received quantities"""
+        # Only process lines with qty_done > 0
+        received_lines = move.move_line_ids.filtered(lambda ml: ml.qty_done > 0)
+        
         received_lot_names = []
-        for line in move.move_line_ids:
+        for line in received_lines:
             if line.lot_id:
                 received_lot_names.append(line.lot_id.name)
             elif line.lot_name:
                 received_lot_names.append(line.lot_name)
+                
         if received_lot_names:
             preassigned_lots = self.env["purchase.lot.preassignment"].search(
                 [

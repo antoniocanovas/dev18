@@ -37,9 +37,8 @@ class PurchaseOrder(models.Model):
         if not self.has_lot_tracking_lines:
             raise UserError(_("No lines with lot/serial tracking found"))
 
-        # Remove existing preassignments in draft state
-        self.lot_preassignment_ids.filtered(lambda x: x.state == "draft").unlink()
-
+        # Only remove existing preassignments in draft state that exceed current quantities
+        # This allows incremental generation when quantities are increased
         preassignments = []
         for line in self.order_line:
             if line.product_id.tracking in ["lot", "serial"]:
@@ -51,27 +50,51 @@ class PurchaseOrder(models.Model):
         return self.action_view_lot_preassignments()
 
     def _generate_line_preassignments(self, line: models.Model) -> list[dict]:
-        """Generate preassignments for a specific line"""
+        """Generate preassignments for a specific line - only create missing ones"""
         preassignments = []
+        
+        # Count existing preassignments for this line (all states)
+        existing_preassignments = line.lot_preassignment_ids
+        existing_count = len(existing_preassignments)
+        required_count = int(line.product_qty)
+        
+        # If we have more than needed, remove excess draft ones
+        if existing_count > required_count:
+            excess_count = existing_count - required_count
+            excess_preassignments = existing_preassignments.filtered(
+                lambda p: p.state == 'draft'
+            ).sorted('sequence', reverse=True)[:excess_count]
+            if excess_preassignments:
+                excess_preassignments.unlink()
+            return []  # No new preassignments needed
+        
+        # If we have exactly what we need, return empty
+        if existing_count >= required_count:
+            return []
+            
+        # Calculate how many new preassignments we need
+        missing_count = required_count - existing_count
+        
+        # Get the next sequence number
+        next_sequence = (max(existing_preassignments.mapped('sequence')) if existing_preassignments else 0) + 1
 
         if line.product_id.tracking == "serial":
-            # For serial numbers, create one preassignment per unit
-            qty_to_assign = int(line.product_qty)
-            for i in range(qty_to_assign):
+            # For serial numbers, create one preassignment per missing unit
+            for i in range(missing_count):
                 preassignments.append(
                     {
                         "purchase_order_id": self.id,
                         "purchase_line_id": line.id,
-                        "name": self._generate_lot_name(line, i + 1),
+                        "name": self._generate_lot_name(line, next_sequence + i),
                         "product_qty": 1.0,
-                        "sequence": i + 1,
+                        "sequence": next_sequence + i,
                     }
                 )
         else:
             # For lots, create preassignments based on lot size or default
             lot_size = self._get_lot_size(line)
-            remaining_qty = line.product_qty
-            sequence = 1
+            remaining_qty = missing_count * 1.0  # Convert to float for lot handling
+            sequence = next_sequence
 
             while remaining_qty > 0:
                 qty = min(lot_size, remaining_qty)

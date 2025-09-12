@@ -19,9 +19,12 @@ valida en la recepción que coincidan con lo esperado.
 ### 🔧 **Nuevas Funciones v1.0.0**
 
 - **Secuencia Estándar Odoo**: Usa la secuencia nativa `stock.lot.serial` (Serial Numbers)
+- **Generación Incremental**: Solo crea lotes faltantes al modificar cantidades en pedidos confirmados
 - **Campo "Preassigned Lots"**: Boolean en albaranes para controlar validación
+- **Validación Inteligente de Parciales**: Maneja recepciones parciales sin errores de validación
 - **Validación Estricta**: Solo acepta lotes pre-asignados cuando está activado
 - **Validación Suave**: Permite cualquier lote con warnings cuando está desactivado
+- **Auto-Reset de Estados**: Corrige automáticamente lotes marcados prematuramente como recibidos
 - **Mensajes Informativos**: Errores detallados con opciones de solución
 - **Configuración Nativa**: Numeración configurable desde Configuración → Secuencias
 
@@ -71,6 +74,20 @@ Asegurar que los productos tengan **trazabilidad configurada**:
 3. Hacer clic en **"Generate Lots"**
 4. El sistema crea automáticamente lotes/números de serie
 
+#### Generación Incremental (v1.0.0)
+
+- **Pedidos nuevos**: Crea todos los lotes necesarios
+- **Modificación de cantidades**: Solo genera los lotes faltantes
+- **Respeta lotes existentes**: Conserva lotes ya recibidos o confirmados
+
+```
+Ejemplo:
+- Pedido original: 3 unidades → 3 lotes creados
+- Recibidas: 2 unidades → 2 lotes marcados 'received'
+- Modificar a 10 unidades → "Generate Lots" crea solo 7 adicionales
+- Resultado: 10 lotes total (3 originales + 7 nuevos)
+```
+
 ### 3. Validar en Recepción
 
 1. Abrir albarán de recepción
@@ -78,6 +95,20 @@ Asegurar que los productos tengan **trazabilidad configurada**:
     - ✅ **Marcado (default)**: Solo acepta lotes pre-asignados
     - ⚪ **Desmarcado**: Acepta cualquier lote (warnings)
 3. Proceder con recepción normal
+
+#### Recepciones Parciales (v1.0.0)
+
+- **Validación inteligente**: Solo valida cantidades realmente recibidas (qty_done > 0)
+- **Sin errores de "lotes faltantes"**: Permite entregas escalonadas
+- **Auto-reset de estados**: Corrige lotes marcados prematuramente como recibidos
+
+```
+Ejemplo de recepción parcial:
+- Pedido: 10 unidades con 10 números de serie
+- Recepción 1: 3 unidades con SN001, SN002, SN003 ✅
+- Recepción 2: 4 unidades con SN004-SN007 ✅
+- Recepción 3: 3 unidades con SN008-SN010 ✅
+```
 
 ## Nomenclatura de Lotes/Series
 
@@ -150,18 +181,38 @@ Si hay lotes no esperados:
 - Control estricto por regulaciones
 - Trazabilidad completa obligatoria
 - Validación estricta recomendada
+- **Recepciones parciales**: Lotes por fecha de caducidad
 
 ### 🔧 **Manufactura de Precisión**
 
 - Coordinación con proveedores
 - Control de calidad desde origen
 - Trazabilidad proactiva
+- **Cantidades variables**: Ajuste de pedidos según demanda
 
 ### 📦 **Distribución General**
 
 - Flexibilidad con diferentes proveedores
 - Warnings informativos suficientes
 - Validación suave según necesidades
+- **Entregas escalonadas**: Múltiples recepciones parciales
+
+### 💹 **Gestión de Cantidades Variables (v1.0.0)**
+
+```
+Escenario real:
+1. Pedido inicial: 50 componentes electrónicos
+2. Recepción parcial: 30 unidades procesadas
+3. Cambio de demanda: Incrementar a 200 unidades
+4. "Generate Lots": Solo crea 150 lotes adicionales
+5. Resultado: Continuidad sin duplicados
+```
+
+**Beneficios:**
+- ⚙️ Adaptación ágil a cambios de demanda
+- 📊 Optimización de inventario
+- 🔄 Integración perfecta con recepciones parciales
+- 🎯 Precisión en control de lotes
 
 ## Estructura del Módulo
 
@@ -220,6 +271,7 @@ def _get_lot_size(self, line):
 1. Desmarcar "Preassigned Lots" en albarán
 2. Ir al pedido → "View Lots" → Añadir lote manualmente
 3. Regenerar lotes: Pedido → "Generate Lots"
+4. **v1.0.0**: El sistema auto-resetea lotes marcados prematuramente
 
 ### ❌ "No preassigned lots found"
 
@@ -236,6 +288,22 @@ def _get_lot_size(self, line):
 1. Albarán es de tipo "incoming" (recepción)
 2. Tiene pedido de compra asociado
 3. Actualizar módulo si es necesario
+
+### ❌ Error en recepción parcial "Faltan X números de serie"
+
+**Solución automática (v1.0.0)**:
+
+- El sistema solo valida cantidades con `qty_done > 0`
+- No requiere números de serie para cantidades no recibidas
+- Permite entregas escalonadas sin errores
+
+### ❌ "Generate Lots" crea duplicados al modificar cantidades
+
+**Solución automática (v1.0.0)**:
+
+- Generación incremental: solo crea lotes faltantes
+- Conserva lotes existentes (received/confirmed)
+- Continúa secuencia desde último número
 
 ## Menús y Navegación
 
