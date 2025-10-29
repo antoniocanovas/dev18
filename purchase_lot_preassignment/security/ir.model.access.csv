@@ -1,6 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_purchase_lot_preassignment_user,purchase.lot.preassignment.user,model_purchase_lot_preassignment,purchase.group_purchase_user,1,1,1,1
-access_purchase_lot_preassignment_manager,purchase.lot.preassignment.manager,model_purchase_lot_preassignment,purchase.group_purchase_manager,1,1,1,1
-access_purchase_lot_preassignment_stock_user,purchase.lot.preassignment.stock.user,model_purchase_lot_preassignment,stock.group_stock_user,1,0,0,0
-access_purchase_lot_preassignment_label_layout_user,purchase.lot.preassignment.label.layout.user,model_purchase_lot_preassignment_label_layout,purchase.group_purchase_user,1,1,1,1
-access_purchase_lot_preassignment_label_layout_manager,purchase.lot.preassignment.label.layout.manager,model_purchase_lot_preassignment_label_layout,purchase.group_purchase_manager,1,1,1,1
