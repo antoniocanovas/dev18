@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_shoes_model_material_user, shoes model materials users,model_shoes_model_material,base.group_user,1,0,0,0
+access_shoes_model_material_admin, shoes model materials admins,model_shoes_model_material,project.group_project_user,1,1,1,1
+access_shoes_product_creation_wizard_user, shoes product creation wizard,model_shoes_product_creation_wizard,base.group_user,1,1,1,1
+access_shoes_type_admin, shoes type admins,model_shoes_type,project.group_project_manager,1,1,1,1
+access_shoes_type_user, shoes type users,model_shoes_type,project.group_project_user,1,0,0,0
+access_shoes_closure_admin, shoes closure admins,model_shoes_closure,project.group_project_manager,1,1,1,1
+access_shoes_closure_user, shoes closure users,model_shoes_closure,project.group_project_user,1,0,0,0
