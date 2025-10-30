@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    # BASE AUTOMATION al borrar atributos de productos:
+    <record id="shoes_dealer_sync_assortment_pair_attributes_aa" model="base.automation">
+        <field name="name">=> Auto Sync shoes attributes from assortment to pairs</field>
+        <field name="model_id" ref="product.model_product_template_attribute_value"/>
+        <field name="trigger">on_unlink</field>
+    </record>
+    # SERVER ACTION para el automatismo borrar atributos de productos:
+    <record id="shoes_dealer_sync_assortment_pair_attributes_as" model="ir.actions.server">
+        <field name="name">=> AS Sync shoes attributes from assortment to pairs</field>
+        <field name="model_id" ref="product.model_product_template_attribute_value"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record._unlink_unused_attributes_from_assortment_to_pairs()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_sync_assortment_pair_attributes_aa"/>
+    </record>
+
+
+
+    # BASE AUTOMATION actualizar precios de coste en variantes:
+    <record id="shoes_dealer_update_standard_price_aa" model="base.automation">
+        <field name="name">=> Auto Update cost prices</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="trigger">on_write</field>
+        <field name="trigger_field_ids" eval="[(6,0, [ref('shoes_dealer.field_product_template__shoes_campaign_id'),
+                                                    ref('shoes_dealer.field_product_template__exwork'),
+                                                    ref('shoes_dealer.field_product_template__exwork_single'),
+                                                    ref('product.field_product_template__product_variant_ids'),
+                                                    ref('shoes_dealer.field_product_template__manufacturer_id')])]"
+        />
+    </record>
+    # SERVER ACTION para el automatismo actualizar precios de coste en variantes:
+    <record id="shoes_dealer_update_standard_price_as" model="ir.actions.server">
+        <field name="name">=> AS Update cost prices</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record.update_standard_price_on_variants()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_update_standard_price_aa"/>
+    </record>
+
+
+
+    # BASE AUTOMATION crear ASSORTMENT.PAIR para surtidos desde SML:
+    <record id="shoes_dealer_create_assortment_pair_aa" model="base.automation">
+        <field name="name">=> Create Assortment Pairs</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="trigger">on_write</field>
+        <field name="trigger_field_ids" eval="[(6,0, [ref('stock.field_stock_move_line__state')])]"/>
+
+    </record>
+    # SERVER ACTION para el automatismo actualizar precios de coste en variantes:
+    <record id="shoes_dealer_create_assortment_pair_as" model="ir.actions.server">
+        <field name="name">=> AS Create Assortment Pairs</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="evaluation_type">value</field>
+        <field name="state">code</field>
+        <field name="code">
+            record._create_assortment_pair()
+        </field>
+        <field name="base_automation_id" ref="shoes_dealer.shoes_dealer_create_assortment_pair_aa"/>
+    </record>
+
+
+        <!-- DELETE NULL ASSORTMENT.PAIR DAILY -->
+        <record id="shoes_dealer_data_delete_assortment_pair_ir_cron" model="ir.cron">
+            <field name="name">=> Delete null assortment.pair</field>
+            <field name="model_id" ref="model_assortment_pair"/>
+            <field name="state">code</field>
+            <field name="code">model._delete_null_assortment_pair()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+
+    <!-- Heredar y extender la acción automática de creación de lotes para añadir assortment_pair -->
+    <record id="action_create_lots_on_sale_confirm_shoes" model="ir.actions.server">
+        <field name="name">Crear lotes de pedidos confirmados (Shoes)</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+# Se comprueba que el registro es un pedido de venta confirmado y con líneas
+if record.id and record.order_line and record.state == 'sale':
+  # Se recorren todas las líneas del pedido
+  for li in record.order_line:
+    product = li.product_id
+    # Se ejecuta solo para productos con trazabilidad por lote o número de serie
+    if product.tracking in ('lot', 'serial'):
+      # --- 1. Se construye el nombre base (lógica común) ---
+      name_parts = []
+      if record.client_order_ref:
+        name_parts.append(record.client_order_ref)
+      name_parts.append(record.name)
+      base_name = "-".join(name_parts)
+      # --- 2. Se determina el número de iteraciones ---
+      # Para 'serial', se itera por la cantidad. Para 'lot', solo una vez.
+      quantity = int(li.product_uom_qty)
+      iterations = quantity if product.tracking == 'serial' else 1
+      # Si no hay cantidad, se salta a la siguiente línea del pedido
+      if iterations < 1:
+        continue
+      # --- 3. Bucle principal para crear registros ---
+      for i in range(1, iterations + 1):
+        # Para 'serial' se añade la secuencia, para 'lot' se usa el nombre base
+        final_name = "%s-%03d" % (base_name, i) if product.tracking == 'serial' else base_name
+        # Búsqueda y creación (lógica común)
+        existing_record = env['stock.lot'].search([
+            ('product_id', '=', product.id),
+            ('name', '=', final_name),
+            ('company_id', '=', record.company_id.id)
+        ], limit=1)
+        if not existing_record:
+          # Construir assortment_pair desde la línea de venta
+          assortment_pair_value = ''
+
+          # Si tiene atributos personalizados, construir el string
+          if li.product_custom_attribute_value_ids:
+            sizes_list = []
+            quantities_list = []
+            ids_list = []
+
+            # Obtener el custom_value (formato: "38x1,39x2")
+            for custom_attr in li.product_custom_attribute_value_ids:
+              if custom_attr.custom_value:
+                custom_value = custom_attr.custom_value.replace(" ", "").lower()
+                custom_pairs = custom_value.split(',')
+
+                # Para cada par tallaXcantidad
+                for pair in custom_pairs:
+                  if 'x' in pair:
+                    parts = pair.split('x')
+                    talla = parts[0].strip()
+                    cantidad = int(parts[1].strip())
+
+                    # Buscar la variante con mismo color y talla
+                    if li.product_id.product_tmpl_single_id and li.product_id.color_value_id:
+                      variant = env['product.product'].search([
+                        ('product_tmpl_id', '=', li.product_id.product_tmpl_single_id.id),
+                        ('color_value_id', '=', li.product_id.color_value_id.id),
+                        ('size_value_id.name', '=', talla)
+                      ], limit=1)
+
+                      if variant:
+                        sizes_list.append(talla)
+                        quantities_list.append(str(cantidad))
+                        ids_list.append(str(variant.id))
+
+            # Construir el string final: "talla1,talla2;cantidad1,cantidad2;id1,id2"
+            if sizes_list:
+              assortment_pair_value = ','.join(sizes_list) + ';' + ','.join(quantities_list) + ';' + ','.join(ids_list)
+
+          # Si no tiene custom values o no se pudo construir, usar el del producto
+          if not assortment_pair_value:
+            try:
+              if li.product_id.assortment_pair:
+                assortment_pair_value = li.product_id.assortment_pair
+            except:
+              pass
+
+          # Crear el lote
+          lot_vals = {
+            'name': final_name,
+            'product_id': product.id,
+            'ref': record.name,
+            'company_id': record.company_id.id
+          }
+
+          if assortment_pair_value:
+            lot_vals['assortment_pair'] = assortment_pair_value
+
+          env['stock.lot'].create(lot_vals)
+]]></field>
+    </record>
+
+    <!-- Actualizar la acción automática base para usar la nueva acción de shoes -->
+    <record id="purchase_lot_preassignment.base_automation_create_lots_on_sale_confirm" model="base.automation">
+        <field name="action_server_ids" eval="[(6, 0, [ref('action_create_lots_on_sale_confirm_shoes')])]"/>
+    </record>
+
+</odoo>

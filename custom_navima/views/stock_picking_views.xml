@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="custom_navima_stock_picking_form" model="ir.ui.view">
+        <field name="name">custom.navima.view.picking.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <field name="user_id" position="attributes">
+                <attribute name="readonly">state not in ['draft', 'waiting', 'confirmed']</attribute>
+            </field>
+        </field>
+        <field name="active" eval="True"/>
+        <field name="priority">99</field>
+    </record>
+
+    <record id="custom_navima_stock_picking_search" model="ir.ui.view">
+        <field name="name">custom.navima.view.picking.search</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="user_id" string="Gestor Interno"/>
+            </field>
+            <filter name="picking_type" position="after">
+                <filter name="group_by_user_id" string="Gestor Interno"
+                        context="{'group_by': 'user_id'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

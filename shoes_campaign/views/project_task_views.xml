@@ -37,6 +37,7 @@
                             <field name="code" readonly="code"/>
                             <field name="manufacturer_id" readonly="shoes_model_material_ids"
                                    options="{'no_create':true, 'no_create_edit':true}" force_save="1"/>
+                            <field name="product_categ_id"/>
                             <field name="displayed_image_id" options="{'no_create': True}"
                                    domain="[('res_model','=','project.task'),('res_id','=',id),('mimetype','ilike','image')]"/>
                             <field name="gender"/>

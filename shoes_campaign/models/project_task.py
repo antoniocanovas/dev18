@@ -86,6 +86,8 @@ class ProjectTask(models.Model):
     shoes_with = fields.Char("With", translate=True)
     exwork = fields.Float("Exwork", store=True, copy=True, tracking=10)
 
+    product_categ_id = fields.Many2one('product.category', string="Category")
+
     @api.depends("manufacturer_id")
     def _get_exwork_currency(self):
         for record in self:

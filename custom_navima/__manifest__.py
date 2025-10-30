@@ -20,31 +20,32 @@
 ##############################################################################
 
 {
-    "name": "Shoes Dealer Campaign",
+    "name": "Custom Navima",
     "version": "18.0",
     "depends": [
         "product",
-        "project",
-        "product_brand",
-        "stock_delivery",
+        "stock",
+        "sale",
+        "account",
         "shoes_dealer",
+        "shoes_campaign",
         "intrastat_duty",
+        "sale_order_type",
+        "purchase",
     ],
     "author": "Punt Sistemes",
-    "category": "Project",
+    "category": "Stock",
     "website": "https://www.puntsistemes.es",
     "description": """
-        Project attributes to shoes dealer campaign and product creation from tasks. 
+        Custom devs Navima.
     """,
     "data": [
         "views/project_project_views.xml",
-        "views/product_template_views.xml",
-        "views/shoes_product_creation_wizard_views.xml",
-        "views/project_task_views.xml",
-        "views/shoes_model_material_views.xml",
-        "views/shoes_type_views.xml",
-        "views/shoes_closure_views.xml",
-        "security/ir.model.access.csv",
+        "views/stock_picking_views.xml",
+        "views/res_partner_views.xml",
+        "views/intrastat_duty_views.xml",
+        "views/purchase_order_views.xml",
+        "views/sale_order_views.xml",
     ],
     "demo": [],
     "installable": True,

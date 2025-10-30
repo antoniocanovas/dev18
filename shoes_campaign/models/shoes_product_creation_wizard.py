@@ -73,6 +73,7 @@ class ShoesProductCreationWizard(models.TransientModel):
                             ),
                             "exwork": record.task_id.exwork,
                             "image_1920": record.task_id.displayed_image_id.datas,
+                            "categ_id": record.task_id.product_categ_id.id,
                         }
                     )
                 )
