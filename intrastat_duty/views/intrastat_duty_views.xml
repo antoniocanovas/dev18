@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- ACCIONES DE VENTANA: -->
+    <record id="intrastat_duty_act_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Duty estimation</field>
+        <field name="res_model">intrastat.duty</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ACCOUNT DUTY CONFIG MENU: -->
+    <record id="intrastat_duty_account_menu" model="ir.ui.menu">
+        <field name="action" ref="intrastat_duty_act_window"/>
+        <field name="active" eval="True"/>
+        <field name="name">Duty estimations</field>
+        <field name="parent_id" ref="account.account_invoicing_menu"/>
+        <field name="sequence">100</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <!-- TREE VIEW: -->
+    <record id="intrastat_duty_default_tree" model="ir.ui.view">
+        <field name="name">intrastat.duty.default.tree</field>
+        <field name="model">intrastat.duty</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="intrastat_id"/>
+                <field name="country_id"/>
+                <field name="duty"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

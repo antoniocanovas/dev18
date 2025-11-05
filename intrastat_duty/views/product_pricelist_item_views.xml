@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- VISTA SOLO PT: -->
+    <record id="intrastat_duty_product_pricelist_item_form" model="ir.ui.view">
+        <field name="name">intrastat.duty.product.pricelist.item.form</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <!-- Marcar si es COSTE o LANDED COST para solicitar como MARGEN: -->
+            <data>
+                <xpath expr="//group[@name='pricelist_rule_base']/group/label[1]" position="attributes">
+                    <attribute name="invisible">base in ["standard_price","estimated_landed_cost"]</attribute>
+                </xpath>
+                <xpath expr="//group[@name='pricelist_rule_base']/group/div[1]" position="attributes">
+                    <attribute name="invisible">base in ["standard_price","estimated_landed_cost"]</attribute>
+                </xpath>
+                <xpath expr="//group[@name='pricelist_rule_base']/group/label[2]" position="attributes">
+                    <attribute name="invisible">base not in ["standard_price","estimated_landed_cost"]</attribute>
+                </xpath>
+                <xpath expr="//group[@name='pricelist_rule_base']/group/div[2]" position="attributes">
+                    <attribute name="invisible">base not in ["standard_price","estimated_landed_cost"]</attribute>
+                </xpath>
+            </data>
+        </field>
+    </record>
+
+</odoo>
