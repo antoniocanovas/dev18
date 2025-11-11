@@ -24,9 +24,9 @@
     ],
     "assets": {
         "web.assets_backend": [
-            "shoes_analysis/static/src/**/*.js",
+            "shoes_analysis_old/static/src/**/*.js",
         ],
     },
-    "installable": True,
+    "installable": False,
     "auto_install": False,
 }
