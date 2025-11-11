@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú principal de Reports -->
+    <menuitem id="menu_shoes_analysis_root"
+              name="Reports"
+              parent="shoes_dealer.shoes_dealer_main_menu"
+              sequence="90"
+              groups="base.group_user"/>
+
+    <!-- Situación de ventas y entregas por agente -->
+    <menuitem id="menu_sales_delivery_by_agent"
+              name="Situación de ventas y entregas por agente"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_delivery_by_agent"
+              sequence="10"
+              groups="base.group_user"/>
+
+    <!-- Ventas totales por representante y país -->
+    <menuitem id="menu_sales_by_rep_country"
+              name="Ventas totales por representante y país"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_rep_country"
+              sequence="20"
+              groups="base.group_user"/>
+
+    <!-- Ventas totales por proveedor -->
+    <menuitem id="menu_sales_by_supplier"
+              name="Ventas totales por proveedor"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_supplier"
+              sequence="30"
+              groups="base.group_user"/>
+
+    <!-- Ventas totales por países -->
+    <menuitem id="menu_sales_by_country"
+              name="Ventas totales por países"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_country"
+              sequence="40"
+              groups="base.group_user"/>
+
+    <!-- Gráfico venta x países -->
+    <menuitem id="menu_chart_sales_by_country"
+              name="Gráfico venta x países"
+              parent="menu_shoes_analysis_root"
+              action="action_chart_sales_by_country"
+              sequence="50"
+              groups="base.group_user"/>
+
+    <!-- Timbrados -->
+    <menuitem id="menu_timbrados"
+              name="Timbrados"
+              parent="menu_shoes_analysis_root"
+              action="action_timbrados"
+              sequence="60"
+              groups="base.group_user"/>
+
+    <!-- Sales by last and styles (gráficos) -->
+    <menuitem id="menu_sales_by_last_styles"
+              name="Sales by last and styles (gráficos)"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_last_styles"
+              sequence="70"
+              groups="base.group_user"/>
+
+    <!-- Stadistic sales (gráfico) -->
+    <menuitem id="menu_stadistic_sales"
+              name="Stadistic sales (gráfico)"
+              parent="menu_shoes_analysis_root"
+              action="action_stadistic_sales"
+              sequence="80"
+              groups="base.group_user"/>
+
+    <!-- Ventas de Modelos hechas por Representante y Posición en ventas -->
+    <menuitem id="menu_model_sales_by_rep_position"
+              name="Ventas de Modelos hechas por Representante y Posición en ventas"
+              parent="menu_shoes_analysis_root"
+              action="action_model_sales_by_rep_position"
+              sequence="90"
+              groups="base.group_user"/>
+
+    <!-- Comparativa de ventas por cliente -->
+    <menuitem id="menu_sales_comparison_by_customer"
+              name="Comparativa de ventas por cliente"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_comparison_by_customer"
+              sequence="100"
+              groups="base.group_user"/>
+
+</odoo>
