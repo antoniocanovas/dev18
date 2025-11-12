@@ -8,36 +8,65 @@ class SaleOrderLine(models.Model):
     shoes_pair_delivered_qty = fields.Float(
         string="Sent pairs",
         compute="_get_shoes_pair_delivered_qty",
-        store=True
+        store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
     )
 
     # Unidades pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     delivery_pending_qty = fields.Float(
         string="Delivery pending",
         compute="_get_delivery_pending_qty",
-        store=True
+        store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
     )
 
     # PARES pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     shoes_pair_delivery_pending_qty = fields.Float(
         string="Pending pairs",
         compute="_get_shoes_pair_delivery_pending_qty",
-        store=True
+        store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
     )
 
     # Unidades canceladas (vendidos - servidos - pendientes):
     cancelled_qty = fields.Float(
         string="Delivery pending",
         compute="_get_cancelled_qty",
-        store=True
+        store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
     )
 
     # PARES cancelados (vendidos - servidos - pendientes):
     shoes_pair_cancelled_qty = fields.Float(
         string="Cancelled pairs",
         compute="_get_shoes_pair_cancelled_qty",
-        store=True
+        store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
     )
+
+    # RESERVADOS EN ALBARÁN:
+    reserved_qty = fields.Float(
+        string="Reserved",
+        compute="_get_reserved_qty",
+        #store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
+    )
+
+    # PARES RESERVADOS EN ALBARÁN):
+    shoes_pair_reserved_qty = fields.Float(
+        string="Reserved pairs",
+        compute="_get_shoes_pair_reserved_qty",
+        #store=True,
+        compute_sudo=True,
+        digits='Product Unit of Measure' # Usa la precisión de UoM
+    )
+
 
     # PARES ENTREGADOS:
     @api.depends('qty_delivered')
@@ -64,7 +93,7 @@ class SaleOrderLine(models.Model):
         for record in self:
             pending_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                pending_pair_qty += record.delivery_pending_qty * record.pairs_count
+                pending_pair_qty = record.delivery_pending_qty * record.pairs_count
             record.shoes_pair_delivery_pending_qty = pending_pair_qty
 
     # CANCELADOS:
@@ -80,4 +109,27 @@ class SaleOrderLine(models.Model):
             if record.product_id.is_assortment or record.product_id.is_pair:
                 cancelled_pair_qty += record.cancelled_qty * record.pairs_count
             record.shoes_pair_cancelled_qty = cancelled_pair_qty
+
+
+    # RESERVADOS:
+    def _get_reserved_qty(self):
+        """
+        Calcula la cantidad reservada sumando la disponibilidad reservada
+        de todos los movimientos de stock que no estén 'hechos' o 'cancelados'.
+        """
+        for line in self:
+            total = 0
+            if line.move_ids.ids and line.state not in ['draft']:
+                relevant_moves = line.move_ids.filtered(
+                    lambda m: m.state not in ('done', 'cancel')
+                )
+                total = sum(relevant_moves.mapped('reserved_availability'))
+            line.shoes_pair_reserved_qty = total
+
+    def _get_shoes_pair_reserved_qty(self):
+        for record in self:
+            reserved_pair_qty = 0
+            if record.product_id.is_assortment or record.product_id.is_pair:
+                reserved_pair_qty = record.reserved_qty * record.pairs_count
+            record.shoes_pair_reserved_qty = reserved_pair_qty
 

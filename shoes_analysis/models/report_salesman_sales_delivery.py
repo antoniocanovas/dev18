@@ -9,8 +9,9 @@ class ShoesAnalysis(models.Model):
     def _compute_salesman_sales_delivery(self):
         """
         Lógica para 'Sales and delivery'.
-        Calcula JSON, HTML de líneas y HTML de resumen,
-        y lo guarda todo en la BBDD.
+        - Obtiene 'Reservados' con una consulta SQL (Query 5)
+        - Añade 'Asignados' (Servidos + Reservados)
+        - Añade '% Asignación' (Asignados / Netos)
         """
         self.ensure_one()
 
@@ -18,36 +19,51 @@ class ShoesAnalysis(models.Model):
 
         if not all_campaigns:
             self.write({
-                'line_ids': [(5, 0, 0)], # (5,0,0) es el comando para borrar todo
+                'line_ids': [(5, 0, 0)],
                 'resume_html': False,
                 'analysis_html': False,
             })
             return True
 
-        # --- Definición de nombres de campos ---
+        # --- Definición de nombres de campos (¡REVISAR!) ---
         field_pairs_sold = 'pairs_count'
         field_delivered = 'shoes_pair_delivered_qty'
         field_pending = 'shoes_pair_delivery_pending_qty'
         field_line_cancelled = 'shoes_pair_cancelled_qty'
         field_product_qty = 'product_uom_qty'
         field_price_unit = 'price_unit'
+        # El 'field_reserved' se elimina de aquí, se usa SQL
 
         campaign_name_map = {c.id: c.name for c in all_campaigns}
 
-        # --- (Consultas 1, 2, 3 y 4: Sin cambios) ---
-        # 1. sales_data (Ventas €)
+        # --- (Consulta 1: Sin cambios) ---
         domain_order_sold = [('shoes_campaign_id', 'in', all_campaigns.ids), ('state', 'in', ['sale', 'done'])]
         sales_data = self.env['sale.order'].read_group(domain_order_sold, ['user_id', 'amount_total', 'shoes_campaign_id'], ['user_id', 'shoes_campaign_id'], lazy=False)
 
-        # 2. pairs_data_sold (Líneas Vendidas)
-        domain_line_sold = [('shoes_campaign_id', 'in', all_campaigns.ids), ('order_id.state', 'in', ['sale', 'done'])]
-        pairs_data_sold = self.env['sale.order.line'].read_group(domain_line_sold, ['salesman_id', 'shoes_campaign_id', f'{field_pairs_sold}:sum', f'{field_delivered}:sum', f'{field_pending}:sum', f'{field_line_cancelled}:sum'], ['salesman_id', 'shoes_campaign_id'], lazy=False)
+        # --- CONSULTA 2: Datos de Líneas Vendidas (Actualizada) ---
+        domain_line_sold = [
+            ('shoes_campaign_id', 'in', all_campaigns.ids),
+            ('order_id.state', 'in', ['sale', 'done'])
+        ]
+        pairs_data_sold = self.env['sale.order.line'].read_group(
+            domain=domain_line_sold,
+            fields=[
+                'salesman_id', 'shoes_campaign_id',
+                f'{field_pairs_sold}:sum',
+                f'{field_delivered}:sum',
+                f'{field_pending}:sum',
+                f'{field_line_cancelled}:sum'
+                # Se elimina el campo 'reserved' no almacenado
+            ],
+            groupby=['salesman_id', 'shoes_campaign_id'],
+            lazy=False
+        )
 
-        # 3. pairs_data_cancel (Líneas Canceladas)
+        # --- (Consulta 3: Sin cambios) ---
         domain_line_cancel = [('shoes_campaign_id', 'in', all_campaigns.ids), ('order_id.state', '=', 'cancel')]
         pairs_data_cancel = self.env['sale.order.line'].read_group(domain_line_cancel, ['salesman_id', 'shoes_campaign_id', f'{field_pairs_sold}:sum'], ['salesman_id', 'shoes_campaign_id'], lazy=False)
 
-        # 4. revenue_data (Fact. Prevista SQL)
+        # --- (Consulta 4: Sin cambios) ---
         query = f"""
             SELECT sol.salesman_id, sol.shoes_campaign_id,
                    SUM((sol.{field_product_qty} - COALESCE(sol.{field_line_cancelled}, 0)) * sol.{field_price_unit}) AS expected_revenue
@@ -58,12 +74,38 @@ class ShoesAnalysis(models.Model):
         self.env.cr.execute(query, (tuple(all_campaigns.ids),))
         revenue_data = self.env.cr.dictfetchall()
 
-        # --- 5. Combinar los resultados en un mapa (Sin cambios) ---
+        # --- ¡NUEVO! CONSULTA 5: Pares Reservados (SQL) ---
+        query_reserved = f"""
+            SELECT
+                sol.salesman_id,
+                sol.shoes_campaign_id,
+                SUM(sm.product_uom_qty) as total_reserved
+            FROM
+                stock_move sm
+            JOIN
+                sale_order_line sol ON sm.sale_line_id = sol.id
+            WHERE
+                sol.shoes_campaign_id IN %s
+                AND sol.salesman_id IS NOT NULL
+                AND sm.state = 'assigned' -- Lógica de Odoo para "reservado"
+            GROUP BY
+                sol.salesman_id, sol.shoes_campaign_id
+        """
+        self.env.cr.execute(query_reserved, (tuple(all_campaigns.ids),))
+        reserved_data = self.env.cr.dictfetchall()
+
+
+        # --- 5. Combinar los resultados en un mapa ---
         data_map = {}
         def campaign_template():
-            return {'total_vendido': 0, 'pairs_count': 0, 'pairs_delivered': 0, 'pairs_pending': 0, 'pairs_line_cancelled': 0, 'pairs_order_cancelled': 0, 'expected_revenue': 0.0}
+            return {
+                'total_vendido': 0, 'pairs_count': 0, 'pairs_delivered': 0,
+                'pairs_pending': 0, 'pairs_line_cancelled': 0,
+                'pairs_order_cancelled': 0, 'expected_revenue': 0.0,
+                'pairs_reserved': 0 # Sigue aquí
+            }
 
-        # ... (Toda la lógica de bucles para llenar data_map es idéntica) ...
+        # Procesar Ventas (€)
         for group in sales_data:
             user_tuple = group['user_id']
             campaign_tuple = group['shoes_campaign_id']
@@ -73,6 +115,8 @@ class ShoesAnalysis(models.Model):
             if user_id not in data_map: data_map[user_id] = {'representante': user_name, 'campanias_data': {}}
             if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
             data_map[user_id]['campanias_data'][campaign_id]['total_vendido'] = group['amount_total']
+
+        # Procesar Líneas Vendidas
         for group in pairs_data_sold:
             user_tuple = group['salesman_id']
             campaign_tuple = group['shoes_campaign_id']
@@ -81,10 +125,14 @@ class ShoesAnalysis(models.Model):
             campaign_id = campaign_tuple[0]
             if user_id not in data_map: data_map[user_id] = {'representante': user_name, 'campanias_data': {}}
             if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
+
             data_map[user_id]['campanias_data'][campaign_id]['pairs_count'] = group[field_pairs_sold]
             data_map[user_id]['campanias_data'][campaign_id]['pairs_delivered'] = group[field_delivered]
             data_map[user_id]['campanias_data'][campaign_id]['pairs_pending'] = group[field_pending]
             data_map[user_id]['campanias_data'][campaign_id]['pairs_line_cancelled'] = group[field_line_cancelled]
+            # La línea de 'pairs_reserved' se elimina de aquí
+
+        # (Procesar Líneas Canceladas y Fact. Prevista - Sin cambios)
         for group in pairs_data_cancel:
             user_tuple = group['salesman_id']
             campaign_tuple = group['shoes_campaign_id']
@@ -101,23 +149,33 @@ class ShoesAnalysis(models.Model):
             if user_id in data_map and campaign_id in data_map[user_id]['campanias_data']:
                 data_map[user_id]['campanias_data'][campaign_id]['expected_revenue'] = group['expected_revenue'] or 0.0
 
-        # --- 6. Crear las líneas (¡AQUÍ CALCULAMOS JSON Y HTML!) ---
+        # --- ¡NUEVO! Procesar Pares Reservados (SQL) ---
+        for group in reserved_data:
+            user_id = group['salesman_id']
+            campaign_id = group['shoes_campaign_id']
+            if not user_id or not campaign_id: continue
+
+            # Asumimos que el vendedor/campaña ya existe por las consultas anteriores
+            if user_id in data_map and campaign_id in data_map[user_id]['campanias_data']:
+                data_map[user_id]['campanias_data'][campaign_id]['pairs_reserved'] = group['total_reserved'] or 0
+
+        # --- 6. Crear las líneas de análisis (con cálculos) ---
+        # (Esta sección es idéntica a la anterior, pero ahora
+        # totals['pairs_reserved'] tendrá el valor correcto)
         lines_to_create = []
         base_camp_id = self.shoes_campaign_id.id
-
         for user_data in data_map.values():
             if base_camp_id not in user_data['campanias_data']:
                 continue
-
             final_json_data = {
                 'representante': user_data['representante'],
                 'campanias': []
             }
-
             for camp_id, totals in user_data['campanias_data'].items():
                 total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
                 total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
                 netos = total_vendidos - total_cancelados
+                asignados = totals['pairs_delivered'] + totals['pairs_reserved'] # ¡Este cálculo ahora funciona!
 
                 final_json_data['campanias'].append({
                     'campania_id': camp_id,
@@ -126,71 +184,86 @@ class ShoesAnalysis(models.Model):
                     'total_vendidos': total_vendidos,
                     'total_cancelados': total_cancelados,
                     'netos': netos,
+                    'asignados': asignados,
                     'pairs_delivered': totals['pairs_delivered'],
                     'pairs_pending': totals['pairs_pending'],
                     'total_vendido': totals['total_vendido'],
                     'expected_revenue': totals['expected_revenue']
                 })
 
-            # --- ¡NUEVO! Generar JSON y HTML aquí ---
             data_json = json.dumps(final_json_data, indent=2, default=str)
             data_html = self._generate_line_html(final_json_data, base_camp_id)
 
-            # Añadimos AMBOS al diccionario de creación
             lines_to_create.append((0, 0, {
                 'data': data_json,
                 'data_html': data_html
             }))
 
-        # --- 7. Escribir datos en el modelo ---
+        # --- (Pasos 7 y 8: Escribir datos - Sin cambios) ---
         self.write({
             'line_ids': [(5, 0, 0)] + lines_to_create,
-            # Limpiamos los resúmenes por ahora
             'resume_html': False,
             'analysis_html': False,
         })
 
-        # --- 8. Calcular y escribir los resúmenes ---
-        # (Llamamos a los métodos que calculan y guardan)
         self._compute_and_set_resume_html()
         self._compute_and_set_analysis_html()
 
         return True
 
+
+
     # --------------------------------------------------------------------------
-    # MÉTODOS HELPER (Movidos desde .line y .analysis)
+    # MÉTODOS HELPER
     # --------------------------------------------------------------------------
 
     def _get_objective_perc_html(self, current, objective, style_str):
+        # (Sin cambios)
         if objective == 0:
-            if current > 0:
-                return f'<td class="text-end" style="{style_str} color: green;"><b>+&infin;%</b></td>'
-            else:
-                return f'<td class="text-end" style="{style_str}">-</td>'
+            if current > 0: return f'<td class="text-end" style="{style_str} color: green;"><b>+&infin;%</b></td>'
+            else: return f'<td class="text-end" style="{style_str}">-</td>'
         perc = current / objective
         formatted_perc = f"{perc:.1%}"
-        if perc >= 1.0:
-            return f'<td class="text-end" style="{style_str} color: green;"><b>{formatted_perc}</b></td>'
-        else:
-            return f'<td class="text-end" style="{style_str} color: red;"><b>{formatted_perc}</b></td>'
+        if perc >= 1.0: return f'<td class="text-end" style="{style_str} color: green;"><b>{formatted_perc}</b></td>'
+        else: return f'<td class="text-end" style="{style_str} color: red;"><b>{formatted_perc}</b></td>'
 
     def _get_servidos_perc_html(self, servidos, netos, style_str):
-        if netos == 0:
-            return f'<td class="text-end" style="{style_str}">-</td>'
+        # (Sin cambios)
+        if netos == 0: return f'<td class="text-end" style="{style_str}">-</td>'
         perc = servidos / netos
         formatted_perc = f"{perc:.1%}"
         return f'<td class="text-end" style="{style_str}"><b>{formatted_perc}</b></td>'
 
+    # --- ¡NUEVO HELPER! ---
+    def _get_asign_perc_html(self, asignados, netos, style_str):
+        """
+        Helper para calcular el % de Asignación (Asignados / Netos).
+        """
+        if netos == 0:
+            return f'<td class="text-end" style="{style_str}">-</td>'
+
+        perc = asignados / netos
+        formatted_perc = f"{perc:.1%}"
+
+        # Colorear si está 100% asignado
+        if perc >= 1.0:
+            return f'<td class="text-end" style="{style_str} color: green;"><b>{formatted_perc}</b></td>'
+        else:
+            return f'<td class="text-end" style="{style_str}"><b>{formatted_perc}</b></td>'
+
+
     def _generate_line_html(self, data_dict, base_camp_id):
         """
         Genera el HTML para UNA línea, basado en el data_dict (JSON).
-        (Esta es la lógica del antiguo _compute_data_html)
+        (Actualizado con nuevas columnas)
         """
         # --- 1. Definir anchos fijos ---
         style_camp = "min-width: 150px;"
         style_total_sold = "width: 110px;"
         style_total_cancel = "width: 110px;"
         style_net = "width: 110px;"
+        style_asign = "width: 110px;"     # ¡NUEVO!
+        style_perc_asign = "width: 100px;" # ¡NUEVO!
         style_delivered = "width: 110px;"
         style_perc_serv = "width: 100px;"
         style_pending = "width: 110px;"
@@ -214,6 +287,7 @@ class ShoesAnalysis(models.Model):
         base_sales = base_data.get('total_vendido', 0.0)
         base_netos = base_data.get('netos', 0)
         base_delivered = base_data.get('pairs_delivered', 0)
+        base_asignados = base_data.get('asignados', 0) # ¡NUEVO!
 
         # --- 3. Construir HTML ---
         salesman_name_safe = html_escape(data_dict.get('representante', ''))
@@ -225,6 +299,8 @@ class ShoesAnalysis(models.Model):
             f'<th class="text-end" style="{style_total_sold}">Total Vend.</th>'
             f'<th class="text-end" style="{style_total_cancel}">Total Canc.</th>'
             f'<th class="text-end" style="{style_net}">Netos</th>'
+            f'<th class="text-end" style="{style_asign}">Asignados</th>' # ¡NUEVO!
+            f'<th class="text-end" style="{style_perc_asign}">% Asign.</th>' # ¡NUEVO!
             f'<th class="text-end" style="{style_delivered}">Servidos</th>'
             f'<th class="text-end" style="{style_perc_serv}">% Servidos</th>'
             f'<th class="text-end" style="{style_pending}">Pendientes</th>'
@@ -238,12 +314,16 @@ class ShoesAnalysis(models.Model):
         # --- 4. Renderizar Fila Base ---
         base_camp_name_safe = html_escape(base_data.get('campania_nombre', 'N/A'))
         perc_serv_html = self._get_servidos_perc_html(base_delivered, base_netos, style_perc_serv)
+        perc_asign_html = self._get_asign_perc_html(base_asignados, base_netos, style_perc_asign) # ¡NUEVO!
+
         html_parts.append(
             f"<tr>"
             f'<td style="{style_camp}"><b>{base_camp_name_safe} (Actual)</b></td>'
             f'<td class="text-end" style="{style_total_sold}"><b>{base_data.get("total_vendidos", 0)} Pairs</b></td>'
             f'<td class="text-end" style="{style_total_cancel}"><b>{base_data.get("total_cancelados", 0)} Pairs</b></td>'
-            f'<td class="text-end" style="{style_net}"><b>{base_data.get("netos", 0)} Pairs</b></td>'
+            f'<td class="text-end" style="{style_net}"><b>{base_netos} Pairs</b></td>'
+            f'<td class="text-end" style="{style_asign}"><b>{base_asignados} Pairs</b></td>' # ¡NUEVO!
+            f'{perc_asign_html}' # ¡NUEVO!
             f'<td class="text-end" style="{style_delivered}"><b>{base_delivered} Serv.</b></td>'
             f'{perc_serv_html}'
             f'<td class="text-end" style="{style_pending}"><b>{base_data.get("pairs_pending", 0)} Pend.</b></td>'
@@ -260,15 +340,21 @@ class ShoesAnalysis(models.Model):
             objective_sales = camp_data.get('total_vendido', 0.0)
             objective_netos = camp_data.get('netos', 0)
             objective_delivered = camp_data.get('pairs_delivered', 0)
+            objective_asignados = camp_data.get('asignados', 0) # ¡NUEVO!
+
             perc_serv_html = self._get_servidos_perc_html(objective_delivered, objective_netos, style_perc_serv)
+            perc_asign_html = self._get_asign_perc_html(objective_asignados, objective_netos, style_perc_asign) # ¡NUEVO!
             perc_pairs_html = self._get_objective_perc_html(base_pairs, objective_pairs, style_perc_obj)
             perc_sales_html = self._get_objective_perc_html(base_sales, objective_sales, style_perc_obj)
+
             html_parts.append(
                 f"<tr>"
                 f'<td style="{style_camp}">{camp_name_safe} (Objetivo)</td>'
                 f'<td class="text-end" style="{style_total_sold}">{camp_data.get("total_vendidos", 0)} Pairs</td>'
                 f'<td class="text-end" style="{style_total_cancel}">{camp_data.get("total_cancelados", 0)} Pairs</td>'
                 f'<td class="text-end" style="{style_net}">{objective_netos} Pairs</td>'
+                f'<td class="text-end" style="{style_asign}">{objective_asignados} Pairs</td>' # ¡NUEVO!
+                f'{perc_asign_html}' # ¡NUEVO!
                 f'<td class="text-end" style="{style_delivered}">{objective_delivered} Serv.</td>'
                 f'{perc_serv_html}'
                 f'<td class="text-end" style="{style_pending}">{camp_data.get("pairs_pending", 0)} Pend.</td>'
@@ -280,6 +366,7 @@ class ShoesAnalysis(models.Model):
 
         html_parts.append('</tbody></table>')
         return "".join(html_parts)
+
 
     def _compute_and_set_resume_html(self):
         """

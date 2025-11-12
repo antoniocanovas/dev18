@@ -7,9 +7,9 @@
         <field name="arch" type="xml">
             <list string="Shoes Analysis">
                 <header>
-                    <button name="update_shoes_analysis" 
-                            string="Update" 
-                            type="object" 
+                    <button name="update_shoes_analysis"
+                            string="Update"
+                            type="object"
                             class="btn-primary"/>
                 </header>
                 <field name="name"/>
@@ -26,9 +26,9 @@
         <field name="arch" type="xml">
             <form string="Shoes Analysis">
                 <header>
-                    <button name="update_shoes_analysis" 
-                            string="Update" 
-                            type="object" 
+                    <button name="update_shoes_analysis"
+                            string="Update"
+                            type="object"
                             class="btn-primary"/>
                 </header>
                 <sheet>
@@ -40,11 +40,13 @@
                     <group>
                         <group>
                             <field name="shoes_campaign_id"/>
-                            <field name="total" />
+                            <field name="shoes_campaign_ids" widget="many2many_tags"/>
+                            <field name="total"/>
+                            <field name="type" groups="base.group_no_one"/>
+                            <field name="write_date"/>
                         </group>
                         <group>
-                            <field name="shoes_campaign_ids" widget="many2many_tags"/>
-                            <field name="type"/>
+                            <field name="resume_html" nolabel="1"/>
                         </group>
                     </group>
                     <notebook>

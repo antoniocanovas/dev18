@@ -12,6 +12,8 @@
     'website': 'https://www.tuempresa.com',
     'license': 'LGPL-3',
     'depends': [
+        'sale',
+        'stock',
         'shoes_dealer',
         'shoes_campaign',
         'purchase_lot_preassignment',
