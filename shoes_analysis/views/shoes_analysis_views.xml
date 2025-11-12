@@ -48,7 +48,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Lines">
+                        <page string="Report">
                             <field name="analysis_html" nolabel="1" readonly="1"/>
                             <field name="line_ids" invisible="type in ['salesman_sales_delivery']">
                                 <list>
