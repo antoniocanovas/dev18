@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-import json
 from odoo import api, fields, models, _
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
+
+    # Pares suministrados desde pedido de venta:
+    shoes_pair_delivered_qty = fields.Float(
+        string="Sent pairs",
+        compute="_get_shoes_pair_delivered_qty",
+    )
 
     # Unidades pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     delivery_pending_qty = fields.Float(
@@ -18,6 +22,14 @@ class SaleOrderLine(models.Model):
         compute="_get_shoes_pair_delivery_pending_qty",
     )
 
+
+    def _get_shoes_pair_delivered_qty(self):
+        for record in self:
+            delivery_pair_qty = 0
+            if record.product_id.is_assortment or record.product_id.is_pair:
+                delivery_pair_qty += record.qty_delivered * record.pairs_count
+            record.shoes_pair_delivered_qty = delivery_pair_qty
+
     def _get_delivery_pending_qty(self):
         for record in self:
             pending_qty = 0
@@ -29,7 +41,8 @@ class SaleOrderLine(models.Model):
 
     def _get_shoes_pair_delivery_pending_qty(self):
         for record in self:
-            pair_qty = 0
+            pending_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                pair_qty += record.delivery_pending_qty * record.pairs_count
-            record.shoes_pair_delivery_pending_qty = pair_qty
+                pending_pair_qty += record.delivery_pending_qty * record.pairs_count
+            record.shoes_pair_delivery_pending_qty = pending_pair_qty
+
