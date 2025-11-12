@@ -8,21 +8,39 @@ class SaleOrderLine(models.Model):
     shoes_pair_delivered_qty = fields.Float(
         string="Sent pairs",
         compute="_get_shoes_pair_delivered_qty",
+        store=True
     )
 
     # Unidades pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     delivery_pending_qty = fields.Float(
         string="Delivery pending",
         compute="_get_delivery_pending_qty",
+        store=True
     )
 
     # PARES pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     shoes_pair_delivery_pending_qty = fields.Float(
-        string="Delivery pending",
+        string="Pending pairs",
         compute="_get_shoes_pair_delivery_pending_qty",
+        store=True
     )
 
+    # Unidades canceladas (vendidos - servidos - pendientes):
+    cancelled_qty = fields.Float(
+        string="Delivery pending",
+        compute="_get_cancelled_qty",
+        store=True
+    )
 
+    # PARES cancelados (vendidos - servidos - pendientes):
+    shoes_pair_cancelled_qty = fields.Float(
+        string="Cancelled pairs",
+        compute="_get_shoes_pair_cancelled_qty",
+        store=True
+    )
+
+    # PARES ENTREGADOS:
+    @api.depends('qty_delivered')
     def _get_shoes_pair_delivered_qty(self):
         for record in self:
             delivery_pair_qty = 0
@@ -30,6 +48,8 @@ class SaleOrderLine(models.Model):
                 delivery_pair_qty += record.qty_delivered * record.pairs_count
             record.shoes_pair_delivered_qty = delivery_pair_qty
 
+    # PENDIENTES:
+    @api.depends('move_ids.product_uom_qty')
     def _get_delivery_pending_qty(self):
         for record in self:
             pending_qty = 0
@@ -39,10 +59,25 @@ class SaleOrderLine(models.Model):
                     pending_qty += move.product_uom_qty
             record.delivery_pending_qty = pending_qty
 
+    @api.depends('delivery_pending_qty')
     def _get_shoes_pair_delivery_pending_qty(self):
         for record in self:
             pending_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
                 pending_pair_qty += record.delivery_pending_qty * record.pairs_count
             record.shoes_pair_delivery_pending_qty = pending_pair_qty
+
+    # CANCELADOS:
+    @api.depends('product_uom_qty', 'qty_delivered', 'delivery_pending_qty')
+    def _get_cancelled_qty(self):
+        for record in self:
+            record.cancelled_qty =  (record.product_uom_qty - record.qty_delivered - record.delivery_pending_qty)
+
+    @api.depends('cancelled_qty')
+    def _get_shoes_pair_cancelled_qty(self):
+        for record in self:
+            cancelled_pair_qty = 0
+            if record.product_id.is_assortment or record.product_id.is_pair:
+                cancelled_pair_qty += record.cancelled_qty * record.pairs_count
+            record.shoes_pair_cancelled_qty = cancelled_pair_qty
 

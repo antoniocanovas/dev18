@@ -50,6 +50,39 @@ class ShoesAnalysis(models.Model):
         compute='_compute_total',
     )
 
+    # Campo html para resumen de resultados en líneas:
+    resume_html = fields.Html(
+        string='Resume',
+        store=True,
+        readonly=True,
+    )
+
+    # CONCATENAR TODAS LAS LINE_IDS EN UN ÚNICO CAMPO HTML:
+    analysis_html = fields.Html(
+        string="Vista HTML del Análisis",
+        store=True,
+        readonly=True,
+    )
+
+    @api.depends('line_ids.data_html')
+    def _compute_and_set_analysis_html(self):
+        """
+        Calcula y GUARDA el HTML de análisis (antiguo _compute_analysis_html)
+        """
+        self.ensure_one()
+
+        try:
+            lines_sorted = sorted(
+                self.line_ids,
+                key=lambda line: json.loads(line.data or '{}').get('representante', '')
+            )
+        except Exception:
+            lines_sorted = self.line_ids
+
+        html_parts = [line.data_html for line in lines_sorted if line.data_html]
+        self.write({'analysis_html': "".join(html_parts)})
+
+
     def _compute_total(self):
         for record in self:
             total = 0
