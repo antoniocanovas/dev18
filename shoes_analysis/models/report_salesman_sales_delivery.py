@@ -9,42 +9,51 @@ class ShoesAnalysis(models.Model):
     def _compute_salesman_sales_delivery(self):
         """
         Lógica para 'Sales and delivery'.
-        - Obtiene 'Reservados' con una consulta SQL (Query 5)
-        - Añade 'Asignados' (Servidos + Reservados)
-        - Añade '% Asignación' (Asignados / Netos)
+        - Filtra por productos ('is_pair', 'is_assortment')
+        - Convierte correctamente los importes multi-moneda
         """
         self.ensure_one()
 
         all_campaigns = self.shoes_campaign_id | self.shoes_campaign_ids
 
         if not all_campaigns:
-            self.write({
-                'line_ids': [(5, 0, 0)],
-                'resume_html': False,
-                'analysis_html': False,
-            })
+            self.write({'line_ids': [(5, 0, 0)], 'resume_html': False, 'analysis_html': False})
             return True
 
-        # --- Definición de nombres de campos (¡REVISAR!) ---
+        # --- 1. Definiciones de Filtros y Moneda ---
+
+        # Asumimos que están en 'product.template'
+        product_domain_list = [
+            '|',
+            ('product_id.product_tmpl_id.is_pair', '=', True),
+            ('product_id.product_tmpl_id.is_assortment', '=', True)
+        ]
+        product_domain_sql = """
+            AND (pt.is_pair = TRUE OR pt.is_assortment = TRUE)
+        """
+
+        # Moneda de la compañía
+        company_currency = self.env.company.currency_id
+
+        # --- Definición de nombres de campos ---
         field_pairs_sold = 'pairs_count'
         field_delivered = 'shoes_pair_delivered_qty'
         field_pending = 'shoes_pair_delivery_pending_qty'
         field_line_cancelled = 'shoes_pair_cancelled_qty'
         field_product_qty = 'product_uom_qty'
         field_price_unit = 'price_unit'
-        # El 'field_reserved' se elimina de aquí, se usa SQL
 
         campaign_name_map = {c.id: c.name for c in all_campaigns}
 
-        # --- (Consulta 1: Sin cambios) ---
-        domain_order_sold = [('shoes_campaign_id', 'in', all_campaigns.ids), ('state', 'in', ['sale', 'done'])]
-        sales_data = self.env['sale.order'].read_group(domain_order_sold, ['user_id', 'amount_total', 'shoes_campaign_id'], ['user_id', 'shoes_campaign_id'], lazy=False)
+        # --- CONSULTA 1: ELIMINADA (se fusiona con la 4) ---
 
         # --- CONSULTA 2: Datos de Líneas Vendidas (Actualizada) ---
         domain_line_sold = [
             ('shoes_campaign_id', 'in', all_campaigns.ids),
             ('order_id.state', 'in', ['sale', 'done'])
         ]
+        domain_line_sold.extend(product_domain_list) # ¡Filtro de producto!
+
         pairs_data_sold = self.env['sale.order.line'].read_group(
             domain=domain_line_sold,
             fields=[
@@ -53,28 +62,54 @@ class ShoesAnalysis(models.Model):
                 f'{field_delivered}:sum',
                 f'{field_pending}:sum',
                 f'{field_line_cancelled}:sum'
-                # Se elimina el campo 'reserved' no almacenado
             ],
             groupby=['salesman_id', 'shoes_campaign_id'],
             lazy=False
         )
 
-        # --- (Consulta 3: Sin cambios) ---
-        domain_line_cancel = [('shoes_campaign_id', 'in', all_campaigns.ids), ('order_id.state', '=', 'cancel')]
-        pairs_data_cancel = self.env['sale.order.line'].read_group(domain_line_cancel, ['salesman_id', 'shoes_campaign_id', f'{field_pairs_sold}:sum'], ['salesman_id', 'shoes_campaign_id'], lazy=False)
+        # --- CONSULTA 3: Datos de Líneas Canceladas (Actualizada) ---
+        domain_line_cancel = [
+            ('shoes_campaign_id', 'in', all_campaigns.ids),
+            ('order_id.state', '=', 'cancel')
+        ]
+        domain_line_cancel.extend(product_domain_list) # ¡Filtro de producto!
 
-        # --- (Consulta 4: Sin cambios) ---
-        query = f"""
-            SELECT sol.salesman_id, sol.shoes_campaign_id,
-                   SUM((sol.{field_product_qty} - COALESCE(sol.{field_line_cancelled}, 0)) * sol.{field_price_unit}) AS expected_revenue
-            FROM sale_order_line sol JOIN sale_order so ON sol.order_id = so.id
-            WHERE sol.shoes_campaign_id IN %s AND so.state IN ('sale', 'done')
-            GROUP BY sol.salesman_id, sol.shoes_campaign_id
+        pairs_data_cancel = self.env['sale.order.line'].read_group(
+            domain=domain_line_cancel,
+            fields=['salesman_id', 'shoes_campaign_id', f'{field_pairs_sold}:sum'],
+            groupby=['salesman_id', 'shoes_campaign_id'],
+            lazy=False
+        )
+
+        # --- CONSULTA 4: Monetaria (Ventas + Fact. Prevista) (Actualizada) ---
+        query_monetary = f"""
+            SELECT
+                sol.salesman_id,
+                sol.shoes_campaign_id,
+                so.currency_id,
+                so.date_order::date,
+                SUM(sol.price_subtotal) AS total_sales,
+                SUM((sol.{field_product_qty} - COALESCE(sol.{field_line_cancelled}, 0)) * sol.{field_price_unit}) AS expected_revenue
+            FROM
+                sale_order_line sol
+            JOIN
+                sale_order so ON sol.order_id = so.id
+            JOIN
+                product_product pp ON sol.product_id = pp.id
+            JOIN
+                product_template pt ON pp.product_tmpl_id = pt.id
+            WHERE
+                sol.shoes_campaign_id IN %s
+                AND so.state IN ('sale', 'done')
+                {product_domain_sql}
+            GROUP BY
+                sol.salesman_id, sol.shoes_campaign_id, so.currency_id, so.date_order::date
         """
-        self.env.cr.execute(query, (tuple(all_campaigns.ids),))
-        revenue_data = self.env.cr.dictfetchall()
+        self.env.cr.execute(query_monetary, (tuple(all_campaigns.ids),))
+        monetary_data = self.env.cr.dictfetchall()
 
-        # --- ¡NUEVO! CONSULTA 5: Pares Reservados (SQL) ---
+
+        # --- CONSULTA 5: Pares Reservados (SQL) (Actualizada) ---
         query_reserved = f"""
             SELECT
                 sol.salesman_id,
@@ -84,10 +119,15 @@ class ShoesAnalysis(models.Model):
                 stock_move sm
             JOIN
                 sale_order_line sol ON sm.sale_line_id = sol.id
+            JOIN
+                product_product pp ON sol.product_id = pp.id
+            JOIN
+                product_template pt ON pp.product_tmpl_id = pt.id
             WHERE
                 sol.shoes_campaign_id IN %s
                 AND sol.salesman_id IS NOT NULL
-                AND sm.state = 'assigned' -- Lógica de Odoo para "reservado"
+                AND sm.state = 'assigned'
+                {product_domain_sql}
             GROUP BY
                 sol.salesman_id, sol.shoes_campaign_id
         """
@@ -98,23 +138,52 @@ class ShoesAnalysis(models.Model):
         # --- 5. Combinar los resultados en un mapa ---
         data_map = {}
         def campaign_template():
+            # 'total_vendido' ahora es 'total_sales' (Ventas €)
             return {
-                'total_vendido': 0, 'pairs_count': 0, 'pairs_delivered': 0,
-                'pairs_pending': 0, 'pairs_line_cancelled': 0,
-                'pairs_order_cancelled': 0, 'expected_revenue': 0.0,
-                'pairs_reserved': 0 # Sigue aquí
+                'total_sales': 0.0, 'expected_revenue': 0.0, # Monetario
+                'pairs_count': 0, 'pairs_delivered': 0, 'pairs_pending': 0,
+                'pairs_line_cancelled': 0, 'pairs_order_cancelled': 0,
+                'pairs_reserved': 0
             }
 
-        # Procesar Ventas (€)
-        for group in sales_data:
-            user_tuple = group['user_id']
-            campaign_tuple = group['shoes_campaign_id']
-            if not user_tuple or not campaign_tuple: continue
-            user_id, user_name = user_tuple
-            campaign_id = campaign_tuple[0]
+        # --- Procesamiento Monetario (¡NUEVO!) ---
+        currency_cache = {c.id: c for c in self.env['res.currency'].search([])}
+
+        for group in monetary_data:
+            user_id = group['salesman_id']
+            campaign_id = group['shoes_campaign_id']
+            if not user_id or not campaign_id: continue
+
+            # Obtener moneda y fecha para conversión
+            from_currency = currency_cache.get(group['currency_id'])
+            date = group['date_order']
+
+            if not from_currency:
+                continue # Omitir si la moneda no se encuentra
+
+            # Convertir importes a la moneda de la compañía
+            total_sales_conv = from_currency._convert(
+                group['total_sales'] or 0.0,
+                company_currency,
+                self.env.company,
+                date
+            )
+            expected_revenue_conv = from_currency._convert(
+                group['expected_revenue'] or 0.0,
+                company_currency,
+                self.env.company,
+                date
+            )
+
+            # Inicializar vendedor y campaña si es necesario
+            user_name = self.env['res.users'].browse(user_id).name # (Ineficiente pero simple)
             if user_id not in data_map: data_map[user_id] = {'representante': user_name, 'campanias_data': {}}
             if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
-            data_map[user_id]['campanias_data'][campaign_id]['total_vendido'] = group['amount_total']
+
+            # Acumular importes convertidos
+            data_map[user_id]['campanias_data'][campaign_id]['total_sales'] += total_sales_conv
+            data_map[user_id]['campanias_data'][campaign_id]['expected_revenue'] += expected_revenue_conv
+
 
         # Procesar Líneas Vendidas
         for group in pairs_data_sold:
@@ -130,9 +199,8 @@ class ShoesAnalysis(models.Model):
             data_map[user_id]['campanias_data'][campaign_id]['pairs_delivered'] = group[field_delivered]
             data_map[user_id]['campanias_data'][campaign_id]['pairs_pending'] = group[field_pending]
             data_map[user_id]['campanias_data'][campaign_id]['pairs_line_cancelled'] = group[field_line_cancelled]
-            # La línea de 'pairs_reserved' se elimina de aquí
 
-        # (Procesar Líneas Canceladas y Fact. Prevista - Sin cambios)
+        # Procesar Líneas Canceladas
         for group in pairs_data_cancel:
             user_tuple = group['salesman_id']
             campaign_tuple = group['shoes_campaign_id']
@@ -141,54 +209,53 @@ class ShoesAnalysis(models.Model):
             campaign_id = campaign_tuple[0]
             if user_id not in data_map: data_map[user_id] = {'representante': user_name, 'campanias_data': {}}
             if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
-            data_map[user_id]['campanias_data'][campaign_id]['pairs_order_cancelled'] = group[field_pairs_sold]
-        for group in revenue_data:
-            user_id = group['salesman_id']
-            campaign_id = group['shoes_campaign_id']
-            if not user_id or not campaign_id: continue
-            if user_id in data_map and campaign_id in data_map[user_id]['campanias_data']:
-                data_map[user_id]['campanias_data'][campaign_id]['expected_revenue'] = group['expected_revenue'] or 0.0
 
-        # --- ¡NUEVO! Procesar Pares Reservados (SQL) ---
+            data_map[user_id]['campanias_data'][campaign_id]['pairs_order_cancelled'] = group[field_pairs_sold]
+
+        # Procesar Pares Reservados
         for group in reserved_data:
             user_id = group['salesman_id']
             campaign_id = group['shoes_campaign_id']
             if not user_id or not campaign_id: continue
 
-            # Asumimos que el vendedor/campaña ya existe por las consultas anteriores
             if user_id in data_map and campaign_id in data_map[user_id]['campanias_data']:
                 data_map[user_id]['campanias_data'][campaign_id]['pairs_reserved'] = group['total_reserved'] or 0
 
         # --- 6. Crear las líneas de análisis (con cálculos) ---
-        # (Esta sección es idéntica a la anterior, pero ahora
-        # totals['pairs_reserved'] tendrá el valor correcto)
         lines_to_create = []
         base_camp_id = self.shoes_campaign_id.id
+
         for user_data in data_map.values():
             if base_camp_id not in user_data['campanias_data']:
                 continue
+
             final_json_data = {
                 'representante': user_data['representante'],
                 'campanias': []
             }
+
             for camp_id, totals in user_data['campanias_data'].items():
+
                 total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
                 total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
                 netos = total_vendidos - total_cancelados
-                asignados = totals['pairs_delivered'] + totals['pairs_reserved'] # ¡Este cálculo ahora funciona!
+                asignados = totals['pairs_delivered'] + totals['pairs_reserved']
 
                 final_json_data['campanias'].append({
                     'campania_id': camp_id,
                     'campania_nombre': campaign_name_map.get(camp_id, "N/A"),
-                    'pairs_count': totals['pairs_count'],
+
+                    'pairs_count': totals['pairs_count'], # Para % Obj.
                     'total_vendidos': total_vendidos,
                     'total_cancelados': total_cancelados,
                     'netos': netos,
                     'asignados': asignados,
                     'pairs_delivered': totals['pairs_delivered'],
                     'pairs_pending': totals['pairs_pending'],
-                    'total_vendido': totals['total_vendido'],
-                    'expected_revenue': totals['expected_revenue']
+
+                    # Importes convertidos
+                    'total_vendido': totals['total_sales'], # ¡ACTUALIZADO!
+                    'expected_revenue': totals['expected_revenue'] # ¡ACTUALIZADO!
                 })
 
             data_json = json.dumps(final_json_data, indent=2, default=str)
@@ -210,7 +277,6 @@ class ShoesAnalysis(models.Model):
         self._compute_and_set_analysis_html()
 
         return True
-
 
 
     # --------------------------------------------------------------------------

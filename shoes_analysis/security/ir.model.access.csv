@@ -3,3 +3,5 @@ access_shoes_analysis_sales_user,access.shoes.analysis.sales.user,model_shoes_an
 access_shoes_analysis_sales_manager,access.shoes.analysis.sales.manager,model_shoes_analysis,sales_team.group_sale_manager,1,1,1,1
 access_shoes_analysis_line_sales_user,access.shoes.analysis.line.sales.user,model_shoes_analysis_line,sales_team.group_sale_salesman,1,1,1,1
 access_shoes_analysis_line_sales_manager,access.shoes.analysis.line.sales.manager,model_shoes_analysis_line,sales_team.group_sale_manager,1,1,1,1
+access_shoes_ranking_user,access.shoes.ranking.user,model_shoes_ranking,sales_team.group_sale_salesman,1,1,1,1
+access_shoes_ranking_manager,access.shoes.ranking.manager,model_shoes_ranking,sales_team.group_sale_manager,1,1,1,1

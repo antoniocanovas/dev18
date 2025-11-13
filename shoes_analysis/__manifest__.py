@@ -22,6 +22,7 @@
         'security/ir.model.access.csv',
         'views/shoes_analysis_views.xml',
         'views/shoes_analysis_menu.xml',
+        'views/product_template_views.xml',
     ],
     'installable': True,
     'application': False,

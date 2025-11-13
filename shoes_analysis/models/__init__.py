@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from . import sale_order_line
 from . import shoes_analysis
 from . import shoes_analysis_line
+from . import shoes_ranking
 from . import report_salesman_sales_delivery
-from . import sale_order_line
+from . import report_product_ranking
+from . import product_template

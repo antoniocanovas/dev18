@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class ShoesAnalysis(models.Model):
     _name = 'shoes.analysis'
@@ -14,6 +15,7 @@ class ShoesAnalysis(models.Model):
     type = fields.Selection(
         selection=[
             ('salesman_sales_delivery', 'Sales and delivery'),
+            ('product_ranking', 'Product Ranking'),
             ('salesman_country', 'Salesman and country'),
             ('manufacturer_sales', 'Sales by manufacturer'),
             ('sales_country', 'Sales by country'),
@@ -64,6 +66,13 @@ class ShoesAnalysis(models.Model):
         readonly=True,
     )
 
+    ranking_line_ids = fields.One2many(
+        comodel_name='shoes.ranking',
+        inverse_name='shoes_analysis_id',
+        readonly=True,
+        copy=False,
+    )
+
     @api.depends('line_ids.data_html')
     def _compute_and_set_analysis_html(self):
         """
@@ -106,6 +115,9 @@ class ShoesAnalysis(models.Model):
             # llamar al método correspondiente.
             if record.type == 'salesman_sales_delivery':
                 record._compute_salesman_sales_delivery()
+
+            elif record.type == 'product_ranking':
+                record._compute_product_sales_ranking()
 
             elif record.type == 'salesman_country':
                 record._compute_salesman_country()
@@ -190,3 +202,16 @@ class ShoesAnalysis(models.Model):
         self.ensure_one()
         # TODO: Añadir lógica de cálculo aquí
         return True
+
+    @api.constrains('shoes_campaign_id')
+    def _check_shoes_campaign_id(self):
+        for record in self:
+            exist = self.env['shoes.analysis'].search(
+                [
+                    ('shoes_campaign_id', '=', record.shoes_campaign_id.id),
+                    ('id','!=',record.id),
+                    ('type','=','product_ranking'),
+                ]
+            )
+            if exist.ids:
+                raise UserError('Ya existe un informe para esta campaña')

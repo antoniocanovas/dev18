@@ -32,6 +32,11 @@ class ShoesAnalysisLine(models.Model):
         string='Shoes Model Material'
     )
 
+    product_tmpl_id = fields.Many2one(
+        comodel_name='product.template',
+        string='Producto par',
+    )
+
     shoes_task_id = fields.Many2one(
         'project.task',
         string='Model'

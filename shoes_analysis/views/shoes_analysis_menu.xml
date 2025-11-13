@@ -87,4 +87,12 @@
               sequence="100"
               groups="base.group_user"/>
 
+    <!-- Comparativa de ventas por cliente -->
+    <menuitem id="menu_product_raking"
+              name="Ranking de productos"
+              parent="menu_shoes_analysis_root"
+              action="action_product_ranking"
+              sequence="110"
+              groups="base.group_user"/>
+
 </odoo>

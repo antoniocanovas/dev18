@@ -74,11 +74,11 @@ class SaleOrderLine(models.Model):
         for record in self:
             delivery_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                delivery_pair_qty += record.qty_delivered * record.pairs_count
+                delivery_pair_qty += record.qty_delivered * record.pairs_count / record.product_uom_qty
             record.shoes_pair_delivered_qty = delivery_pair_qty
 
     # PENDIENTES:
-    @api.depends('move_ids.product_uom_qty')
+    @api.depends('move_ids', 'move_ids.product_uom_qty', 'move_ids.state')
     def _get_delivery_pending_qty(self):
         for record in self:
             pending_qty = 0
@@ -93,7 +93,7 @@ class SaleOrderLine(models.Model):
         for record in self:
             pending_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                pending_pair_qty = record.delivery_pending_qty * record.pairs_count
+                pending_pair_qty = record.delivery_pending_qty * record.pairs_count / record.product_uom_qty
             record.shoes_pair_delivery_pending_qty = pending_pair_qty
 
     # CANCELADOS:
@@ -107,7 +107,7 @@ class SaleOrderLine(models.Model):
         for record in self:
             cancelled_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                cancelled_pair_qty += record.cancelled_qty * record.pairs_count
+                cancelled_pair_qty += record.cancelled_qty * record.pairs_count / record.product_uom_qty
             record.shoes_pair_cancelled_qty = cancelled_pair_qty
 
 
@@ -130,6 +130,6 @@ class SaleOrderLine(models.Model):
         for record in self:
             reserved_pair_qty = 0
             if record.product_id.is_assortment or record.product_id.is_pair:
-                reserved_pair_qty = record.reserved_qty * record.pairs_count
+                reserved_pair_qty = record.reserved_qty * record.pairs_count / record.product_uom_qty
             record.shoes_pair_reserved_qty = reserved_pair_qty
 
