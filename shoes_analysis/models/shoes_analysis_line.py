@@ -47,6 +47,10 @@ class ShoesAnalysisLine(models.Model):
         string='Shoes last'
     )
 
+    ranking = fields.Integer(
+        'Ranking'
+    )
+
     total = fields.Integer(
         'Total'
     )

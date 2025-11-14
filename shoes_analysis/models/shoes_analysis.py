@@ -15,16 +15,17 @@ class ShoesAnalysis(models.Model):
     type = fields.Selection(
         selection=[
             ('salesman_sales_delivery', 'Sales and delivery'),
-            ('product_ranking', 'Product Ranking'),
+            ('stadistic_sales', 'Graphic stadistic Sales'),
             ('salesman_country', 'Salesman and country'),
             ('manufacturer_sales', 'Sales by manufacturer'),
             ('sales_country', 'Sales by country'),
             ('sales_country_graphic', 'Graphic sales by country'),
             ('sale_type', 'Sales type'),
             ('sale_last', 'Sales by last'),
-            ('stadistic_sales', 'Graphic stadistic Sales'),
             ('salesman_model', 'Salesman model'),
             ('customer_comparison', 'Customer comparison'),
+            ('product_ranking', 'Product Ranking'),
+            ('last_ranking', 'Last Ranking'),
         ]
     )
 
@@ -66,12 +67,33 @@ class ShoesAnalysis(models.Model):
         readonly=True,
     )
 
-    ranking_line_ids = fields.One2many(
+    ranking_line_ids = fields.Many2many(
         comodel_name='shoes.ranking',
-        inverse_name='shoes_analysis_id',
+        string="Ranking Lines",
+        compute='_compute_ranking_line_ids',
         readonly=True,
-        copy=False,
+        store=False, # No se almacena en la base de datos
     )
+
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency',
+        default=lambda self: self.env.company.currency_id
+    )
+
+    @api.depends('shoes_campaign_id', 'type')
+    def _compute_ranking_line_ids(self):
+        for analysis in self:
+            domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
+            if analysis.type == 'product_ranking':
+                domain.append(('product_tmpl_id', '!=', False))
+            elif analysis.type == 'last_ranking':
+                domain.append(('shoes_last_id', '!=', False))
+            else:
+                analysis.ranking_line_ids = False
+                continue
+
+            analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
+
 
     @api.depends('line_ids.data_html')
     def _compute_and_set_analysis_html(self):
@@ -107,42 +129,29 @@ class ShoesAnalysis(models.Model):
         Este método actúa como un despachador (dispatcher) que llama al
         submétodo apropiado basado en el campo 'type' del registro.
         """
-        # Es buena práctica iterar sobre self, ya que un botón puede
-        # (aunque sea raro) ser llamado desde una vista de lista
-        # seleccionando múltiples registros.
         for record in self:
-            # Usamos una cadena de if/elif para encontrar el tipo y
-            # llamar al método correspondiente.
             if record.type == 'salesman_sales_delivery':
                 record._compute_salesman_sales_delivery()
-
-            elif record.type == 'product_ranking':
-                record._compute_product_sales_ranking()
-
-            elif record.type == 'salesman_country':
-                record._compute_salesman_country()
-
-            elif record.type == 'manufacturer_sales':
-                record._compute_manufacturer_sales()
-
-            elif record.type == 'sales_country':
-                record._compute_sales_country()
-
-            elif record.type == 'sales_country_graphic':
-                record._compute_sales_country_graphic()
-
-            elif record.type == 'sale_type':
-                record._compute_sale_type()
-
-            elif record.type == 'sale_last':
-                record._compute_sale_last()
-
             elif record.type == 'stadistic_sales':
                 record._compute_stadistic_sales()
-
+            elif record.type == 'product_ranking':
+                record._compute_product_sales_ranking()
+            elif record.type == 'last_ranking':
+                record._compute_last_ranking()
+            elif record.type == 'salesman_country':
+                record._compute_salesman_country()
+            elif record.type == 'manufacturer_sales':
+                record._compute_manufacturer_sales()
+            elif record.type == 'sales_country':
+                record._compute_sales_country()
+            elif record.type == 'sales_country_graphic':
+                record._compute_sales_country_graphic()
+            elif record.type == 'sale_type':
+                record._compute_sale_type()
+            elif record.type == 'sale_last':
+                record._compute_sale_last()
             elif record.type == 'salesman_model':
                 record._compute_salesman_model()
-
             elif record.type == 'customer_comparison':
                 record._compute_customer_comparison()
 
@@ -185,12 +194,6 @@ class ShoesAnalysis(models.Model):
         # TODO: Añadir lógica de cálculo aquí
         return True
 
-    def _compute_stadistic_sales(self):
-        """ Lógica para 'Graphic stadistic Sales' """
-        self.ensure_one()
-        # TODO: Añadir lógica de cálculo aquí
-        return True
-
     def _compute_salesman_model(self):
         """ Lógica para 'Salesman model' """
         self.ensure_one()
@@ -210,8 +213,8 @@ class ShoesAnalysis(models.Model):
                 [
                     ('shoes_campaign_id', '=', record.shoes_campaign_id.id),
                     ('id','!=',record.id),
-                    ('type','=','product_ranking'),
+                    ('type','in',['product_ranking']),
                 ]
             )
-            if exist.ids:
+            if exist.ids and record.type == 'product_ranking':
                 raise UserError('Ya existe un informe para esta campaña')

@@ -1,6 +1,4 @@
-import json
-from odoo import models, fields, api
-from odoo.tools import float_is_zero
+from odoo import models, api
 from odoo.tools.misc import formatLang
 
 class ShoesAnalysis(models.Model):
@@ -10,10 +8,10 @@ class ShoesAnalysis(models.Model):
     # MÉTODO PRINCIPAL (Orquestador)
     # -----------------------------------------------------------------
 
-    def _compute_product_sales_ranking(self):
+    def _compute_last_ranking(self):
         """
         Método principal que orquesta la actualización de datos y la
-        generación del informe HTML, incluyendo comparativas.
+        generación del informe HTML para el ranking de hormas.
         """
         for analysis in self:
             main_campaign = analysis.shoes_campaign_id
@@ -21,20 +19,21 @@ class ShoesAnalysis(models.Model):
             all_campaigns = main_campaign | comparison_campaigns
 
             # 1. Asegura que los datos de TODAS las campañas están actualizados
+            #    (Esto actualiza tanto productos como hormas)
             for campaign in all_campaigns:
                 self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
 
-            # 2. Busca todas las líneas de producto de todas las campañas involucradas
+            # 2. Busca todas las líneas de HORMAS de todas las campañas involucradas
             all_ranking_lines = self.env['shoes.ranking'].search([
                 ('shoes_campaign_id', 'in', all_campaigns.ids),
-                ('product_tmpl_id', '!=', False)
+                ('shoes_last_id', '!=', False)
             ])
 
             # 3. Ordena el conjunto completo por el neto de pares
             sorted_lines = all_ranking_lines.sorted(key=lambda r: r.pairs_count_net, reverse=True)
 
             # 4. Genera el HTML con la lista consolidada y ordenada
-            analysis._generate_ranking_html(sorted_lines)
+            analysis._generate_last_ranking_html(sorted_lines)
 
         return True
 
@@ -42,10 +41,9 @@ class ShoesAnalysis(models.Model):
     # MÉTODO 2: CREACIÓN DE HTML (analysis_html)
     # -----------------------------------------------------------------
 
-    def _generate_ranking_html(self, ranking_lines):
+    def _generate_last_ranking_html(self, ranking_lines):
         """
-        Genera el informe HTML completo (Header, Filas, Footer)
-        basado en los registros 'shoes.ranking' y lo guarda.
+        Genera el informe HTML para el ranking de hormas.
         """
         self.ensure_one()
         analysis = self
@@ -68,14 +66,12 @@ class ShoesAnalysis(models.Model):
         style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; text-align: left; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
         style_td_num = f"{style_td} text-align: right;"
-        style_td_img = f"{style_td} text-align: center;"
 
         # 2. El Header (Cabecera)
         html_lines.append(f"<table style='{style_table}'>")
         html_lines.append("<thead><tr>")
         html_lines.append(f"<th style='{style_th} width: 60px;'>Ranking</th>")
-        html_lines.append(f"<th style='{style_th} width: 70px;'>Imagen</th>")
-        html_lines.append(f"<th style='{style_th}'>Producto (Ref.)</th>")
+        html_lines.append(f"<th style='{style_th}'>Horma</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Vend.</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Canc.</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Netos</th>")
@@ -96,14 +92,13 @@ class ShoesAnalysis(models.Model):
             
             row_style = ""
             if not is_main_campaign:
-                color = campaign_color_map.get(line.shoes_campaign_id.id, '#ccc') # Gris por defecto
+                color = campaign_color_map.get(line.shoes_campaign_id.id, '#ccc')
                 row_style = f"style='border-left: 5px solid {color};'"
             
             campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.name})</span>"
 
-            prod_name = line.product_tmpl_id.name or "N/A"
-            prod_ref = line.shoes_model_material_id.name or ""
-            prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>{campaign_tag}"
+            last_name = line.shoes_last_id.name or "N/A"
+            last_display = f"<strong>{last_name}</strong>{campaign_tag}"
 
             formatted_amount = formatLang(
                 analysis.env,
@@ -111,15 +106,9 @@ class ShoesAnalysis(models.Model):
                 currency_obj=line.currency_id
             )
 
-            image_html = ""
-            if line.image:
-                img_base64 = line.image.decode('utf-8')
-                image_html = f"<img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/>"
-
             html_lines.append(f"<tr {row_style}>")
             html_lines.append(f"<td style='{style_td_num} font-size: 1.1em; font-weight: {font_weight_style};'>{line.ranking}</td>")
-            html_lines.append(f"<td style='{style_td_img}'>{image_html}</td>")
-            html_lines.append(f"<td style='{style_td}'>{prod_display}</td>")
+            html_lines.append(f"<td style='{style_td}'>{last_display}</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_net} Pairs</td>")
@@ -144,7 +133,7 @@ class ShoesAnalysis(models.Model):
 
         html_lines.append("<tfoot>")
         html_lines.append("<tr>")
-        html_lines.append(f"<td style='{style_td_total} text-align: left;' colspan='3'>TOTALES (Campaña Principal)</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: left;' colspan='2'>TOTALES (Campaña Principal)</td>")
         html_lines.append(f"<td style='{style_td_total}'>{total_sale} Pairs</td>")
         html_lines.append(f"<td style='{style_td_total}'>{total_cancel} Pairs</td>")
         html_lines.append(f"<td style='{style_td_total}'>{total_net} Pairs</td>")
