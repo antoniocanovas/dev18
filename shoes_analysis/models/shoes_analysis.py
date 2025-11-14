@@ -15,7 +15,11 @@ class ShoesAnalysis(models.Model):
     type = fields.Selection(
         selection=[
             ('salesman_sales_delivery', 'Sales and delivery'),
-            ('stadistic_sales', 'Graphic stadistic Sales'),
+            ('product_ranking', 'Product Ranking'),
+            ('last_ranking', 'Last Ranking'),
+            ('campaign_product_ranking', 'Campaign product ranking'),
+            ('campaign_last_ranking', 'Campaign last ranking'),
+
             ('salesman_country', 'Salesman and country'),
             ('manufacturer_sales', 'Sales by manufacturer'),
             ('sales_country', 'Sales by country'),
@@ -24,8 +28,6 @@ class ShoesAnalysis(models.Model):
             ('sale_last', 'Sales by last'),
             ('salesman_model', 'Salesman model'),
             ('customer_comparison', 'Customer comparison'),
-            ('product_ranking', 'Product Ranking'),
-            ('last_ranking', 'Last Ranking'),
         ]
     )
 
@@ -40,17 +42,6 @@ class ShoesAnalysis(models.Model):
         comodel_name='project.project',
         string='Compare to',
         domain=[('is_shoes_campaign', '=', True)],
-    )
-
-    line_ids = fields.One2many(
-        comodel_name='shoes.analysis.line',
-        inverse_name='shoes_analysis_id',
-        string='Lines'
-    )
-
-    total = fields.Integer(
-        'Total',
-        compute='_compute_total',
     )
 
     # Campo html para resumen de resultados en líneas:
@@ -84,42 +75,15 @@ class ShoesAnalysis(models.Model):
     def _compute_ranking_line_ids(self):
         for analysis in self:
             domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
-            if analysis.type == 'product_ranking':
+            if analysis.type in ['product_ranking', 'campaign_product_ranking']:
                 domain.append(('product_tmpl_id', '!=', False))
-            elif analysis.type == 'last_ranking':
+            elif analysis.type in ['last_ranking', 'campaign_last_ranking']:
                 domain.append(('shoes_last_id', '!=', False))
             else:
                 analysis.ranking_line_ids = False
                 continue
 
             analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
-
-
-    @api.depends('line_ids.data_html')
-    def _compute_and_set_analysis_html(self):
-        """
-        Calcula y GUARDA el HTML de análisis (antiguo _compute_analysis_html)
-        """
-        self.ensure_one()
-
-        try:
-            lines_sorted = sorted(
-                self.line_ids,
-                key=lambda line: json.loads(line.data or '{}').get('representante', '')
-            )
-        except Exception:
-            lines_sorted = self.line_ids
-
-        html_parts = [line.data_html for line in lines_sorted if line.data_html]
-        self.write({'analysis_html': "".join(html_parts)})
-
-
-    def _compute_total(self):
-        for record in self:
-            total = 0
-            for li in record.line_ids:
-                total += li.total
-            record.total = total
 
     # --- Método Principal (Dispatcher) ---
 
@@ -132,12 +96,14 @@ class ShoesAnalysis(models.Model):
         for record in self:
             if record.type == 'salesman_sales_delivery':
                 record._compute_salesman_sales_delivery()
-            elif record.type == 'stadistic_sales':
-                record._compute_stadistic_sales()
+            elif record.type == 'campaign_product_ranking':
+                record._compute_campaign_product_ranking()
             elif record.type == 'product_ranking':
                 record._compute_product_sales_ranking()
             elif record.type == 'last_ranking':
                 record._compute_last_ranking()
+            elif record.type == 'campaign_last_ranking':
+                record._compute_campaign_last_ranking()
             elif record.type == 'salesman_country':
                 record._compute_salesman_country()
             elif record.type == 'manufacturer_sales':

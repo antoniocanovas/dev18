@@ -40,9 +40,8 @@
                     <group>
                         <group>
                             <field name="shoes_campaign_id"/>
-                            <field name="shoes_campaign_ids" widget="many2many_tags"/>
-                            <field name="total"/>
-                            <field name="type" groups="base.group_no_one"/>
+                            <field name="shoes_campaign_ids" widget="many2many_tags" invisible="1"/>
+                            <field name="type" groups="base.group_no_one" readonly="1"/>
                             <field name="write_date"/>
                         </group>
                         <group>
@@ -52,21 +51,8 @@
                     <notebook>
                         <page string="Report">
                             <field name="analysis_html" nolabel="1" readonly="1"/>
-                            <field name="line_ids">
-                                <list>
-                                <!-- <list editable="bottom"> -->
-                                    <field name="name" optional="hide"/>
-                                    <field name="product_tmpl_id" optional="show" />
-                                    <field name="shoes_model_material_id" optional="hide"/>
-                                    <field name="shoes_task_id" optional="hide"/>
-                                    <field name="shoes_last_id" optional="hide"/>
-                                    <field name="data" optional="hide"/>
-                                    <field name="data_html"/>
-                                    <field name="total" optional="hide"/>
-                                </list>
-                            </field>
                         </page>
-                        <page string="Product Ranking" invisible="type not in ['product_ranking']">
+                        <page string="Product Ranking" invisible="type not in ['product_ranking', 'campaign_product_ranking']">
                             <field name="ranking_line_ids">
                                 <list>
                                     <field name="ranking"/>
@@ -82,7 +68,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Last Ranking" invisible="type not in ['last_ranking']">
+                        <page string="Last Ranking" invisible="type not in ['last_ranking', 'campaign_last_ranking']">
                             <field name="ranking_line_ids">
                                 <list>
                                     <field name="ranking"/>
@@ -199,16 +185,16 @@
         </field>
     </record>
 
-    <!-- Acción 8: Stadistic sales -->
-    <record id="action_stadistic_sales" model="ir.actions.act_window">
-        <field name="name">Stadistic sales (gráfico)</field>
+    <!-- Acción 8: Campaign product ranking -->
+    <record id="action_campaign_product_ranking" model="ir.actions.act_window">
+        <field name="name">Campaign product ranking</field>
         <field name="res_model">shoes.analysis</field>
-        <field name="context">{'default_type': 'stadistic_sales'}</field>
-        <field name="domain">[('type','=','stadistic_sales')]</field>
+        <field name="context">{'default_type': 'campaign_product_ranking'}</field>
+        <field name="domain">[('type','=','campaign_product_ranking')]</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis estadístico de ventas
+                Crea un nuevo ranking de productos por campaña
             </p>
         </field>
     </record>
@@ -265,6 +251,20 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Crea un nuevo ranking de hormas
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción 13: Campaign last ranking -->
+    <record id="action_campaign_last_ranking" model="ir.actions.act_window">
+        <field name="name">Campaign last ranking</field>
+        <field name="res_model">shoes.analysis</field>
+        <field name="context">{'default_type': 'campaign_last_ranking'}</field>
+        <field name="domain">[('type','=','campaign_last_ranking')]</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo ranking de campaña por hormas
             </p>
         </field>
     </record>

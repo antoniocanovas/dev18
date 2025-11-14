@@ -1,0 +1,84 @@
+from odoo import models, api
+from collections import defaultdict
+
+class ShoesAnalysis(models.Model):
+    _inherit = 'shoes.analysis'
+
+    # -----------------------------------------------------------------
+    # INFORME "CAMPAIGN LAST RANKING"
+    # -----------------------------------------------------------------
+
+    def _compute_campaign_last_ranking(self):
+        """
+        Orquesta la creación del informe que agrupa productos por el ranking de su horma.
+        """
+        for analysis in self:
+            # 1. Asegura que todos los datos de ranking (productos y hormas) están actualizados.
+            self.env['shoes.ranking']._update_ranking_for_campaign(analysis.shoes_campaign_id)
+
+            # 2. Obtiene los datos necesarios para el informe
+            campaign_id = analysis.shoes_campaign_id.id
+            
+            # Líneas de ranking para las HORMAS (bucle principal)
+            horma_lines = self.env['shoes.ranking'].search([
+                ('shoes_campaign_id', '=', campaign_id),
+                ('shoes_last_id', '!=', False)
+            ], order='ranking asc')
+
+            # Todas las líneas de ranking de PRODUCTOS de la campaña
+            product_lines = self.env['shoes.ranking'].search([
+                ('shoes_campaign_id', '=', campaign_id),
+                ('product_tmpl_id', '!=', False)
+            ])
+
+            # 3. Genera el HTML
+            analysis._generate_campaign_last_ranking_html(horma_lines, product_lines)
+        
+        return True
+
+    def _generate_campaign_last_ranking_html(self, horma_lines, product_lines):
+        """
+        Genera el HTML agrupando productos por horma.
+        """
+        self.ensure_one()
+        analysis = self
+
+        if not horma_lines:
+            analysis.analysis_html = "<p>No hay datos de ranking de hormas para mostrar.</p>"
+            return
+
+        # 1. Agrupar productos por el ID de su horma para un acceso rápido
+        products_by_last = defaultdict(list)
+        for prod_line in product_lines:
+            if prod_line.product_tmpl_id.shoes_last_id:
+                products_by_last[prod_line.product_tmpl_id.shoes_last_id.id].append(prod_line)
+
+        # 2. Construir el HTML
+        html_parts = []
+        style_horma_group = "border: 2px solid #666; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f9f9f9;"
+        style_horma_header = "font-size: 32px; font-weight: bold; margin: 0 0 20px 0; border-bottom: 1px solid #ccc; padding-bottom: 10px;"
+        style_total_quantity = "float: right; font-size: 32px; font-weight: bold;"
+
+        # Bucle principal por HORMAS
+        for horma_line in horma_lines:
+            html_parts.append(f"<div style='{style_horma_group}'>")
+            
+            # Encabezado de la horma con el total de pares
+            total_pairs_html = f"<div style='{style_total_quantity}'>{int(horma_line.pairs_count_net)}</div>"
+            html_parts.append(f"<h2 style='{style_horma_header}'>{horma_line.shoes_last_id.name or 'N/A'} {total_pairs_html}</h2>")
+            
+            # Obtener y ordenar los productos para esta horma
+            products_for_this_last = products_by_last.get(horma_line.shoes_last_id.id, [])
+            sorted_products = sorted(products_for_this_last, key=lambda p: p.ranking)
+
+            if not sorted_products:
+                html_parts.append("<p>No hay productos con ranking para esta horma.</p>")
+            else:
+                # Bucle anidado por PRODUCTOS
+                for product_line in sorted_products:
+                    # Reutilizamos la lógica de la "ficha" del otro informe
+                    html_parts.append(self._generate_product_card_html(product_line))
+            
+            html_parts.append("</div>")
+
+        analysis.analysis_html = "\n".join(html_parts)

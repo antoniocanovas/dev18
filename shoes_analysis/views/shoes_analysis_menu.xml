@@ -63,11 +63,11 @@
               sequence="70"
               groups="base.group_user"/>
 
-    <!-- Stadistic sales (gráfico) -->
-    <menuitem id="menu_stadistic_sales"
-              name="Stadistic sales (gráfico)"
+    <!-- Campaign product ranking -->
+    <menuitem id="menu_campaign_product_ranking"
+              name="Campaign product ranking"
               parent="menu_shoes_analysis_root"
-              action="action_stadistic_sales"
+              action="action_campaign_product_ranking"
               sequence="80"
               groups="base.group_user"/>
 
@@ -101,6 +101,14 @@
               parent="menu_shoes_analysis_root"
               action="action_last_ranking"
               sequence="111"
+              groups="base.group_user"/>
+    
+    <!-- Campaign last ranking -->
+    <menuitem id="menu_campaign_last_ranking"
+              name="Campaign last ranking"
+              parent="menu_shoes_analysis_root"
+              action="action_campaign_last_ranking"
+              sequence="112"
               groups="base.group_user"/>
 
 </odoo>
