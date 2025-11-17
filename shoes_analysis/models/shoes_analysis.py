@@ -5,6 +5,10 @@ from odoo.tools import html_escape
 from odoo.tools.misc import formatLang
 
 class ShoesAnalysis(models.Model):
+    """
+    Modelo central para la configuración y visualización de informes de análisis de ventas.
+    Cada registro representa un informe específico con su propia configuración y resultado.
+    """
     _name = 'shoes.analysis'
     _description = 'Shoes Analysis'
     _order = 'name'
@@ -16,18 +20,19 @@ class ShoesAnalysis(models.Model):
 
     type = fields.Selection(
         selection=[
-            ('salesman_sales_delivery', 'Sales and delivery'),
-            ('product_ranking', 'Product Ranking'),
-            ('last_ranking', 'Last Ranking'),
-            ('campaign_product_ranking', 'Campaign product ranking'),
-            ('campaign_last_ranking', 'Campaign last ranking'),
-            ('salesman_model', 'Salesman model'),
-            ('customer_comparison', 'Customer comparison'),
-            ('salesman_country', 'Por representante y país'),
-            ('manufacturer_sales', 'Ventas por proveedor'),
-            ('sales_by_country', 'Ventas por países'),
-            ('sales_by_shipping_mark', 'Ventas por timbrado'),
-        ]
+            ('salesman_sales_delivery', 'Ventas y Entregas por Agente'),
+            ('salesman_country', 'Ventas por Representante y País'),
+            ('manufacturer_sales', 'Ventas por Proveedor'),
+            ('sales_by_country', 'Ventas por Países'),
+            ('sales_by_shipping_mark', 'Ventas por Timbrado'),
+            ('customer_comparison', 'Comparativa por Cliente'),
+            ('product_ranking', 'Ranking de Productos (Comparativo)'),
+            ('last_ranking', 'Ranking de Hormas (Comparativo)'),
+            ('campaign_product_ranking', 'Ranking de Productos (Fichas)'),
+            ('campaign_last_ranking', 'Ranking de Hormas (Agrupado)'),
+            ('salesman_model', 'Ventas de Modelos por Cliente'),
+        ],
+        string="Tipo de Informe"
     )
 
     shoes_campaign_id = fields.Many2one(
@@ -80,7 +85,7 @@ class ShoesAnalysis(models.Model):
     @api.depends('shoes_campaign_id', 'type')
     def _compute_ranking_line_ids(self):
         for analysis in self:
-            ranking_types = ['product_ranking', 'campaign_product_ranking', 'last_ranking', 'campaign_last_ranking']
+            ranking_types = ['product_ranking', 'last_ranking', 'campaign_product_ranking', 'campaign_last_ranking']
             if analysis.type in ranking_types:
                 domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
                 if analysis.type in ['product_ranking', 'campaign_product_ranking']:
@@ -92,34 +97,25 @@ class ShoesAnalysis(models.Model):
                 analysis.ranking_line_ids = False
 
     def update_shoes_analysis(self):
+        """
+        Punto de entrada principal para generar/actualizar el análisis.
+        1. Actualiza los datos de ranking si el informe lo requiere.
+        2. Llama al método de cómputo específico según el tipo de informe.
+        """
+        reports_without_ranking = [
+            'salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 
+            'sales_by_country', 'sales_by_shipping_mark'
+        ]
+        
         for record in self:
-            if record.type not in ['salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 'sales_by_country', 'sales_by_shipping_mark']:
+            if record.type not in reports_without_ranking:
                 campaigns_to_update = record.shoes_campaign_id | record.shoes_campaign_ids
                 for campaign in campaigns_to_update:
                     self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
 
-            if record.type == 'salesman_sales_delivery':
-                record._compute_salesman_sales_delivery()
-            elif record.type == 'campaign_product_ranking':
-                record._compute_campaign_product_ranking()
-            elif record.type == 'product_ranking':
-                record._compute_product_sales_ranking()
-            elif record.type == 'last_ranking':
-                record._compute_last_ranking()
-            elif record.type == 'campaign_last_ranking':
-                record._compute_campaign_last_ranking()
-            elif record.type == 'salesman_model':
-                record._compute_salesman_model()
-            elif record.type == 'customer_comparison':
-                record._compute_customer_comparison()
-            elif record.type == 'salesman_country':
-                record._compute_salesman_country()
-            elif record.type == 'manufacturer_sales':
-                record._compute_manufacturer_sales()
-            elif record.type == 'sales_by_country':
-                record._compute_sales_by_country()
-            elif record.type == 'sales_by_shipping_mark':
-                record._compute_sales_by_shipping_mark()
+            method_name = f'_compute_{record.type}'
+            if hasattr(record, method_name):
+                getattr(record, method_name)()
         return True
 
     def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):

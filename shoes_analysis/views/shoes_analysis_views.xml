@@ -45,6 +45,8 @@
                             <field name="partner_id"
                                    invisible="type != 'salesman_model'"
                                    required="type == 'salesman_model'"/>
+                        </group>
+                        <group>
                             <field name="type" groups="base.group_no_one" readonly="1"/>
                             <field name="write_date"/>
                         </group>
@@ -98,11 +100,6 @@
         <field name="context">{'default_type': 'salesman_sales_delivery'}</field>
         <field name="domain">[('type','=','salesman_sales_delivery')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas y entregas por agente
-            </p>
-        </field>
     </record>
 
     <!-- Acción 2: Por representante y país -->
@@ -112,11 +109,6 @@
         <field name="context">{'default_type': 'salesman_country'}</field>
         <field name="domain">[('type','=','salesman_country')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis por representante y país
-            </p>
-        </field>
     </record>
 
     <!-- Acción 3: Ventas por proveedor -->
@@ -126,11 +118,6 @@
         <field name="context">{'default_type': 'manufacturer_sales'}</field>
         <field name="domain">[('type','=','manufacturer_sales')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas por proveedor
-            </p>
-        </field>
     </record>
 
     <!-- Acción 4: Ventas por países -->
@@ -140,11 +127,6 @@
         <field name="context">{'default_type': 'sales_by_country'}</field>
         <field name="domain">[('type','=','sales_by_country')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas por países
-            </p>
-        </field>
     </record>
 
     <!-- Acción 5: Ventas por timbrado -->
@@ -154,11 +136,6 @@
         <field name="context">{'default_type': 'sales_by_shipping_mark'}</field>
         <field name="domain">[('type','=','sales_by_shipping_mark')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas por timbrado
-            </p>
-        </field>
     </record>
 
     <!-- Acción 8: Campaign product ranking -->
@@ -168,11 +145,6 @@
         <field name="context">{'default_type': 'campaign_product_ranking'}</field>
         <field name="domain">[('type','=','campaign_product_ranking')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo ranking de productos por campaña
-            </p>
-        </field>
     </record>
 
     <!-- Acción 9: Ventas de Modelos por Representante y Posición -->
@@ -182,11 +154,6 @@
         <field name="context">{'default_type': 'salesman_model'}</field>
         <field name="domain">[('type','=','salesman_model')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas de modelos por representante
-            </p>
-        </field>
     </record>
 
     <!-- Acción 10: Comparativa de ventas por cliente -->
@@ -196,11 +163,6 @@
         <field name="context">{'default_type': 'customer_comparison'}</field>
         <field name="domain">[('type','=','customer_comparison')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis comparativo de ventas por cliente
-            </p>
-        </field>
     </record>
 
     <!-- Acción 11: Product ranking -->
@@ -210,11 +172,6 @@
         <field name="context">{'default_type': 'product_ranking'}</field>
         <field name="domain">[('type','=','product_ranking')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo ranking de productos
-            </p>
-        </field>
     </record>
 
     <!-- Acción 12: Last ranking -->
@@ -224,11 +181,6 @@
         <field name="context">{'default_type': 'last_ranking'}</field>
         <field name="domain">[('type','=','last_ranking')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo ranking de hormas
-            </p>
-        </field>
     </record>
 
     <!-- Acción 13: Campaign last ranking -->
@@ -238,10 +190,5 @@
         <field name="context">{'default_type': 'campaign_last_ranking'}</field>
         <field name="domain">[('type','=','campaign_last_ranking')]</field>
         <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo ranking de campaña por hormas
-            </p>
-        </field>
     </record>
 </odoo>
