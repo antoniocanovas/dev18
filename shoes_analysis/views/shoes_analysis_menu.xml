@@ -15,12 +15,44 @@
               sequence="10"
               groups="base.group_user"/>
 
+    <!-- Por representante y país -->
+    <menuitem id="menu_sales_by_rep_country"
+              name="Por representante y país"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_rep_country"
+              sequence="20"
+              groups="base.group_user"/>
+
+    <!-- Ventas por proveedor -->
+    <menuitem id="menu_sales_by_supplier"
+              name="Ventas por proveedor"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_supplier"
+              sequence="25"
+              groups="base.group_user"/>
+
+    <!-- Ventas por países -->
+    <menuitem id="menu_sales_by_country"
+              name="Ventas por países"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_country"
+              sequence="27"
+              groups="base.group_user"/>
+
+    <!-- Ventas por timbrado -->
+    <menuitem id="menu_sales_by_shipping_mark"
+              name="Ventas por timbrado"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_by_shipping_mark"
+              sequence="28"
+              groups="base.group_user"/>
+
     <!-- Ranking de productos -->
     <menuitem id="menu_product_raking"
               name="Ranking de productos"
               parent="menu_shoes_analysis_root"
               action="action_product_ranking"
-              sequence="20"
+              sequence="30"
               groups="base.group_user"/>
 
     <!-- Ranking de hormas -->
@@ -28,7 +60,7 @@
               name="Ranking de hormas"
               parent="menu_shoes_analysis_root"
               action="action_last_ranking"
-              sequence="30"
+              sequence="40"
               groups="base.group_user"/>
 
     <!-- Campaign product ranking -->
@@ -36,7 +68,7 @@
               name="Campaign product ranking"
               parent="menu_shoes_analysis_root"
               action="action_campaign_product_ranking"
-              sequence="40"
+              sequence="50"
               groups="base.group_user"/>
 
     <!-- Campaign last ranking -->
@@ -44,7 +76,7 @@
               name="Campaign last ranking"
               parent="menu_shoes_analysis_root"
               action="action_campaign_last_ranking"
-              sequence="50"
+              sequence="60"
               groups="base.group_user"/>
 
     <!-- Ventas de Modelos hechas por Representante y Posición en ventas -->
@@ -52,7 +84,7 @@
               name="Ventas de Modelos hechas por Representante y Posición en ventas"
               parent="menu_shoes_analysis_root"
               action="action_model_sales_by_rep_position"
-              sequence="60"
+              sequence="70"
               groups="base.group_user"/>
 
     <!-- Comparativa de ventas por cliente -->
@@ -60,55 +92,7 @@
               name="Comparativa de ventas por cliente"
               parent="menu_shoes_analysis_root"
               action="action_sales_comparison_by_customer"
-              sequence="70"
-              groups="base.group_user"/>
-
-    <!-- Ventas totales por representante y país -->
-    <menuitem id="menu_sales_by_rep_country"
-              name="Ventas totales por representante y país"
-              parent="menu_shoes_analysis_root"
-              action="action_sales_by_rep_country"
               sequence="80"
-              groups="base.group_user"/>
-
-    <!-- Ventas totales por proveedor -->
-    <menuitem id="menu_sales_by_supplier"
-              name="Ventas totales por proveedor"
-              parent="menu_shoes_analysis_root"
-              action="action_sales_by_supplier"
-              sequence="90"
-              groups="base.group_user"/>
-
-    <!-- Ventas totales por países -->
-    <menuitem id="menu_sales_by_country"
-              name="Ventas totales por países"
-              parent="menu_shoes_analysis_root"
-              action="action_sales_by_country"
-              sequence="100"
-              groups="base.group_user"/>
-
-    <!-- Gráfico venta x países -->
-    <menuitem id="menu_chart_sales_by_country"
-              name="Gráfico venta x países"
-              parent="menu_shoes_analysis_root"
-              action="action_chart_sales_by_country"
-              sequence="110"
-              groups="base.group_user"/>
-
-    <!-- Timbrados -->
-    <menuitem id="menu_timbrados"
-              name="Timbrados"
-              parent="menu_shoes_analysis_root"
-              action="action_timbrados"
-              sequence="120"
-              groups="base.group_user"/>
-
-    <!-- Sales by last and styles (gráficos) -->
-    <menuitem id="menu_sales_by_last_styles"
-              name="Sales by last and styles (gráficos)"
-              parent="menu_shoes_analysis_root"
-              action="action_sales_by_last_styles"
-              sequence="130"
               groups="base.group_user"/>
 
 </odoo>

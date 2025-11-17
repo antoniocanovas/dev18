@@ -17,6 +17,7 @@
         'shoes_dealer',
         'shoes_campaign',
         'purchase_lot_preassignment',
+        'sale_order_type',
     ],
     'data': [
         'security/ir.model.access.csv',

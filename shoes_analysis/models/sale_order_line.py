@@ -4,6 +4,14 @@ from odoo import api, fields, models, _
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
+    sale_type_id = fields.Many2one(
+        'sale.order.type',
+        string='Sale Type',
+        related='order_id.type_id',
+        store=True,
+        readonly=True
+    )
+
     # Pares suministrados desde pedido de venta:
     shoes_pair_delivered_qty = fields.Float(
         string="Sent pairs",

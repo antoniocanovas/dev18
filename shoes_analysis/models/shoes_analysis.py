@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from odoo.exceptions import UserError
+from odoo.tools import html_escape
+from odoo.tools.misc import formatLang
 
 class ShoesAnalysis(models.Model):
     _name = 'shoes.analysis'
@@ -20,13 +22,11 @@ class ShoesAnalysis(models.Model):
             ('campaign_product_ranking', 'Campaign product ranking'),
             ('campaign_last_ranking', 'Campaign last ranking'),
             ('salesman_model', 'Salesman model'),
-            ('salesman_country', 'Salesman and country'),
-            ('manufacturer_sales', 'Sales by manufacturer'),
-            ('sales_country', 'Sales by country'),
-            ('sales_country_graphic', 'Graphic sales by country'),
-            ('sale_type', 'Sales type'),
-            ('sale_last', 'Sales by last'),
             ('customer_comparison', 'Customer comparison'),
+            ('salesman_country', 'Por representante y país'),
+            ('manufacturer_sales', 'Ventas por proveedor'),
+            ('sales_by_country', 'Ventas por países'),
+            ('sales_by_shipping_mark', 'Ventas por timbrado'),
         ]
     )
 
@@ -92,19 +92,12 @@ class ShoesAnalysis(models.Model):
                 analysis.ranking_line_ids = False
 
     def update_shoes_analysis(self):
-        """
-        Actualiza los datos del análisis.
-        Centraliza el cálculo de rankings y luego llama al método específico
-        de cada informe.
-        """
         for record in self:
-            # 1. Centralización del cálculo de rankings
-            if record.type != 'salesman_sales_delivery':
+            if record.type not in ['salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 'sales_by_country', 'sales_by_shipping_mark']:
                 campaigns_to_update = record.shoes_campaign_id | record.shoes_campaign_ids
                 for campaign in campaigns_to_update:
                     self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
 
-            # 2. Despachador (Dispatcher) para la generación de informes
             if record.type == 'salesman_sales_delivery':
                 record._compute_salesman_sales_delivery()
             elif record.type == 'campaign_product_ranking':
@@ -117,44 +110,36 @@ class ShoesAnalysis(models.Model):
                 record._compute_campaign_last_ranking()
             elif record.type == 'salesman_model':
                 record._compute_salesman_model()
+            elif record.type == 'customer_comparison':
+                record._compute_customer_comparison()
             elif record.type == 'salesman_country':
                 record._compute_salesman_country()
             elif record.type == 'manufacturer_sales':
                 record._compute_manufacturer_sales()
-            elif record.type == 'sales_country':
-                record._compute_sales_country()
-            elif record.type == 'sales_country_graphic':
-                record._compute_sales_country_graphic()
-            elif record.type == 'sale_type':
-                record._compute_sale_type()
-            elif record.type == 'sale_last':
-                record._compute_sale_last()
-            elif record.type == 'customer_comparison':
-                record._compute_customer_comparison()
-
+            elif record.type == 'sales_by_country':
+                record._compute_sales_by_country()
+            elif record.type == 'sales_by_shipping_mark':
+                record._compute_sales_by_shipping_mark()
         return True
 
-    def _compute_salesman_country(self):
-        self.ensure_one()
-        return True
-    def _compute_manufacturer_sales(self):
-        self.ensure_one()
-        return True
-    def _compute_sales_country(self):
-        self.ensure_one()
-        return True
-    def _compute_sales_country_graphic(self):
-        self.ensure_one()
-        return True
-    def _compute_sale_type(self):
-        self.ensure_one()
-        return True
-    def _compute_sale_last(self):
-        self.ensure_one()
-        return True
-    def _compute_customer_comparison(self):
-        self.ensure_one()
-        return True
+    def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):
+        style_camp, style_net, style_rev, style_avg = "min-width: 150px;", "width: 130px;", "width: 150px;", "width: 130px;"
+        html_parts = ['<div style="font-size: 1.1em; font-weight: 600; border-bottom: 2px solid #eee; margin-top: 16px; padding-bottom: 4px; margin-bottom: 8px;">Resumen General de Campañas</div>', '<table class="table table-sm o_main_table" style="width: 100%; table-layout: fixed;">', f'<thead><tr style="font-size: 0.85em; color: #555;"><th style="{style_camp}">Campaña</th><th class="text-end" style="{style_net}">Pares Netos</th><th class="text-end" style="{style_rev}">Facturación Prevista</th><th class="text-end" style="{style_avg}">Precio Medio</th></tr></thead><tbody>']
+        def create_row(camp_id, is_base=False):
+            data = campaign_totals.get(camp_id)
+            if not data: return ""
+            netos, fact_prevista = data['netos'], data['fact_prevista']
+            avg_price = (fact_prevista / netos) if netos > 0 else 0.0
+            tag, label = ("b", " (Actual)") if is_base else ("span", " (Objetivo)")
+            return (f'<tr><td><{tag}>{html_escape(data["nombre"])}{label}</{tag}></td>'
+                    f'<td class="text-end"><{tag}>{netos} Pairs</{tag}></td>'
+                    f'<td class="text-end"><{tag}>{fact_prevista:.2f} €</{tag}></td>'
+                    f'<td class="text-end"><{tag}>{avg_price:.2f} €</{tag}></td></tr>')
+        if base_camp_id: html_parts.append(create_row(base_camp_id, is_base=True))
+        for obj_camp in comparison_campaigns:
+            if obj_camp.id != base_camp_id: html_parts.append(create_row(obj_camp.id))
+        html_parts.append('</tbody></table>')
+        return "".join(html_parts)
 
     @api.constrains('shoes_campaign_id')
     def _check_shoes_campaign_id(self):

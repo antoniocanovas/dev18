@@ -45,8 +45,6 @@
                             <field name="partner_id"
                                    invisible="type != 'salesman_model'"
                                    required="type == 'salesman_model'"/>
-                        </group>
-                        <group>
                             <field name="type" groups="base.group_no_one" readonly="1"/>
                             <field name="write_date"/>
                         </group>
@@ -107,23 +105,23 @@
         </field>
     </record>
 
-    <!-- Acción 2: Ventas totales por representante y país -->
+    <!-- Acción 2: Por representante y país -->
     <record id="action_sales_by_rep_country" model="ir.actions.act_window">
-        <field name="name">Ventas totales por representante y país</field>
+        <field name="name">Por representante y país</field>
         <field name="res_model">shoes.analysis</field>
         <field name="context">{'default_type': 'salesman_country'}</field>
         <field name="domain">[('type','=','salesman_country')]</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas por representante y país
+                Crea un nuevo análisis por representante y país
             </p>
         </field>
     </record>
 
-    <!-- Acción 3: Ventas totales por proveedor -->
+    <!-- Acción 3: Ventas por proveedor -->
     <record id="action_sales_by_supplier" model="ir.actions.act_window">
-        <field name="name">Ventas totales por proveedor</field>
+        <field name="name">Ventas por proveedor</field>
         <field name="res_model">shoes.analysis</field>
         <field name="context">{'default_type': 'manufacturer_sales'}</field>
         <field name="domain">[('type','=','manufacturer_sales')]</field>
@@ -135,12 +133,12 @@
         </field>
     </record>
 
-    <!-- Acción 4: Ventas totales por países -->
+    <!-- Acción 4: Ventas por países -->
     <record id="action_sales_by_country" model="ir.actions.act_window">
-        <field name="name">Ventas totales por países</field>
+        <field name="name">Ventas por países</field>
         <field name="res_model">shoes.analysis</field>
-        <field name="context">{'default_type': 'sales_country'}</field>
-        <field name="domain">[('type','=','sales_country')]</field>
+        <field name="context">{'default_type': 'sales_by_country'}</field>
+        <field name="domain">[('type','=','sales_by_country')]</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -149,44 +147,16 @@
         </field>
     </record>
 
-    <!-- Acción 5: Gráfico venta x países -->
-    <record id="action_chart_sales_by_country" model="ir.actions.act_window">
-        <field name="name">Gráfico venta x países</field>
+    <!-- Acción 5: Ventas por timbrado -->
+    <record id="action_sales_by_shipping_mark" model="ir.actions.act_window">
+        <field name="name">Ventas por timbrado</field>
         <field name="res_model">shoes.analysis</field>
-        <field name="context">{'default_type': 'sales_country_graphic'}</field>
-        <field name="domain">[('type','=','sales_country_graphic')]</field>
+        <field name="context">{'default_type': 'sales_by_shipping_mark'}</field>
+        <field name="domain">[('type','=','sales_by_shipping_mark')]</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis gráfico de ventas por países
-            </p>
-        </field>
-    </record>
-
-    <!-- Acción 6: Timbrados -->
-    <record id="action_timbrados" model="ir.actions.act_window">
-        <field name="name">Timbrados</field>
-        <field name="res_model">shoes.analysis</field>
-        <field name="context">{'default_type': 'sale_type'}</field>
-        <field name="domain">[('type','=','sale_type')]</field>
-        <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de timbrados
-            </p>
-        </field>
-    </record>
-
-    <!-- Acción 7: Sales by last and styles -->
-    <record id="action_sales_by_last_styles" model="ir.actions.act_window">
-        <field name="name">Sales by last and styles (gráficos)</field>
-        <field name="res_model">shoes.analysis</field>
-        <field name="context">{'default_type': 'sale_last'}</field>
-        <field name="domain">[('type','=','sale_last')]</field>
-        <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo análisis de ventas por horma y estilos
+                Crea un nuevo análisis de ventas por timbrado
             </p>
         </field>
     </record>

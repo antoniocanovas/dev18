@@ -142,26 +142,6 @@ class ShoesAnalysis(models.Model):
         })
         return True
 
-    # ... (resto de los métodos helper sin cambios) ...
-    def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):
-        style_camp, style_net, style_rev, style_avg = "min-width: 150px;", "width: 130px;", "width: 150px;", "width: 130px;"
-        html_parts = ['<div style="font-size: 1.1em; font-weight: 600; border-bottom: 2px solid #eee; margin-top: 16px; padding-bottom: 4px; margin-bottom: 8px;">Resumen General de Campañas</div>', '<table class="table table-sm o_main_table" style="width: 100%; table-layout: fixed;">', f'<thead><tr style="font-size: 0.85em; color: #555;"><th style="{style_camp}">Campaña</th><th class="text-end" style="{style_net}">Pares Netos</th><th class="text-end" style="{style_rev}">Facturación Prevista</th><th class="text-end" style="{style_avg}">Precio Medio</th></tr></thead><tbody>']
-        def create_row(camp_id, is_base=False):
-            data = campaign_totals.get(camp_id)
-            if not data: return ""
-            netos, fact_prevista = data['netos'], data['fact_prevista']
-            avg_price = (fact_prevista / netos) if netos > 0 else 0.0
-            tag, label = ("b", " (Actual)") if is_base else ("span", " (Objetivo)")
-            return (f'<tr><td><{tag}>{html_escape(data["nombre"])}{label}</{tag}></td>'
-                    f'<td class="text-end"><{tag}>{netos} Pairs</{tag}></td>'
-                    f'<td class="text-end"><{tag}>{fact_prevista:.2f} €</{tag}></td>'
-                    f'<td class="text-end"><{tag}>{avg_price:.2f} €</{tag}></td></tr>')
-        if base_camp_id: html_parts.append(create_row(base_camp_id, is_base=True))
-        for obj_camp in comparison_campaigns:
-            if obj_camp.id != base_camp_id: html_parts.append(create_row(obj_camp.id))
-        html_parts.append('</tbody></table>')
-        return "".join(html_parts)
-
     def _get_objective_perc_html(self, current, objective, style_str):
         if objective == 0: return f'<td class="text-end" style="{style_str} color: green;"><b>+&infin;%</b></td>' if current > 0 else f'<td class="text-end" style="{style_str}">-</td>'
         perc = current / objective
