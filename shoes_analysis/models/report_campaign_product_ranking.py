@@ -9,10 +9,6 @@ import base64
 class ShoesAnalysis(models.Model):
     _inherit = 'shoes.analysis'
 
-    # -----------------------------------------------------------------
-    # INFORME "CAMPAIGN PRODUCT RANKING"
-    # -----------------------------------------------------------------
-
     def _compute_campaign_product_ranking(self):
         for analysis in self:
             product_ranking_lines = self.env['shoes.ranking'].search([
@@ -25,14 +21,27 @@ class ShoesAnalysis(models.Model):
     def _generate_campaign_product_ranking_html(self, ranking_lines):
         self.ensure_one()
         if not ranking_lines:
-            self.analysis_html = "<p>No hay datos de ranking para mostrar.</p>"
+            self.write({
+                'analysis_html': "<p>No hay datos de ranking para mostrar.</p>",
+                'data': False
+            })
             return
         
         html_cards = [self._generate_product_card_html(line) for line in ranking_lines]
-        self.analysis_html = "\n".join(html_cards)
+        
+        data_for_json = ranking_lines.read([
+            'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
+            'pairs_count_net', 'sale_net_amount', 'currency_id',
+            'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
+        ])
+
+        self.write({
+            'analysis_html': "\n".join(html_cards),
+            'data': data_for_json
+        })
 
     def _generate_product_card_html(self, line):
-        # Estilos
+        # ... (el resto del método no cambia)
         style_card = "border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; overflow: hidden; font-family: sans-serif; background-color: #fff;"
         style_left = "float: left; width: 20%; text-align: center; min-height: 180px;"
         style_right = "float: left; width: 78%; margin-left: 2%;"

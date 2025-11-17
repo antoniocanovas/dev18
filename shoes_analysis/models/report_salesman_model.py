@@ -71,11 +71,13 @@ class ShoesAnalysis(models.Model):
                     ranking_line = product_rank_map.get(campaign_id, {}).get(tmpl_id)
                     processed_list.append({
                         'campaign_id': campaign_id,
-                        'product': product_map[tmpl_id],
+                        'product_id': product_map[tmpl_id].id,
+                        'product_name': product_map[tmpl_id].name,
                         'pedidos': data['pedidos'],
                         'anulados': data['anulados'],
                         'venta_neta': venta_neta,
-                        'ranking_name': ranking_line.name if ranking_line else ''
+                        'ranking_name': ranking_line.name if ranking_line else '',
+                        'ranking_value': ranking_line.ranking if ranking_line else 0
                     })
         
         sorted_list = sorted(processed_list, key=lambda x: x['venta_neta'], reverse=True)
@@ -107,14 +109,23 @@ class ShoesAnalysis(models.Model):
         """)
 
         for item in sorted_list:
-            product = item['product']
+            product = product_map[item['product_id']]
             is_main_campaign = (item['campaign_id'] == analysis.shoes_campaign_id.id)
             font_weight_style = "bold" if is_main_campaign else "normal"
             
-            row_style = ""
+            # Lógica de estilo de fila
+            styles = []
             if not is_main_campaign:
                 color = campaign_color_map.get(item['campaign_id'], '#ccc')
-                row_style = f"style='border-left: 5px solid {color};'"
+                styles.append(f"border-left: 5px solid {color};")
+            
+            ranking_value = item.get('ranking_value', 0)
+            if 1 <= ranking_value <= 10:
+                styles.append("background-color: #E8F5E9;") # Verde claro
+            elif 11 <= ranking_value <= 20:
+                styles.append("background-color: #FFF9C4;") # Amarillo claro
+            
+            row_style = f"style='{' '.join(styles)}'" if styles else ""
 
             campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({self.env['project.project'].browse(item['campaign_id']).name})</span>"
             
@@ -137,7 +148,10 @@ class ShoesAnalysis(models.Model):
 
         html_parts.append("</tbody></table>")
 
-        # 7. Escribir en el campo analysis_html
-        analysis.analysis_html = "".join(html_parts)
+        # 7. Escribir en los campos analysis_html y data
+        analysis.write({
+            'analysis_html': "".join(html_parts),
+            'data': sorted_list
+        })
         
         return True

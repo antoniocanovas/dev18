@@ -60,6 +60,10 @@ class ShoesAnalysis(models.Model):
         readonly=True,
     )
 
+    data = fields.Json(
+        string="Structured Data"
+    )
+
     ranking_line_ids = fields.Many2many(
         comodel_name='shoes.ranking',
         string="Ranking Lines",

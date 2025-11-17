@@ -8,4 +8,5 @@ from . import report_campaign_product_ranking
 from . import report_last_ranking
 from . import report_campaign_last_ranking
 from . import report_salesman_model
+from . import report_customer_comparison
 from . import product_template

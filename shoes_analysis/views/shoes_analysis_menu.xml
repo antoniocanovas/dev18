@@ -55,14 +55,20 @@
               sequence="60"
               groups="base.group_user"/>
 
-
+    <!-- Comparativa de ventas por cliente -->
+    <menuitem id="menu_sales_comparison_by_customer"
+              name="Comparativa de ventas por cliente"
+              parent="menu_shoes_analysis_root"
+              action="action_sales_comparison_by_customer"
+              sequence="70"
+              groups="base.group_user"/>
 
     <!-- Ventas totales por representante y país -->
     <menuitem id="menu_sales_by_rep_country"
               name="Ventas totales por representante y país"
               parent="menu_shoes_analysis_root"
               action="action_sales_by_rep_country"
-              sequence="69"
+              sequence="80"
               groups="base.group_user"/>
 
     <!-- Ventas totales por proveedor -->
@@ -70,7 +76,7 @@
               name="Ventas totales por proveedor"
               parent="menu_shoes_analysis_root"
               action="action_sales_by_supplier"
-              sequence="70"
+              sequence="90"
               groups="base.group_user"/>
 
     <!-- Ventas totales por países -->
@@ -78,7 +84,7 @@
               name="Ventas totales por países"
               parent="menu_shoes_analysis_root"
               action="action_sales_by_country"
-              sequence="80"
+              sequence="100"
               groups="base.group_user"/>
 
     <!-- Gráfico venta x países -->
@@ -86,7 +92,7 @@
               name="Gráfico venta x países"
               parent="menu_shoes_analysis_root"
               action="action_chart_sales_by_country"
-              sequence="90"
+              sequence="110"
               groups="base.group_user"/>
 
     <!-- Timbrados -->
@@ -94,7 +100,7 @@
               name="Timbrados"
               parent="menu_shoes_analysis_root"
               action="action_timbrados"
-              sequence="100"
+              sequence="120"
               groups="base.group_user"/>
 
     <!-- Sales by last and styles (gráficos) -->
@@ -102,14 +108,6 @@
               name="Sales by last and styles (gráficos)"
               parent="menu_shoes_analysis_root"
               action="action_sales_by_last_styles"
-              sequence="110"
-              groups="base.group_user"/>
-
-    <!-- Comparativa de ventas por cliente -->
-    <menuitem id="menu_sales_comparison_by_customer"
-              name="Comparativa de ventas por cliente"
-              parent="menu_shoes_analysis_root"
-              action="action_sales_comparison_by_customer"
               sequence="130"
               groups="base.group_user"/>
 

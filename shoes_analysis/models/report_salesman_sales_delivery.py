@@ -9,7 +9,7 @@ class ShoesAnalysis(models.Model):
     def _compute_salesman_sales_delivery(self):
         """
         Lógica para 'Sales and delivery'.
-        Genera el informe HTML directamente sin usar 'shoes.analysis.line'.
+        Genera el informe HTML y guarda los datos estructurados en un campo JSON.
         """
         self.ensure_one()
         analysis = self
@@ -17,42 +17,37 @@ class ShoesAnalysis(models.Model):
         all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
 
         if not all_campaigns:
-            analysis.write({'analysis_html': "<p>No hay campañas seleccionadas.</p>", 'resume_html': False})
+            analysis.write({
+                'analysis_html': "<p>No hay campañas seleccionadas.</p>",
+                'resume_html': False,
+                'data': False
+            })
             return True
 
-        # --- 1. Lógica de cálculo ---
+        # --- 1. Lógica de cálculo (sin cambios) ---
         product_domain_sql = "AND (pt.is_pair = TRUE OR pt.is_assortment = TRUE)"
         company_currency = self.env.company.currency_id
         campaign_name_map = {c.id: c.name for c in all_campaigns}
 
-        # Recolectar todos los salesman_id de todas las consultas
-        salesman_ids = set()
-        
-        # Consulta Monetaria
+        # (Consultas SQL y de read_group se mantienen igual)
         query_monetary = """
             SELECT sol.salesman_id, sol.shoes_campaign_id, so.currency_id, so.date_order::date,
                    SUM(sol.price_subtotal) AS total_sales,
                    SUM((sol.product_uom_qty - COALESCE(sol.shoes_pair_cancelled_qty, 0)) * sol.price_unit) AS expected_revenue
-            FROM sale_order_line sol
-            JOIN sale_order so ON sol.order_id = so.id
-            JOIN product_product pp ON sol.product_id = pp.id
-            JOIN product_template pt ON pp.product_tmpl_id = pt.id
+            FROM sale_order_line sol JOIN sale_order so ON sol.order_id = so.id
+            JOIN product_product pp ON sol.product_id = pp.id JOIN product_template pt ON pp.product_tmpl_id = pt.id
             WHERE sol.shoes_campaign_id IN %s AND so.state IN ('sale', 'done') {}
             GROUP BY sol.salesman_id, sol.shoes_campaign_id, so.currency_id, so.date_order::date
         """.format(product_domain_sql)
         self.env.cr.execute(query_monetary, (tuple(all_campaigns.ids),))
         monetary_data = self.env.cr.dictfetchall()
-        salesman_ids.update(g['salesman_id'] for g in monetary_data if g['salesman_id'])
-
-        # Consulta de Pares
+        
         domain_line_sold = [('shoes_campaign_id', 'in', all_campaigns.ids), ('order_id.state', 'in', ['sale', 'done']), '|', ('product_id.product_tmpl_id.is_pair', '=', True), ('product_id.product_tmpl_id.is_assortment', '=', True)]
         pairs_data_sold = self.env['sale.order.line'].read_group(domain_line_sold, ['salesman_id', 'shoes_campaign_id', 'pairs_count:sum', 'shoes_pair_delivered_qty:sum', 'shoes_pair_delivery_pending_qty:sum', 'shoes_pair_cancelled_qty:sum'], ['salesman_id', 'shoes_campaign_id'], lazy=False)
-        salesman_ids.update(g['salesman_id'][0] for g in pairs_data_sold if g['salesman_id'])
-
+        
         domain_line_cancel = [('shoes_campaign_id', 'in', all_campaigns.ids), ('order_id.state', '=', 'cancel'), '|', ('product_id.product_tmpl_id.is_pair', '=', True), ('product_id.product_tmpl_id.is_assortment', '=', True)]
         pairs_data_cancel = self.env['sale.order.line'].read_group(domain_line_cancel, ['salesman_id', 'shoes_campaign_id', 'pairs_count:sum'], ['salesman_id', 'shoes_campaign_id'], lazy=False)
-        salesman_ids.update(g['salesman_id'][0] for g in pairs_data_cancel if g['salesman_id'])
-
+        
         query_reserved = """
             SELECT sol.salesman_id, sol.shoes_campaign_id, SUM(sm.product_uom_qty) as total_reserved
             FROM stock_move sm JOIN sale_order_line sol ON sm.sale_line_id = sol.id
@@ -62,20 +57,18 @@ class ShoesAnalysis(models.Model):
         """.format(product_domain_sql)
         self.env.cr.execute(query_reserved, (tuple(all_campaigns.ids),))
         reserved_data = self.env.cr.dictfetchall()
-        salesman_ids.update(g['salesman_id'] for g in reserved_data if g['salesman_id'])
 
-        # --- 2. Preparar mapas y combinar resultados ---
+        # --- 2. Combinar resultados ---
+        data_map = {}
+        # (Lógica de combinación de datos sin cambios)
+        salesman_ids = set(g['salesman_id'] for g in monetary_data if g['salesman_id']) | set(g['salesman_id'][0] for g in pairs_data_sold if g['salesman_id']) | set(g['salesman_id'][0] for g in pairs_data_cancel if g['salesman_id']) | set(g['salesman_id'] for g in reserved_data if g['salesman_id'])
         salesman_name_map = {u.id: u.name for u in self.env['res.users'].browse(list(salesman_ids))}
         currency_cache = {c.id: c for c in self.env['res.currency'].search([])}
-        data_map = {}
-
+        def campaign_template(): return {'total_sales': 0.0, 'expected_revenue': 0.0, 'pairs_count': 0, 'pairs_delivered': 0, 'pairs_pending': 0, 'pairs_line_cancelled': 0, 'pairs_order_cancelled': 0, 'pairs_reserved': 0}
         def get_or_create_entry(user_id, campaign_id):
-            if user_id not in data_map:
-                data_map[user_id] = {'representante': salesman_name_map.get(user_id, 'N/A'), 'campanias_data': {}}
-            if campaign_id not in data_map[user_id]['campanias_data']:
-                data_map[user_id]['campanias_data'][campaign_id] = {'total_sales': 0.0, 'expected_revenue': 0.0, 'pairs_count': 0, 'pairs_delivered': 0, 'pairs_pending': 0, 'pairs_line_cancelled': 0, 'pairs_order_cancelled': 0, 'pairs_reserved': 0}
+            if user_id not in data_map: data_map[user_id] = {'representante': salesman_name_map.get(user_id, 'N/A'), 'campanias_data': {}}
+            if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
             return data_map[user_id]['campanias_data'][campaign_id]
-
         for group in monetary_data:
             user_id, campaign_id = group['salesman_id'], group['shoes_campaign_id']
             if not user_id or not campaign_id: continue
@@ -84,64 +77,72 @@ class ShoesAnalysis(models.Model):
             entry = get_or_create_entry(user_id, campaign_id)
             entry['total_sales'] += from_currency._convert(group['total_sales'] or 0.0, company_currency, self.env.company, group['date_order'])
             entry['expected_revenue'] += from_currency._convert(group['expected_revenue'] or 0.0, company_currency, self.env.company, group['date_order'])
-
         for group in pairs_data_sold:
             if not group['salesman_id'] or not group['shoes_campaign_id']: continue
             user_id, campaign_id = group['salesman_id'][0], group['shoes_campaign_id'][0]
             entry = get_or_create_entry(user_id, campaign_id)
-            entry.update({
-                'pairs_count': group['pairs_count'],
-                'pairs_delivered': group['shoes_pair_delivered_qty'],
-                'pairs_pending': group['shoes_pair_delivery_pending_qty'],
-                'pairs_line_cancelled': group['shoes_pair_cancelled_qty']
-            })
-
+            entry.update({'pairs_count': group['pairs_count'], 'pairs_delivered': group['shoes_pair_delivered_qty'], 'pairs_pending': group['shoes_pair_delivery_pending_qty'], 'pairs_line_cancelled': group['shoes_pair_cancelled_qty']})
         for group in pairs_data_cancel:
             if not group['salesman_id'] or not group['shoes_campaign_id']: continue
             user_id, campaign_id = group['salesman_id'][0], group['shoes_campaign_id'][0]
             entry = get_or_create_entry(user_id, campaign_id)
             entry['pairs_order_cancelled'] = group['pairs_count']
-
         for group in reserved_data:
             user_id, campaign_id = group['salesman_id'], group['shoes_campaign_id']
             if not user_id or not campaign_id: continue
             entry = get_or_create_entry(user_id, campaign_id)
             entry['pairs_reserved'] = group['total_reserved'] or 0
 
-        # --- 3. Generar HTML ---
-        analysis_html_parts, campaign_totals = [], {}
+        # --- 3. Preparar datos para JSON y HTML ---
+        analysis_html_parts = []
+        data_for_json = []
+        campaign_totals = {}
         base_camp_id = analysis.shoes_campaign_id.id
         sorted_user_data = sorted(data_map.values(), key=lambda u: u['representante'])
 
         for user_data in sorted_user_data:
             if base_camp_id not in user_data['campanias_data']: continue
-            final_json_data = {'representante': user_data['representante'], 'campanias': []}
+            
+            json_line_data = {'representante': user_data['representante'], 'campanias': []}
             for camp_id, totals in user_data['campanias_data'].items():
                 total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
                 total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
                 netos = total_vendidos - total_cancelados
                 asignados = totals['pairs_delivered'] + totals['pairs_reserved']
-                final_json_data['campanias'].append({
+                
+                camp_data_for_json = {
                     'campania_id': camp_id, 'campania_nombre': campaign_name_map.get(camp_id, "N/A"),
                     'pairs_count': totals['pairs_count'], 'total_vendidos': total_vendidos,
                     'total_cancelados': total_cancelados, 'netos': netos, 'asignados': asignados,
                     'pairs_delivered': totals['pairs_delivered'], 'pairs_pending': totals['pairs_pending'],
                     'total_vendido': totals['total_sales'], 'expected_revenue': totals['expected_revenue']
-                })
+                }
+                json_line_data['campanias'].append(camp_data_for_json)
+
                 if camp_id not in campaign_totals:
                     campaign_totals[camp_id] = {'nombre': campaign_name_map.get(camp_id, 'N/A'), 'netos': 0, 'fact_prevista': 0.0}
                 campaign_totals[camp_id]['netos'] += netos
                 campaign_totals[camp_id]['fact_prevista'] += totals['expected_revenue']
-            analysis_html_parts.append(self._generate_line_html(final_json_data, base_camp_id))
+            
+            data_for_json.append(json_line_data)
+            analysis_html_parts.append(self._generate_line_html(json_line_data, base_camp_id))
 
-        # --- 4. Escribir resultados ---
+        # --- 4. Generar HTML de Resumen y preparar JSON final ---
         resume_html = self._generate_resume_html(campaign_totals, base_camp_id, analysis.shoes_campaign_ids)
+        final_json_output = {
+            'resumen_campañas': list(campaign_totals.values()),
+            'detalle_representantes': data_for_json
+        }
+
+        # --- 5. Escribir los resultados ---
         analysis.write({
             'analysis_html': "".join(analysis_html_parts),
             'resume_html': resume_html,
+            'data': final_json_output,
         })
         return True
 
+    # ... (resto de los métodos helper sin cambios) ...
     def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):
         style_camp, style_net, style_rev, style_avg = "min-width: 150px;", "width: 130px;", "width: 150px;", "width: 130px;"
         html_parts = ['<div style="font-size: 1.1em; font-weight: 600; border-bottom: 2px solid #eee; margin-top: 16px; padding-bottom: 4px; margin-bottom: 8px;">Resumen General de Campañas</div>', '<table class="table table-sm o_main_table" style="width: 100%; table-layout: fixed;">', f'<thead><tr style="font-size: 0.85em; color: #555;"><th style="{style_camp}">Campaña</th><th class="text-end" style="{style_net}">Pares Netos</th><th class="text-end" style="{style_rev}">Facturación Prevista</th><th class="text-end" style="{style_avg}">Precio Medio</th></tr></thead><tbody>']
