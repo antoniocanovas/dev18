@@ -15,7 +15,6 @@ class ShoesAnalysis(models.Model):
 
     def _compute_campaign_product_ranking(self):
         for analysis in self:
-            self.env['shoes.ranking']._update_ranking_for_campaign(analysis.shoes_campaign_id)
             product_ranking_lines = self.env['shoes.ranking'].search([
                 ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
                 ('product_tmpl_id', '!=', False)

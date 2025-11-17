@@ -19,7 +19,6 @@ class ShoesAnalysis(models.Model):
             all_campaigns = main_campaign | comparison_campaigns
 
             # 1. Asegura que los datos de TODAS las campañas están actualizados
-            #    (Esto actualiza tanto productos como hormas)
             for campaign in all_campaigns:
                 self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
 
@@ -70,7 +69,7 @@ class ShoesAnalysis(models.Model):
         # 2. El Header (Cabecera)
         html_lines.append(f"<table style='{style_table}'>")
         html_lines.append("<thead><tr>")
-        html_lines.append(f"<th style='{style_th} width: 60px;'>Ranking</th>")
+        html_lines.append(f"<th style='{style_th} width: 15%;'>Ranking</th>")
         html_lines.append(f"<th style='{style_th}'>Horma</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Vend.</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Canc.</th>")
@@ -107,7 +106,7 @@ class ShoesAnalysis(models.Model):
             )
 
             html_lines.append(f"<tr {row_style}>")
-            html_lines.append(f"<td style='{style_td_num} font-size: 1.1em; font-weight: {font_weight_style};'>{line.ranking}</td>")
+            html_lines.append(f"<td style='{style_td} font-weight: {font_weight_style};'>{line.name}</td>")
             html_lines.append(f"<td style='{style_td}'>{last_display}</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")

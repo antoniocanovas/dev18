@@ -40,7 +40,13 @@
                     <group>
                         <group>
                             <field name="shoes_campaign_id"/>
-                            <field name="shoes_campaign_ids" widget="many2many_tags" invisible="1"/>
+                            <field name="shoes_campaign_ids" widget="many2many_tags"
+                                   invisible="type in ['campaign_last_ranking','campaign_product_ranking']"/>
+                            <field name="partner_id"
+                                   invisible="type != 'salesman_model'"
+                                   required="type == 'salesman_model'"/>
+                        </group>
+                        <group>
                             <field name="type" groups="base.group_no_one" readonly="1"/>
                             <field name="write_date"/>
                         </group>

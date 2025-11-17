@@ -182,17 +182,12 @@ class ShoesRanking(models.Model):
                 line.write({'ranking': rank})
             rank += 1
 
-    @api.depends('shoes_campaign_id', 'product_tmpl_id', 'ranking')
+    @api.depends('shoes_campaign_id', 'ranking')
     def _compute_name(self):
         for record in self:
-            parts = []
-            if record.shoes_campaign_id:
-                parts.append(record.shoes_campaign_id.name)
-            
-            if record.product_tmpl_id:
-                parts.append(f"- {record.product_tmpl_id.name}")
-
-            if record.ranking:
-                parts.append(f"({record.ranking})")
-            
-            record.name = " ".join(parts)
+            if record.shoes_campaign_id and record.ranking:
+                record.name = f"{record.shoes_campaign_id.name} ({record.ranking})"
+            elif record.shoes_campaign_id:
+                record.name = record.shoes_campaign_id.name
+            else:
+                record.name = ''

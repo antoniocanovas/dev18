@@ -12,28 +12,22 @@ class ShoesAnalysis(models.Model):
 
     def _compute_product_sales_ranking(self):
         """
-        Método principal que orquesta la actualización de datos y la
-        generación del informe HTML, incluyendo comparativas.
+        Genera el informe HTML para el ranking de productos.
+        El cálculo de datos ya se ha hecho de forma centralizada.
         """
         for analysis in self:
-            main_campaign = analysis.shoes_campaign_id
-            comparison_campaigns = analysis.shoes_campaign_ids
-            all_campaigns = main_campaign | comparison_campaigns
+            all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
 
-            # 1. Asegura que los datos de TODAS las campañas están actualizados
-            for campaign in all_campaigns:
-                self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
-
-            # 2. Busca todas las líneas de producto de todas las campañas involucradas
+            # 1. Busca todas las líneas de producto de todas las campañas involucradas
             all_ranking_lines = self.env['shoes.ranking'].search([
                 ('shoes_campaign_id', 'in', all_campaigns.ids),
                 ('product_tmpl_id', '!=', False)
             ])
 
-            # 3. Ordena el conjunto completo por el neto de pares
+            # 2. Ordena el conjunto completo por el neto de pares
             sorted_lines = all_ranking_lines.sorted(key=lambda r: r.pairs_count_net, reverse=True)
 
-            # 4. Genera el HTML con la lista consolidada y ordenada
+            # 3. Genera el HTML con la lista consolidada y ordenada
             analysis._generate_ranking_html(sorted_lines)
 
         return True
@@ -73,8 +67,8 @@ class ShoesAnalysis(models.Model):
         # 2. El Header (Cabecera)
         html_lines.append(f"<table style='{style_table}'>")
         html_lines.append("<thead><tr>")
-        html_lines.append(f"<th style='{style_th} width: 60px;'>Ranking</th>")
-        html_lines.append(f"<th style='{style_th} width: 70px;'>Imagen</th>")
+        html_lines.append(f"<th style='{style_th} width: 15%;'>Ranking</th>")
+        html_lines.append(f"<th style='{style_th} width: 10%;'>Imagen</th>")
         html_lines.append(f"<th style='{style_th}'>Producto (Ref.)</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Vend.</th>")
         html_lines.append(f"<th style='{style_th} text-align: right;'>Total Canc.</th>")
@@ -117,7 +111,7 @@ class ShoesAnalysis(models.Model):
                 image_html = f"<img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/>"
 
             html_lines.append(f"<tr {row_style}>")
-            html_lines.append(f"<td style='{style_td_num} font-size: 1.1em; font-weight: {font_weight_style};'>{line.ranking}</td>")
+            html_lines.append(f"<td style='{style_td} font-weight: {font_weight_style};'>{line.name}</td>")
             html_lines.append(f"<td style='{style_td_img}'>{image_html}</td>")
             html_lines.append(f"<td style='{style_td}'>{prod_display}</td>")
             html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")

@@ -7,4 +7,5 @@ from . import report_product_ranking
 from . import report_campaign_product_ranking
 from . import report_last_ranking
 from . import report_campaign_last_ranking
+from . import report_salesman_model
 from . import product_template
