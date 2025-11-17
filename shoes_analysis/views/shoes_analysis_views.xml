@@ -45,8 +45,6 @@
                             <field name="partner_id"
                                    invisible="type != 'salesman_model'"
                                    required="type == 'salesman_model'"/>
-                        </group>
-                        <group>
                             <field name="type" groups="base.group_no_one" readonly="1"/>
                             <field name="write_date"/>
                         </group>
