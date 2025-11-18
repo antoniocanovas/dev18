@@ -94,7 +94,6 @@ class ShoesAnalysis(models.Model):
         color_stats = self._get_color_statistics(line.product_tmpl_id, line.shoes_campaign_id)
         
         table_html = f"<table style='{style_table}'><thead><tr>"
-        table_html += f"<th style='{style_th}'>Cod. Color</th>"
         table_html += f"<th style='{style_th}'>Color</th>"
         table_html += f"<th style='{style_th} text-align: right;'>Vendido</th>"
         table_html += f"<th style='{style_th} text-align: right;'>En Produccion</th>"
@@ -103,7 +102,7 @@ class ShoesAnalysis(models.Model):
 
         total_vendido, total_produccion = 0, 0
         if not color_stats:
-            table_html += f"<tr><td colspan='5' style='{style_td} text-align: center;'>Sin desglose de color</td></tr>"
+            table_html += f"<tr><td colspan='4' style='{style_td} text-align: center;'>Sin desglose de color</td></tr>"
         else:
             for stat in color_stats:
                 total_vendido += stat['sold']
@@ -111,7 +110,6 @@ class ShoesAnalysis(models.Model):
                 row_style = style_td + (' background-color: #f0f0f0;' if stat['sold'] >= 100 else '')
                 table_html += f"""
                     <tr>
-                        <td style='{row_style}'>{stat['color_code'] or ''}</td>
                         <td style='{row_style}'>{stat['color_name'] or ''}</td>
                         <td style='{row_style} text-align: right; font-weight: bold;'>{stat['sold']}</td>
                         <td style='{row_style} text-align: right;'>{stat['produced']}</td>
@@ -122,7 +120,7 @@ class ShoesAnalysis(models.Model):
         table_html += f"""
             </tbody><tfoot>
                 <tr style='background-color: #ddd; font-weight: bold;'>
-                    <td style='{style_td}' colspan='2'>TOTALES</td>
+                    <td style='{style_td}'>TOTALES</td>
                     <td style='{style_td_num}'>{total_vendido}</td>
                     <td style='{style_td_num}'>{total_produccion}</td>
                     <td style='{style_td}'></td>
@@ -163,7 +161,7 @@ class ShoesAnalysis(models.Model):
             ], limit=1)
             stock_estimado = variant.virtual_available if variant else 0
             final_stats.append({
-                'color_code': color_val.code, 'color_name': color_val.name,
+                'color_name': color_val.name,
                 'sold': data['sold'], 'produced': data['produced'], 'stock': stock_estimado,
             })
         return sorted(final_stats, key=lambda x: x['sold'], reverse=True)

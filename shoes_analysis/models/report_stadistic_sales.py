@@ -115,7 +115,6 @@ class ShoesAnalysis(models.Model):
             <table style='{style_table}'>
                 <thead>
                     <tr>
-                        <th style='{style_th}'>Cod. Color</th>
                         <th style='{style_th}'>Color</th>
                         <th style='{style_th} text-align: right;'>Vendido</th>
                         <th style='{style_th} text-align: right;'>En Produccion</th>
@@ -129,7 +128,7 @@ class ShoesAnalysis(models.Model):
             total_produccion = 0
 
             if not color_stats:
-                card_html += f"<tr><td colspan='5' style='{style_td} text-align: center;'>Sin desglose de color</td></tr>"
+                card_html += f"<tr><td colspan='4' style='{style_td} text-align: center;'>Sin desglose de color</td></tr>"
 
             for stat in color_stats:
                 total_vendido += stat['sold']
@@ -139,7 +138,6 @@ class ShoesAnalysis(models.Model):
                     row_style = f"{style_td} background-color: #f0f0f0;"
                 card_html += f"""
                 <tr>
-                    <td style='{row_style}'>{stat['color_code'] or ''}</td>
                     <td style='{row_style}'>{stat['color_name'] or ''}</td>
                     <td style='{row_style} text-align: right; font-weight: bold;'>{stat['sold']}</td>
                     <td style='{row_style} text-align: right;'>{stat['produced']}</td>
@@ -151,7 +149,7 @@ class ShoesAnalysis(models.Model):
                 </tbody>
                 <tfoot>
                     <tr style='background-color: #ddd; font-weight: bold;'>
-                        <td style='{style_td}' colspan='2'>TOTALES</td>
+                        <td style='{style_td}'>TOTALES</td>
                         <td style='{style_td_num}'>{total_vendido}</td>
                         <td style='{style_td_num}'>{total_produccion}</td>
                         <td style='{style_td}'></td>
@@ -217,7 +215,6 @@ class ShoesAnalysis(models.Model):
             if variant:
                 stock_estimado = variant.virtual_available
             final_stats.append({
-                'color_code': color_val.code,
                 'color_name': color_val.name,
                 'sold': data['sold'],
                 'produced': data['produced'],

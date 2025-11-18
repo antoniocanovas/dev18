@@ -114,6 +114,9 @@ class ShoesAnalysis(models.Model):
                     self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
 
             method_name = f'_compute_{record.type}'
+            if record.type == 'product_ranking':
+                method_name = '_compute_product_sales_ranking'
+            
             if hasattr(record, method_name):
                 getattr(record, method_name)()
         return True

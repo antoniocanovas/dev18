@@ -71,7 +71,7 @@ class ShoesAnalysis(models.Model):
             campaigns_data = data_map[country.id]
             
             style_th = "padding: 8px; border-bottom: 2px solid #333;"
-            country_html.append(f"<table class='table table-sm'><thead><tr><th style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
+            country_html.append(f"<table class='table table-sm'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
             
             base_camp_stats = campaigns_data.get(analysis.shoes_campaign_id.id, {'net_pairs': 0, 'net_sales': 0})
 
@@ -80,12 +80,12 @@ class ShoesAnalysis(models.Model):
                 is_main = (camp_id == analysis.shoes_campaign_id.id)
                 tag = "b" if is_main else "span"
                 
-                row_html = f"<tr><td><{tag}>{html_escape(camp.name)}</{tag}></td>"
+                row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.name)}</{tag}></td>"
                 row_html += f"<td class='text-end'><{tag}>{int(stats['net_pairs'])}</{tag}></td>"
                 row_html += f"<td class='text-end'><{tag}>{formatLang(self.env, stats['net_sales'], currency_obj=analysis.currency_id)}</{tag}></td>"
                 
                 if is_main:
-                    row_html += "<td>-</td><td>-</td>"
+                    row_html += "<td class='text-end'>-</td><td class='text-end'>-</td>"
                 else:
                     row_html += self._get_objective_perc_html(base_camp_stats['net_pairs'], stats['net_pairs'], "padding: 8px;")
                     row_html += self._get_objective_perc_html(base_camp_stats['net_sales'], stats['net_sales'], "padding: 8px;")

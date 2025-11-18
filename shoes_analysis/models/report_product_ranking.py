@@ -49,13 +49,23 @@ class ShoesAnalysis(models.Model):
 
         html_lines = []
         style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;"
-        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; text-align: left; font-weight: 600;"
+        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
-        style_td_num = f"{style_td} text-align: right;"
-        style_td_img = f"{style_td} text-align: center;"
-
+        
         html_lines.append(f"<table style='{style_table}'>")
-        html_lines.append("<thead><tr><th style='{style_th} width: 15%;'>Ranking</th><th style='{style_th} width: 10%;'>Imagen</th><th style='{style_th}'>Producto (Ref.)</th><th style='{style_th} text-align: right;'>Total Vend.</th><th style='{style_th} text-align: right;'>Total Canc.</th><th style='{style_th} text-align: right;'>Netos</th><th style='{style_th} text-align: right;'>Importe Neto</th></tr></thead>")
+        html_lines.append(f"""
+            <thead>
+                <tr>
+                    <th style='{style_th} width: 15%; text-align: left;'>Ranking</th>
+                    <th style='{style_th} width: 10%; text-align: center;'>Imagen</th>
+                    <th style='{style_th} text-align: left;'>Producto (Ref.)</th>
+                    <th style='{style_th} text-align: right;'>Total Vend.</th>
+                    <th style='{style_th} text-align: right;'>Total Canc.</th>
+                    <th style='{style_th} text-align: right;'>Netos</th>
+                    <th style='{style_th} text-align: right;'>Importe Neto</th>
+                </tr>
+            </thead>
+        """)
         html_lines.append("<tbody>")
 
         total_sale, total_cancel, total_net, total_amount = 0.0, 0.0, 0.0, 0.0
@@ -80,13 +90,13 @@ class ShoesAnalysis(models.Model):
                 image_html = f"<img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/>"
 
             html_lines.append(f"<tr {row_style}>")
-            html_lines.append(f"<td style='{style_td} font-weight: {font_weight_style};'>{line.name}</td>")
-            html_lines.append(f"<td style='{style_td_img}'>{image_html}</td>")
-            html_lines.append(f"<td style='{style_td}'>{prod_display}</td>")
-            html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
-            html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")
-            html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{line.pairs_count_net} Pairs</td>")
-            html_lines.append(f"<td style='{style_td_num} font-weight: {font_weight_style};'>{formatted_amount}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: center;'>{image_html}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: left;'>{prod_display}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_net} Pairs</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{formatted_amount}</td>")
             html_lines.append("</tr>")
 
             if is_main_campaign:
@@ -98,13 +108,13 @@ class ShoesAnalysis(models.Model):
         html_lines.append("</tbody>")
         
         formatted_total_amount = formatLang(analysis.env, total_amount, currency_obj=analysis.currency_id)
-        style_td_total = f"{style_td_num} font-weight: bold; border-top: 2px solid #dee2e6;"
+        style_td_total = f"border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle; font-weight: bold; border-top: 2px solid #dee2e6;"
         html_lines.append("<tfoot><tr>")
         html_lines.append(f"<td style='{style_td_total} text-align: left;' colspan='3'>TOTALES (Campaña Principal)</td>")
-        html_lines.append(f"<td style='{style_td_total}'>{total_sale} Pairs</td>")
-        html_lines.append(f"<td style='{style_td_total}'>{total_cancel} Pairs</td>")
-        html_lines.append(f"<td style='{style_td_total}'>{total_net} Pairs</td>")
-        html_lines.append(f"<td style='{style_td_total}'>{formatted_total_amount}</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_sale} Pairs</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_cancel} Pairs</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_net} Pairs</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{formatted_total_amount}</td>")
         html_lines.append("</tr></tfoot></table>")
 
         analysis.write({

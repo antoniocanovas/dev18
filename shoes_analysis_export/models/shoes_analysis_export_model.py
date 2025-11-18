@@ -27,7 +27,5 @@ class ShoesAnalysisExport(models.TransientModel): # Usamos TransientModel, que e
     ranking_name = fields.Char('Nombre Ranking') # Para ranking de productos
     ranking_value = fields.Integer('Valor Ranking') # Para ranking de productos
     
-    # Campo de color (Many2one)
-    color_value_id = fields.Many2one('product.attribute.value', 'Color') 
     
     update_date = fields.Datetime('Fecha Actualización')
