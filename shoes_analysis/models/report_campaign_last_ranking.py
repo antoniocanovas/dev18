@@ -11,15 +11,17 @@ class ShoesAnalysis(models.Model):
         for analysis in self:
             campaign_id = analysis.shoes_campaign_id.id
             
-            horma_lines = self.env['shoes.ranking'].search([
+            horma_lines_domain = [
                 ('shoes_campaign_id', '=', campaign_id),
                 ('shoes_last_id', '!=', False)
-            ], order='ranking asc')
+            ]
+            horma_lines = self.env['shoes.ranking'].search(horma_lines_domain, order='ranking asc')
 
-            product_lines = self.env['shoes.ranking'].search([
+            product_lines_domain = [
                 ('shoes_campaign_id', '=', campaign_id),
                 ('product_tmpl_id', '!=', False)
-            ])
+            ]
+            product_lines = self.env['shoes.ranking'].search(product_lines_domain)
 
             analysis._generate_campaign_last_ranking_html(horma_lines, product_lines)
         

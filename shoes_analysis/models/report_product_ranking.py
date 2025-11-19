@@ -13,10 +13,11 @@ class ShoesAnalysis(models.Model):
         """
         for analysis in self:
             all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
-            all_ranking_lines = self.env['shoes.ranking'].search([
+            ranking_lines_domain = [
                 ('shoes_campaign_id', 'in', all_campaigns.ids),
                 ('product_tmpl_id', '!=', False)
-            ])
+            ]
+            all_ranking_lines = self.env['shoes.ranking'].search(ranking_lines_domain)
             sorted_lines = all_ranking_lines.sorted(key=lambda r: r.pairs_count_net, reverse=True)
             analysis._generate_ranking_html(sorted_lines)
         return True
@@ -82,16 +83,16 @@ class ShoesAnalysis(models.Model):
             prod_name = line.product_tmpl_id.name or "N/A"
             prod_ref = line.shoes_model_material_id.name or ""
             prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>{campaign_tag}"
-            formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=line.currency_id)
+            formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
             
             image_html = ""
             if line.image:
                 img_base64 = line.image.decode('utf-8')
-                image_html = f"<img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/>"
+                image_html = f"<div style='text-align: center;'><img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/></div>"
 
             html_lines.append(f"<tr {row_style}>")
             html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
-            html_lines.append(f"<td style='{style_td} text-align: center;'>{image_html}</td>")
+            html_lines.append(f"<td style='{style_td}'>{image_html}</td>")
             html_lines.append(f"<td style='{style_td} text-align: left;'>{prod_display}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")

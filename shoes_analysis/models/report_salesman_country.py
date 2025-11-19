@@ -14,6 +14,9 @@ class ShoesAnalysis(models.Model):
         return f'<td class="text-end" style="{style_str} color: {color};"><b>{perc:.1%}</b></td>'
 
     def _compute_salesman_country(self):
+        """
+        Genera el informe HTML y los datos JSON para las ventas agrupadas por representante y país.
+        """
         self.ensure_one()
         analysis = self
         
@@ -106,8 +109,11 @@ class ShoesAnalysis(models.Model):
             html_parts.extend(salesman_html)
             json_output.append(salesman_json)
 
+        resume_html = self._generate_resume_html(campaign_totals, analysis.shoes_campaign_id.id, analysis.shoes_campaign_ids)
+
         analysis.write({
             'analysis_html': "".join(html_parts),
+            'resume_html': resume_html,
             'data': json_output
         })
         return True

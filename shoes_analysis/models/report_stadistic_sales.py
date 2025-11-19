@@ -9,10 +9,6 @@ import base64
 class ShoesAnalysis(models.Model):
     _inherit = 'shoes.analysis'
 
-    # -----------------------------------------------------------------
-    # INFORME "STATISTIC SALES"
-    # -----------------------------------------------------------------
-
     def _compute_stadistic_sales(self):
         """
         Método principal que orquesta la actualización de datos y la
@@ -32,10 +28,6 @@ class ShoesAnalysis(models.Model):
             analysis._generate_stadistic_sale_html(product_ranking_lines)
 
         return True
-
-    # -----------------------------------------------------------------
-    # MÉTODO 2: GENERACIÓN DE HTML (NUEVO FORMATO)
-    # -----------------------------------------------------------------
 
     def _generate_stadistic_sale_html(self, ranking_lines):
         """

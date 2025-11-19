@@ -14,6 +14,9 @@ class ShoesAnalysis(models.Model):
         return f'<td class="text-end" style="{style_str} color: {color};"><b>{perc:.1%}</b></td>'
 
     def _compute_customer_comparison(self):
+        """
+        Genera el informe HTML y los datos JSON para la comparativa de ventas por cliente.
+        """
         self.ensure_one()
         analysis = self
         
@@ -26,7 +29,7 @@ class ShoesAnalysis(models.Model):
         domain = [
             ('order_id.shoes_campaign_id', 'in', all_campaigns.ids),
             ('order_id.state', 'in', ['sale', 'done']),
-            ('order_partner_id', '!=', False),
+            ('order_partner_id', '=', analysis.partner_id.id),
             '|',
                 '&', ('product_id.is_pair', '=', True), ('product_id.product_tmpl_id', '!=', False),
                 '&', ('product_id.is_assortment', '=', True), ('product_id.product_tmpl_single_id', '!=', False),

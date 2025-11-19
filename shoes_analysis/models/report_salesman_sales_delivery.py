@@ -1,6 +1,7 @@
 from odoo import fields, models, api
 import json
 from odoo.tools import html_escape
+from collections import defaultdict
 
 
 class ShoesAnalysis(models.Model):
@@ -24,7 +25,7 @@ class ShoesAnalysis(models.Model):
             })
             return True
 
-        # --- 1. Lógica de cálculo (sin cambios) ---
+        # --- 1. Lógica de cálculo ---
         product_domain_sql = "AND (pt.is_pair = TRUE OR pt.is_assortment = TRUE)"
         company_currency = self.env.company.currency_id
         campaign_name_map = {c.id: c.name for c in all_campaigns}
@@ -59,44 +60,50 @@ class ShoesAnalysis(models.Model):
         reserved_data = self.env.cr.dictfetchall()
 
         # --- 2. Combinar resultados ---
-        data_map = {}
-        # (Lógica de combinación de datos sin cambios)
-        salesman_ids = set(g['salesman_id'] for g in monetary_data if g['salesman_id']) | set(g['salesman_id'][0] for g in pairs_data_sold if g['salesman_id']) | set(g['salesman_id'][0] for g in pairs_data_cancel if g['salesman_id']) | set(g['salesman_id'] for g in reserved_data if g['salesman_id'])
-        salesman_name_map = {u.id: u.name for u in self.env['res.users'].browse(list(salesman_ids))}
-        currency_cache = {c.id: c for c in self.env['res.currency'].search([])}
+        data_map = defaultdict(lambda: {'representante': '', 'campanias_data': defaultdict(campaign_template)})
+        salesman_ids = set()
+        
         def campaign_template(): return {'total_sales': 0.0, 'expected_revenue': 0.0, 'pairs_count': 0, 'pairs_delivered': 0, 'pairs_pending': 0, 'pairs_line_cancelled': 0, 'pairs_order_cancelled': 0, 'pairs_reserved': 0}
-        def get_or_create_entry(user_id, campaign_id):
-            if user_id not in data_map: data_map[user_id] = {'representante': salesman_name_map.get(user_id, 'N/A'), 'campanias_data': {}}
-            if campaign_id not in data_map[user_id]['campanias_data']: data_map[user_id]['campanias_data'][campaign_id] = campaign_template()
-            return data_map[user_id]['campanias_data'][campaign_id]
+
         for group in monetary_data:
             user_id, campaign_id = group['salesman_id'], group['shoes_campaign_id']
             if not user_id or not campaign_id: continue
-            from_currency = currency_cache.get(group['currency_id'])
-            if not from_currency: continue
-            entry = get_or_create_entry(user_id, campaign_id)
+            salesman_ids.add(user_id)
+            
+            from_currency = self.env['res.currency'].browse(group['currency_id'])
+            entry = data_map[user_id]['campanias_data'][campaign_id]
             entry['total_sales'] += from_currency._convert(group['total_sales'] or 0.0, company_currency, self.env.company, group['date_order'])
             entry['expected_revenue'] += from_currency._convert(group['expected_revenue'] or 0.0, company_currency, self.env.company, group['date_order'])
+        
         for group in pairs_data_sold:
             if not group['salesman_id'] or not group['shoes_campaign_id']: continue
             user_id, campaign_id = group['salesman_id'][0], group['shoes_campaign_id'][0]
-            entry = get_or_create_entry(user_id, campaign_id)
+            salesman_ids.add(user_id)
+            entry = data_map[user_id]['campanias_data'][campaign_id]
             entry.update({'pairs_count': group['pairs_count'], 'pairs_delivered': group['shoes_pair_delivered_qty'], 'pairs_pending': group['shoes_pair_delivery_pending_qty'], 'pairs_line_cancelled': group['shoes_pair_cancelled_qty']})
+        
         for group in pairs_data_cancel:
             if not group['salesman_id'] or not group['shoes_campaign_id']: continue
             user_id, campaign_id = group['salesman_id'][0], group['shoes_campaign_id'][0]
-            entry = get_or_create_entry(user_id, campaign_id)
+            salesman_ids.add(user_id)
+            entry = data_map[user_id]['campanias_data'][campaign_id]
             entry['pairs_order_cancelled'] = group['pairs_count']
+        
         for group in reserved_data:
             user_id, campaign_id = group['salesman_id'], group['shoes_campaign_id']
             if not user_id or not campaign_id: continue
-            entry = get_or_create_entry(user_id, campaign_id)
+            salesman_ids.add(user_id)
+            entry = data_map[user_id]['campanias_data'][campaign_id]
             entry['pairs_reserved'] = group['total_reserved'] or 0
+
+        salesman_name_map = {u.id: u.name for u in self.env['res.users'].browse(list(salesman_ids))}
+        for user_id, user_data in data_map.items():
+            user_data['representante'] = salesman_name_map.get(user_id, 'N/A')
 
         # --- 3. Preparar datos para JSON y HTML ---
         analysis_html_parts = []
         data_for_json = []
-        campaign_totals = {}
+        campaign_totals = defaultdict(lambda: {'nombre': '', 'netos': 0, 'fact_prevista': 0.0})
         base_camp_id = analysis.shoes_campaign_id.id
         sorted_user_data = sorted(data_map.values(), key=lambda u: u['representante'])
 
@@ -119,8 +126,7 @@ class ShoesAnalysis(models.Model):
                 }
                 json_line_data['campanias'].append(camp_data_for_json)
 
-                if camp_id not in campaign_totals:
-                    campaign_totals[camp_id] = {'nombre': campaign_name_map.get(camp_id, 'N/A'), 'netos': 0, 'fact_prevista': 0.0}
+                campaign_totals[camp_id]['nombre'] = campaign_name_map.get(camp_id, 'N/A')
                 campaign_totals[camp_id]['netos'] += netos
                 campaign_totals[camp_id]['fact_prevista'] += totals['expected_revenue']
             

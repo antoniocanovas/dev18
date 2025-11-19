@@ -20,8 +20,7 @@ class ShoesAnalysis(models.Model):
         all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
 
         # 1. Asegura que los datos de TODAS las campañas están actualizados
-        for campaign in all_campaigns:
-            self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
+        self.env['shoes.ranking']._update_ranking_for_campaign(all_campaigns)
 
         # 2. Obtener el ranking general de productos para TODAS las campañas
         product_ranking_lines = self.env['shoes.ranking'].search([
@@ -93,7 +92,7 @@ class ShoesAnalysis(models.Model):
         campaign_color_map = {c.id: colors[i % len(colors)] for i, c in enumerate(analysis.shoes_campaign_ids)}
 
         style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;"
-        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; font-weight: 600;"
+        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; text-align: left; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
         
         html_parts.append(f"<table style='{style_table}'>")

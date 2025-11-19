@@ -10,10 +10,11 @@ class ShoesAnalysis(models.Model):
         """
         for analysis in self:
             all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
-            all_ranking_lines = self.env['shoes.ranking'].search([
+            ranking_lines_domain = [
                 ('shoes_campaign_id', 'in', all_campaigns.ids),
                 ('shoes_last_id', '!=', False)
-            ])
+            ]
+            all_ranking_lines = self.env['shoes.ranking'].search(ranking_lines_domain)
             sorted_lines = all_ranking_lines.sorted(key=lambda r: r.pairs_count_net, reverse=True)
             analysis._generate_last_ranking_html(sorted_lines)
         return True
@@ -77,7 +78,7 @@ class ShoesAnalysis(models.Model):
             campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.name})</span>"
             last_name = line.shoes_last_id.name or "N/A"
             last_display = f"<strong>{last_name}</strong>{campaign_tag}"
-            formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=line.currency_id)
+            formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
 
             html_lines.append(f"<tr {row_style}>")
             html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")

@@ -14,6 +14,9 @@ class ShoesAnalysis(models.Model):
         return f'<td class="text-end" style="{style_str} color: {color};"><b>{perc:.1%}</b></td>'
 
     def _compute_sales_by_country(self):
+        """
+        Genera el informe HTML y los datos JSON para las ventas agrupadas por país.
+        """
         self.ensure_one()
         analysis = self
         

@@ -14,6 +14,9 @@ class ShoesAnalysis(models.Model):
         return f'<td class="text-end" style="{style_str} color: {color};"><b>{perc:.1%}</b></td>'
 
     def _compute_manufacturer_sales(self):
+        """
+        Genera el informe HTML y los datos JSON para las ventas agrupadas por fabricante.
+        """
         self.ensure_one()
         analysis = self
         
@@ -23,7 +26,6 @@ class ShoesAnalysis(models.Model):
             return True
 
         # 1. Lógica de cálculo
-        campaign_name_map = {c.id: c.name for c in all_campaigns}
         domain = [
             ('order_id.shoes_campaign_id', 'in', all_campaigns.ids),
             ('order_id.state', 'in', ['sale', 'done']),

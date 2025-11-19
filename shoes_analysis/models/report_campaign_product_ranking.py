@@ -10,15 +10,22 @@ class ShoesAnalysis(models.Model):
     _inherit = 'shoes.analysis'
 
     def _compute_campaign_product_ranking(self):
+        """
+        Genera el informe HTML y los datos JSON para el ranking de productos por campaña.
+        """
         for analysis in self:
-            product_ranking_lines = self.env['shoes.ranking'].search([
+            ranking_lines_domain = [
                 ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
                 ('product_tmpl_id', '!=', False)
-            ])
+            ]
+            product_ranking_lines = self.env['shoes.ranking'].search(ranking_lines_domain)
             analysis._generate_campaign_product_ranking_html(product_ranking_lines)
         return True
 
     def _generate_campaign_product_ranking_html(self, ranking_lines):
+        """
+        Genera el HTML y los datos JSON para el ranking de productos por campaña.
+        """
         self.ensure_one()
         if not ranking_lines:
             self.write({
