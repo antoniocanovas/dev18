@@ -10,6 +10,8 @@ class ShoesAnalysis(models.Model):
         correcto según el tipo de informe actual.
         """
         self.ensure_one()
+        if not self.analysis_html:
+            return False
         
         # Mapeo de tipos de informe a sus vistas de lista y métodos de parseo
         export_config = {

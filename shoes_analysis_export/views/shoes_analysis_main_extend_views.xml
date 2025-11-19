@@ -12,7 +12,7 @@
                         string="Exportar"
                         class="oe_stat_button"
                         icon="fa-file-excel-o"
-                        invisible="type not in ['salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 'sales_by_country', 'sales_by_shipping_mark', 'product_ranking', 'last_ranking', 'campaign_product_ranking', 'campaign_last_ranking', 'salesman_model', 'customer_comparison']"/>
+                        invisible="type not in ['salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 'sales_by_country', 'sales_by_shipping_mark', 'product_ranking', 'last_ranking', 'campaign_product_ranking', 'campaign_last_ranking', 'salesman_model', 'customer_comparison'] or not analysis_html"/>
             </xpath>
         </field>
     </record>
