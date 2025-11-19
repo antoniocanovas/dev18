@@ -8,7 +8,7 @@ class ShoesAnalysisExport(models.TransientModel): # Usamos TransientModel, que e
     
     # Campos de Agrupación
     partner_id = fields.Many2one('res.partner', 'Cliente', ondelete='set null')
-    salesman_id = fields.Many2one('res.users', 'Vendedor', ondelete='set null')
+    referrer_id = fields.Many2one('res.users', 'Representante', ondelete='set null')
     country_id = fields.Many2one('res.country', 'País', ondelete='set null')
     manufacturer_id = fields.Many2one('res.partner', 'Fabricante', ondelete='set null') # Asumiendo res.partner para fabricante
     sale_type_id = fields.Many2one('sale.order.type', 'Timbrado', ondelete='set null')

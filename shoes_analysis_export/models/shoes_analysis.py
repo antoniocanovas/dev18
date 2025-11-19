@@ -71,7 +71,7 @@ class ShoesAnalysis(models.Model):
             records_to_delete.write({
                 'analysis_id': False,
                 'partner_id': False,
-                'salesman_id': False,
+                'referrer_id': False,
                 'country_id': False,
                 'manufacturer_id': False,
                 'sale_type_id': False,
@@ -106,7 +106,7 @@ class ShoesAnalysis(models.Model):
         for salesman_data in json_data.get('detalle_representantes', []):
             for campaign_data in salesman_data.get('campanias', []):
                 lines_to_create.append({
-                    'salesman_id': self.env['res.users'].search([('name', '=', salesman_data.get('representante'))], limit=1).id,
+                    'referrer_id': self.env['res.users'].search([('name', '=', salesman_data.get('representante'))], limit=1).id,
                     'campaign_id': self.shoes_campaign_id.id,
                     'net_pairs': campaign_data.get('netos'),
                     'net_sales': campaign_data.get('total_vendido'),
@@ -120,12 +120,12 @@ class ShoesAnalysis(models.Model):
         """ Parsea los datos JSON para el informe 'salesman_country'. """
         lines_to_create = []
         for salesman_data in json_data: # La estructura JSON es una lista de representantes
-            salesman_id = self.env['res.users'].search([('name', '=', salesman_data.get('salesman_name'))], limit=1).id
+            referrer_id = self.env['res.users'].search([('name', '=', salesman_data.get('salesman_name'))], limit=1).id
             for country_data in salesman_data.get('countries', []):
                 country_id = self.env['res.country'].search([('name', '=', country_data.get('country_name'))], limit=1).id
                 for campaign_data in country_data.get('campaigns', []):
                     lines_to_create.append({
-                        'salesman_id': salesman_id,
+                        'referrer_id': referrer_id,
                         'country_id': country_id,
                         'campaign_id': self.shoes_campaign_id.id,
                         'net_pairs': campaign_data.get('net_pairs'),
@@ -265,7 +265,7 @@ class ShoesAnalysis(models.Model):
         lines_to_create = []
         for item in json_data:
             lines_to_create.append({
-                'partner_id': item.get('partner_id'),
+                'referrer_id': item.get('referrer_id'),
                 'ranking_value': item.get('ranking_value'),
                 'product_material_id': item.get('shoes_model_material_id'),
                 'ranking_name': item.get('product_name'),

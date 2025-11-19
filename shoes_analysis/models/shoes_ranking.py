@@ -31,11 +31,6 @@ class ShoesRanking(models.Model):
         string='Shoes last'
     )
 
-    referrer_id = fields.Many2one(
-        comodel_name='res.partner',
-        string='Referrer'
-    )
-
     image = fields.Binary(
         string='Image',
         related='product_tmpl_id.image_256',

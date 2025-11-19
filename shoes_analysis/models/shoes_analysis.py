@@ -54,7 +54,7 @@ class ShoesAnalysis(models.Model):
     )
 
     referrer_id = fields.Many2one(
-        comodel_name='res.partner',
+        comodel_name='res.users',
         string='Referrer'
     )
 
@@ -95,15 +95,11 @@ class ShoesAnalysis(models.Model):
         for analysis in self:
             analysis.ranking_line_ids = False
             if analysis.type in ('product_ranking', 'campaign_product_ranking'):
-                analysis.ranking_line_ids = self.env['shoes.ranking'].search([
-                    ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
-                    ('product_tmpl_id', '!=', False)
-                ])
+                domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id), ('product_tmpl_id', '!=', False)]
+                analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
             elif analysis.type in ('last_ranking', 'campaign_last_ranking'):
-                analysis.ranking_line_ids = self.env['shoes.ranking'].search([
-                    ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
-                    ('shoes_last_id', '!=', False)
-                ])
+                domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id), ('shoes_last_id', '!=', False)]
+                analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
 
     def update_shoes_analysis(self):
         """
@@ -133,8 +129,8 @@ class ShoesAnalysis(models.Model):
             tag, label = ("b", " (Actual)") if is_base else ("span", " (Objetivo)")
             return (f'<tr><td><{tag}>{html_escape(data["nombre"])}{label}</{tag}></td>'
                     f'<td class="text-end"><{tag}>{netos} Pairs</{tag}></td>'
-                    f'<td class="text-end"><{tag}>{fact_prevista:.2f} €</{tag}></td>'
-                    f'<td class="text-end"><{tag}>{avg_price:.2f} €</{tag}></td></tr>')
+                    f'<td class="text-end"><{tag}>{formatLang(self.env, fact_prevista, currency_obj=self.currency_id)}</{tag}></td>'
+                    f'<td class="text-end"><{tag}>{formatLang(self.env, avg_price, currency_obj=self.currency_id)}</{tag}></td></tr>')
         if base_camp_id: html_parts.append(create_row(base_camp_id, is_base=True))
         for obj_camp in comparison_campaigns:
             if obj_camp.id != base_camp_id: html_parts.append(create_row(obj_camp.id))

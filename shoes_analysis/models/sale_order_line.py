@@ -61,7 +61,7 @@ class SaleOrderLine(models.Model):
         digits='Product Unit of Measure'
     )
 
-    @api.depends('qty_delivered', 'product_uom_qty', 'pairs_count', 'move_ids.product_uom_qty', 'move_ids.state', 'move_ids.reserved_availability')
+    @api.depends('qty_delivered', 'product_uom_qty', 'pairs_count', 'move_ids.product_uom_qty', 'move_ids.state', 'move_ids.forecast_availability')
     def _compute_shoes_pair_quantities(self):
         """
         Calcula las cantidades en pares para entregados, pendientes, cancelados y reservados.
@@ -80,7 +80,7 @@ class SaleOrderLine(models.Model):
             record.shoes_pair_cancelled_qty = (record.product_uom_qty - record.qty_delivered - pending_qty) * pairs_factor
 
             # Pares reservados
-            reserved_qty = sum(move.reserved_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
+            reserved_qty = sum(move.forecast_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
             record.shoes_pair_reserved_qty = reserved_qty * pairs_factor
 
     @api.depends('move_ids.product_uom_qty', 'move_ids.state')
@@ -101,11 +101,11 @@ class SaleOrderLine(models.Model):
         for record in self:
             record.cancelled_qty = record.product_uom_qty - record.qty_delivered - record.delivery_pending_qty
 
-    @api.depends('move_ids.reserved_availability', 'move_ids.state')
+    @api.depends('move_ids.forecast_availability', 'move_ids.state')
     def _compute_reserved_qty(self):
         """
         Calcula la cantidad reservada (en unidades) sumando la disponibilidad reservada
         de todos los movimientos de stock que no estén 'hechos' o 'cancelados'.
         """
         for record in self:
-            record.reserved_qty = sum(move.reserved_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
+            record.reserved_qty = sum(move.forecast_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))

@@ -7,14 +7,14 @@ class ShoesAnalysis(models.Model):
 
     def _compute_salesman_model(self):
         """
-        Genera un informe de ventas de modelos para un cliente, incluyendo
+        Genera un informe de ventas de modelos para un representante, incluyendo
         comparativas con otras campañas.
         """
         self.ensure_one()
         analysis = self
 
-        if not analysis.partner_id or not analysis.shoes_campaign_id:
-            analysis.analysis_html = "<p>Por favor, seleccione una campaña y un cliente.</p>"
+        if not analysis.referrer_id or not analysis.shoes_campaign_id:
+            analysis.analysis_html = "<p>Por favor, seleccione una campaña y un representante.</p>"
             return True
 
         all_campaigns = analysis.shoes_campaign_id | analysis.shoes_campaign_ids
@@ -31,10 +31,10 @@ class ShoesAnalysis(models.Model):
         for line in product_ranking_lines:
             product_rank_map[line.shoes_campaign_id.id][line.product_tmpl_id.id] = line
 
-        # 3. Obtener datos de ventas para el cliente en TODAS las campañas
+        # 3. Obtener datos de ventas para el representante en TODAS las campañas
         domain = [
             ('order_id.shoes_campaign_id', 'in', all_campaigns.ids),
-            ('order_id.partner_id', '=', analysis.partner_id.id),
+            ('order_id.user_id', '=', analysis.referrer_id.id), # Filtrar por user_id del pedido
             ('order_id.state', 'in', ['sale', 'done']),
             '|',
                 '&', ('product_id.is_pair', '=', True), ('product_id.product_tmpl_id', '!=', False),
@@ -69,8 +69,8 @@ class ShoesAnalysis(models.Model):
                 if venta_neta > 0:
                     ranking_line = product_rank_map.get(campaign_id, {}).get(tmpl_id)
                     processed_list.append({
-                        'partner_id': analysis.partner_id.id,
-                        'partner_name': analysis.partner_id.name,
+                        'referrer_id': analysis.referrer_id.id,
+                        'referrer_name': analysis.referrer_id.name,
                         'campaign_id': campaign_id,
                         'product_id': product_map[tmpl_id].id,
                         'shoes_model_material_id': product_map[tmpl_id].shoes_model_material_id.id,

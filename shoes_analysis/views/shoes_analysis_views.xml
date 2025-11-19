@@ -45,6 +45,10 @@
                             <field name="shoes_campaign_ids" widget="many2many_tags"
                                    invisible="type in ['campaign_last_ranking','campaign_product_ranking']"/>
                             <field name="partner_id"
+                                   invisible="type == 'salesman_model'"
+                                   required="type != 'salesman_model'"/>
+                            <field name="referrer_id"
+                                   string="Representante"
                                    invisible="type != 'salesman_model'"
                                    required="type == 'salesman_model'"/>
                             <field name="type" groups="base.group_no_one" readonly="1"/>

@@ -46,6 +46,7 @@ class ShoesAnalysis(models.Model):
         # 2. Estructurar datos
         data_map = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'net_pairs': 0, 'net_sales': 0})))
         all_salesman_ids = set()
+        campaign_totals = defaultdict(lambda: {'nombre': '', 'netos': 0, 'fact_prevista': 0.0}) # Initialize campaign_totals
         
         for group in sales_data:
             salesman_id = group['salesman_id'][0]
@@ -54,8 +55,15 @@ class ShoesAnalysis(models.Model):
             all_salesman_ids.add(salesman_id)
             
             net_pairs = (group['product_uom_qty'] * group.get('pairs_count', 1)) - group.get('shoes_pair_cancelled_qty', 0)
+            net_sales = group['price_subtotal']
+
             data_map[salesman_id][country_id][campaign_id]['net_pairs'] += net_pairs
-            data_map[salesman_id][country_id][campaign_id]['net_sales'] += group['price_subtotal']
+            data_map[salesman_id][country_id][campaign_id]['net_sales'] += net_sales
+
+            # Populate campaign_totals
+            campaign_totals[campaign_id]['nombre'] = self.env['project.project'].browse(campaign_id).name
+            campaign_totals[campaign_id]['netos'] += net_pairs
+            campaign_totals[campaign_id]['fact_prevista'] += net_sales
 
         # 3. Generar HTML y JSON
         html_parts, json_output = [], []
