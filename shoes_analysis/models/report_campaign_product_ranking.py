@@ -29,11 +29,15 @@ class ShoesAnalysis(models.Model):
         
         html_cards = [self._generate_product_card_html(line) for line in ranking_lines]
         
-        data_for_json = ranking_lines.read([
-            'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
-            'pairs_count_net', 'sale_net_amount', 'currency_id',
-            'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
-        ])
+        data_for_json = []
+        for line in ranking_lines:
+            line_data = line.read([
+                'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
+                'pairs_count_net', 'sale_net_amount', 'currency_id',
+                'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
+            ])[0]
+            line_data['colors'] = self._get_color_statistics(line.product_tmpl_id, line.shoes_campaign_id)
+            data_for_json.append(line_data)
 
         self.write({
             'analysis_html': "\n".join(html_cards),

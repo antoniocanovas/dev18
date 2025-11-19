@@ -15,9 +15,9 @@
               sequence="10"
               groups="base.group_user"/>
 
-    <!-- Por representante y país -->
+    <!-- Ventas por representante y país -->
     <menuitem id="menu_sales_by_rep_country"
-              name="Por representante y país"
+              name="Ventas por representante y país"
               parent="menu_shoes_analysis_root"
               action="action_sales_by_rep_country"
               sequence="20"
@@ -63,33 +63,33 @@
               sequence="40"
               groups="base.group_user"/>
 
-    <!-- Campaign product ranking -->
+    <!-- Ranking de productos por campaña con colores -->
     <menuitem id="menu_campaign_product_ranking"
-              name="Campaign product ranking"
+              name="Ranking de productos por campaña con colores"
               parent="menu_shoes_analysis_root"
               action="action_campaign_product_ranking"
               sequence="50"
               groups="base.group_user"/>
 
-    <!-- Campaign last ranking -->
+    <!-- Ranking de hormas por campaña con modelos y colores -->
     <menuitem id="menu_campaign_last_ranking"
-              name="Campaign last ranking"
+              name="Ranking de hormas por campaña con modelos y colores"
               parent="menu_shoes_analysis_root"
               action="action_campaign_last_ranking"
               sequence="60"
               groups="base.group_user"/>
 
-    <!-- Ventas de Modelos hechas por Representante y Posición en ventas -->
+    <!-- Ventas de representante por modelo -->
     <menuitem id="menu_model_sales_by_rep_position"
-              name="Ventas de Modelos hechas por Representante y Posición en ventas"
+              name="Ventas de representante por modelo"
               parent="menu_shoes_analysis_root"
               action="action_model_sales_by_rep_position"
               sequence="70"
               groups="base.group_user"/>
 
-    <!-- Comparativa de ventas por cliente -->
+    <!-- Ventas a cliente por campañas -->
     <menuitem id="menu_sales_comparison_by_customer"
-              name="Comparativa de ventas por cliente"
+              name="Ventas a cliente por campañas"
               parent="menu_shoes_analysis_root"
               action="action_sales_comparison_by_customer"
               sequence="80"

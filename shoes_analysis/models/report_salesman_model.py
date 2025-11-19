@@ -70,8 +70,12 @@ class ShoesAnalysis(models.Model):
                 if venta_neta > 0:
                     ranking_line = product_rank_map.get(campaign_id, {}).get(tmpl_id)
                     processed_list.append({
+                        'partner_id': analysis.partner_id.id,
+                        'partner_name': analysis.partner_id.name,
                         'campaign_id': campaign_id,
                         'product_id': product_map[tmpl_id].id,
+                        'shoes_model_material_id': product_map[tmpl_id].shoes_model_material_id.id,
+                        'shoes_model_material_name': product_map[tmpl_id].shoes_model_material_id.name,
                         'product_name': product_map[tmpl_id].name,
                         'pedidos': data['pedidos'],
                         'anulados': data['anulados'],
@@ -89,7 +93,7 @@ class ShoesAnalysis(models.Model):
         campaign_color_map = {c.id: colors[i % len(colors)] for i, c in enumerate(analysis.shoes_campaign_ids)}
 
         style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;"
-        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; text-align: left; font-weight: 600;"
+        style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
         
         html_parts.append(f"<table style='{style_table}'>")
@@ -97,7 +101,7 @@ class ShoesAnalysis(models.Model):
             <thead>
                 <tr>
                     <th style='{style_th} width: 15%;'>Ranking</th>
-                    <th style='{style_th} width: 10%;'>Imagen</th>
+                    <th style='{style_th} width: 10%; text-align: center;'>Imagen</th>
                     <th style='{style_th} width: 15%;'>Artículo</th>
                     <th style='{style_th} width: 30%;'>Nombre modelo</th>
                     <th style='{style_th} width: 10%; text-align: right;'>Pedidos</th>
@@ -132,12 +136,12 @@ class ShoesAnalysis(models.Model):
             image_html = ""
             if product.image_256:
                 img_base64 = product.image_256.decode('utf-8')
-                image_html = f"<img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;'/>"
+                image_html = f"<div style='text-align: center;'><img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;'/></div>"
 
             html_parts.append(f"""
                 <tr {row_style}>
                     <td style='{style_td} font-weight: {font_weight_style};'>{item['ranking_name']}</td>
-                    <td style='{style_td} text-align: center;'>{image_html}</td>
+                    <td style='{style_td}'>{image_html}</td>
                     <td style='{style_td}'>{product.shoes_model_material_id.name or ''}</td>
                     <td style='{style_td}'>{product.name}{campaign_tag}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['pedidos'])}</td>

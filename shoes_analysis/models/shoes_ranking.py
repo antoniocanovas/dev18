@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 from odoo.tools import float_is_zero
+from collections import defaultdict
 
 class ShoesRanking(models.Model):
     _name = 'shoes.ranking'
@@ -30,6 +31,11 @@ class ShoesRanking(models.Model):
         string='Shoes last'
     )
 
+    referrer_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Referrer'
+    )
+
     image = fields.Binary(
         string='Image',
         related='product_tmpl_id.image_256',
@@ -50,79 +56,65 @@ class ShoesRanking(models.Model):
         'res.currency', string='Currency', default=lambda self: self.env.user.company_id.currency_id)
 
     @api.model
-    def _update_ranking_for_campaign(cls, campaign):
+    def _update_ranking_for_campaign(cls, campaigns):
         """
-        Método principal que calcula y actualiza los rankings (por producto y por horma)
-        para una campaña específica.
+        Calcula y actualiza los rankings (por producto y por horma) para las campañas dadas.
         """
-        if not campaign:
+        if not campaigns:
             return
 
-        # 1. Agregar datos de ventas en dos diccionarios separados
-        sale_lines = cls.env['sale.order.line'].search([
-            ('order_id.shoes_campaign_id', '=', campaign.id),
-            ('order_id.state', 'in', ['sale', 'done']),
-            '|',
-            ('product_id.is_assortment', '=', True),
-            ('product_id.is_pair', '=', True)
-        ])
-
-        product_agg_data = {}
-        last_agg_data = {}
         company_currency = cls.env.company.currency_id
 
-        for line in sale_lines:
-            product = line.product_id
-            target_template = None
-            if product.is_assortment and product.product_tmpl_single_id:
-                target_template = product.product_tmpl_single_id
-            elif product.is_pair:
-                target_template = product.product_tmpl_id
-            
-            if not target_template:
-                continue
+        for campaign in campaigns:
+            sale_lines = cls.env['sale.order.line'].search([
+                ('order_id.shoes_campaign_id', '=', campaign.id),
+                ('order_id.state', 'in', ['sale', 'done']),
+                '|',
+                ('product_id.is_assortment', '=', True),
+                ('product_id.is_pair', '=', True)
+            ])
 
-            # --- Datos comunes ---
-            line_pairs_gross = line.product_uom_qty * line.pairs_count
-            line_pairs_cancelled = line.shoes_pair_cancelled_qty
-            line_pairs_net = line_pairs_gross - line_pairs_cancelled
-            line_amount_company_currency = 0.0
-            if not float_is_zero(line.price_subtotal, precision_rounding=company_currency.rounding):
-                order_currency = line.order_id.currency_id
-                order_date = line.order_id.date_order or fields.Date.today()
-                line_amount_company_currency = order_currency._convert(
-                    from_amount=line.price_subtotal,
-                    to_currency=company_currency,
-                    company=cls.env.company,
-                    date=order_date
-                )
+            product_agg_data = defaultdict(lambda: {"pairs_count_sale": 0.0, "pairs_count_cancel": 0.0, "pairs_count_net": 0.0, "sale_net_amount": 0.0})
+            last_agg_data = defaultdict(lambda: {"pairs_count_sale": 0.0, "pairs_count_cancel": 0.0, "pairs_count_net": 0.0, "sale_net_amount": 0.0})
 
-            # --- Agregación por Producto ---
-            prod_key = target_template.id
-            if prod_key not in product_agg_data:
-                product_agg_data[prod_key] = {"pairs_count_sale": 0.0, "pairs_count_cancel": 0.0, "pairs_count_net": 0.0, "sale_net_amount": 0.0}
-            
-            product_agg_data[prod_key]["pairs_count_sale"] += line_pairs_gross
-            product_agg_data[prod_key]["pairs_count_cancel"] += line_pairs_cancelled
-            product_agg_data[prod_key]["pairs_count_net"] += line_pairs_net
-            product_agg_data[prod_key]["sale_net_amount"] += line_amount_company_currency
+            for line in sale_lines:
+                product = line.product_id
+                target_template = product.product_tmpl_single_id if product.is_assortment else product.product_tmpl_id
+                
+                if not target_template:
+                    continue
 
-            # --- Agregación por Horma ---
-            if target_template.shoes_last_id:
-                last_key = target_template.shoes_last_id.id
-                if last_key not in last_agg_data:
-                    last_agg_data[last_key] = {"pairs_count_sale": 0.0, "pairs_count_cancel": 0.0, "pairs_count_net": 0.0, "sale_net_amount": 0.0}
+                line_pairs_gross = line.product_uom_qty * line.pairs_count
+                line_pairs_cancelled = line.shoes_pair_cancelled_qty
+                line_pairs_net = line_pairs_gross - line_pairs_cancelled
+                
+                line_amount_company_currency = 0.0
+                if not float_is_zero(line.price_subtotal, precision_rounding=company_currency.rounding):
+                    order_currency = line.order_id.currency_id
+                    order_date = line.order_id.date_order or fields.Date.today()
+                    line_amount_company_currency = order_currency._convert(
+                        from_amount=line.price_subtotal,
+                        to_currency=company_currency,
+                        company=cls.env.company,
+                        date=order_date
+                    )
 
-                last_agg_data[last_key]["pairs_count_sale"] += line_pairs_gross
-                last_agg_data[last_key]["pairs_count_cancel"] += line_pairs_cancelled
-                last_agg_data[last_key]["pairs_count_net"] += line_pairs_net
-                last_agg_data[last_key]["sale_net_amount"] += line_amount_company_currency
+                # Agregación por Producto
+                product_agg_data[target_template.id]["pairs_count_sale"] += line_pairs_gross
+                product_agg_data[target_template.id]["pairs_count_cancel"] += line_pairs_cancelled
+                product_agg_data[target_template.id]["pairs_count_net"] += line_pairs_net
+                product_agg_data[target_template.id]["sale_net_amount"] += line_amount_company_currency
 
-        # --- 2. PROCESAR RANKING POR PRODUCTO ---
-        cls._process_ranking_type(campaign, product_agg_data, 'product_tmpl_id')
+                # Agregación por Horma
+                if target_template.shoes_last_id:
+                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_sale"] += line_pairs_gross
+                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_cancel"] += line_pairs_cancelled
+                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_net"] += line_pairs_net
+                    last_agg_data[target_template.shoes_last_id.id]["sale_net_amount"] += line_amount_company_currency
 
-        # --- 3. PROCESAR RANKING POR HORMA ---
-        cls._process_ranking_type(campaign, last_agg_data, 'shoes_last_id')
+            # Procesar ranking por producto y por horma
+            cls._process_ranking_type(campaign, product_agg_data, 'product_tmpl_id')
+            cls._process_ranking_type(campaign, last_agg_data, 'shoes_last_id')
 
     @api.model
     def _process_ranking_type(cls, campaign, aggregated_data, field_name):

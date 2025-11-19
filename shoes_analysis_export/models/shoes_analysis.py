@@ -53,13 +53,36 @@ class ShoesAnalysis(models.Model):
                 'view_id': 'shoes_analysis_export.shoes_analysis_export_salesman_model_list_view',
                 'parser': '_parse_salesman_model_data',
             },
+            'customer_comparison': {
+                'view_id': 'shoes_analysis_export.shoes_analysis_export_customer_comparison_list_view',
+                'parser': '_parse_customer_comparison_data',
+            },
         }
         
         config = export_config.get(self.type)
         if not config:
             raise UserError(f"La exportación a hoja de cálculo no está implementada para el tipo de informe: {self.type}")
 
-        export_model = self.env['shoes.analysis.export'] # Siempre el mismo modelo transitorio
+        export_model = self.env['shoes.analysis.export']
+        
+        # Borrar registros antiguos para este análisis
+        records_to_delete = export_model.search([('analysis_id', '=', self.id)])
+        if records_to_delete:
+            records_to_delete.write({
+                'analysis_id': False,
+                'partner_id': False,
+                'salesman_id': False,
+                'country_id': False,
+                'manufacturer_id': False,
+                'sale_type_id': False,
+                'last_id': False,
+                'campaign_id': False,
+                'product_tmpl_id': False,
+                'product_material_id': False,
+                'color_value_id': False,
+            })
+            records_to_delete.unlink()
+
         parser_method = getattr(self, config['parser'])
         
         # Crear los registros transitorios
@@ -84,7 +107,7 @@ class ShoesAnalysis(models.Model):
             for campaign_data in salesman_data.get('campanias', []):
                 lines_to_create.append({
                     'salesman_id': self.env['res.users'].search([('name', '=', salesman_data.get('representante'))], limit=1).id,
-                    'campaign_id': campaign_data.get('campania_id'),
+                    'campaign_id': self.shoes_campaign_id.id,
                     'net_pairs': campaign_data.get('netos'),
                     'net_sales': campaign_data.get('total_vendido'),
                     'cancelled_pairs': campaign_data.get('total_cancelados'),
@@ -104,7 +127,7 @@ class ShoesAnalysis(models.Model):
                     lines_to_create.append({
                         'salesman_id': salesman_id,
                         'country_id': country_id,
-                        'campaign_id': campaign_data.get('campaign_id'),
+                        'campaign_id': self.shoes_campaign_id.id,
                         'net_pairs': campaign_data.get('net_pairs'),
                         'net_sales': campaign_data.get('net_sales'),
                         'total_pairs': campaign_data.get('total_pairs'),
@@ -121,7 +144,7 @@ class ShoesAnalysis(models.Model):
             for campaign_data in manufacturer_data.get('campaigns', []):
                 lines_to_create.append({
                     'manufacturer_id': manufacturer_id,
-                    'campaign_id': campaign_data.get('campaign_id'),
+                    'campaign_id': self.shoes_campaign_id.id,
                     'net_pairs': campaign_data.get('net_pairs'),
                     'net_sales': campaign_data.get('net_sales'),
                     'analysis_id': self.id, # Enlazar con el análisis original
@@ -136,7 +159,7 @@ class ShoesAnalysis(models.Model):
             for campaign_data in country_data.get('campaigns', []):
                 lines_to_create.append({
                     'country_id': country_id,
-                    'campaign_id': campaign_data.get('campaign_id'),
+                    'campaign_id': self.shoes_campaign_id.id,
                     'net_pairs': campaign_data.get('net_pairs'),
                     'net_sales': campaign_data.get('net_sales'),
                     'analysis_id': self.id, # Enlazar con el análisis original
@@ -151,7 +174,7 @@ class ShoesAnalysis(models.Model):
             for campaign_data in mark_data.get('campaigns', []):
                 lines_to_create.append({
                     'sale_type_id': sale_type_id,
-                    'campaign_id': campaign_data.get('campaign_id'),
+                    'campaign_id': self.shoes_campaign_id.id,
                     'net_pairs': campaign_data.get('net_pairs'),
                     'net_sales': campaign_data.get('net_sales'),
                     'analysis_id': self.id, # Enlazar con el análisis original
@@ -166,7 +189,7 @@ class ShoesAnalysis(models.Model):
                 'ranking_name': item.get('name'),
                 'ranking_value': item.get('ranking'),
                 'product_tmpl_id': item.get('product_tmpl_id')[0] if item.get('product_tmpl_id') else False,
-                'campaign_id': item.get('shoes_campaign_id')[0] if item.get('shoes_campaign_id') else False,
+                'campaign_id': self.shoes_campaign_id.id,
                 'net_pairs': item.get('pairs_count_net'),
                 'net_sales': item.get('sale_net_amount'),
                 'total_pairs': item.get('pairs_count_sale'),
@@ -183,7 +206,7 @@ class ShoesAnalysis(models.Model):
                 'ranking_name': item.get('name'),
                 'ranking_value': item.get('ranking'),
                 'last_id': item.get('shoes_last_id')[0] if item.get('shoes_last_id') else False,
-                'campaign_id': item.get('shoes_campaign_id')[0] if item.get('shoes_campaign_id') else False,
+                'campaign_id': self.shoes_campaign_id.id,
                 'net_pairs': item.get('pairs_count_net'),
                 'net_sales': item.get('sale_net_amount'),
                 'total_pairs': item.get('pairs_count_sale'),
@@ -198,18 +221,18 @@ class ShoesAnalysis(models.Model):
         """
         lines_to_create = []
         for item in json_data:
-            lines_to_create.append({
-                'ranking_name': item.get('name'),
-                'ranking_value': item.get('ranking'),
-                'product_tmpl_id': item.get('product_tmpl_id')[0] if item.get('product_tmpl_id') else False,
-                'product_material_id': item.get('shoes_model_material_id')[0] if item.get('shoes_model_material_id') else False,
-                'campaign_id': item.get('shoes_campaign_id')[0] if item.get('shoes_campaign_id') else False,
-                'net_pairs': item.get('pairs_count_net'),
-                'net_sales': item.get('sale_net_amount'),
-                'total_pairs': item.get('pairs_count_sale'),
-                'cancelled_pairs': item.get('pairs_count_cancel'),
-                'analysis_id': self.id,
-            })
+            for color in item.get('colors', []):
+                lines_to_create.append({
+                    'ranking_value': item.get('ranking'),
+                    'ranking_name': item.get('name'),
+                    'product_material_id': item.get('shoes_model_material_id')[0] if item.get('shoes_model_material_id') else False,
+                    'color_value_id': self.env['product.attribute.value'].search([('name', '=', color.get('color_name'))], limit=1).id,
+                    'sold_pairs': color.get('sold'),
+                    'produced_pairs': color.get('produced'),
+                    'estimated_stock': color.get('stock'),
+                    'analysis_id': self.id,
+                    'campaign_id': self.shoes_campaign_id.id,
+                })
         return lines_to_create
 
     def _parse_campaign_last_ranking_data(self, json_data):
@@ -218,19 +241,21 @@ class ShoesAnalysis(models.Model):
         """
         lines_to_create = []
         for item in json_data:
-            lines_to_create.append({
-                'last_id': item.get('shoes_last_id')[0] if item.get('shoes_last_id') else False,
-                'ranking_name': item.get('name'),
-                'ranking_value': item.get('ranking'),
-                'product_tmpl_id': item.get('product_tmpl_id')[0] if item.get('product_tmpl_id') else False,
-                'product_material_id': item.get('shoes_model_material_id')[0] if item.get('shoes_model_material_id') else False,
-                'campaign_id': item.get('shoes_campaign_id')[0] if item.get('shoes_campaign_id') else False,
-                'net_pairs': item.get('pairs_count_net'),
-                'net_sales': item.get('sale_net_amount'),
-                'total_pairs': item.get('pairs_count_sale'),
-                'cancelled_pairs': item.get('pairs_count_cancel'),
-                'analysis_id': self.id,
-            })
+            for product in item.get('products', []):
+                for color in product.get('colors', []):
+                    lines_to_create.append({
+                        'last_id': item.get('shoes_last_id')[0] if item.get('shoes_last_id') else False,
+                        'product_tmpl_id': product.get('product_tmpl_id')[0] if product.get('product_tmpl_id') else False,
+                        'ranking_value': product.get('ranking'),
+                        'ranking_name': product.get('name'),
+                        'product_material_id': product.get('shoes_model_material_id')[0] if product.get('shoes_model_material_id') else False,
+                        'color_value_id': self.env['product.attribute.value'].search([('name', '=', color.get('color_name'))], limit=1).id,
+                        'sold_pairs': color.get('sold'),
+                        'produced_pairs': color.get('produced'),
+                        'estimated_stock': color.get('stock'),
+                        'analysis_id': self.id,
+                        'campaign_id': self.shoes_campaign_id.id,
+                    })
         return lines_to_create
 
     def _parse_salesman_model_data(self, json_data):
@@ -238,16 +263,34 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'salesman_model'.
         """
         lines_to_create = []
-        salesman_id = self.env['res.users'].search([('partner_id', '=', self.partner_id.id)], limit=1).id
         for item in json_data:
             lines_to_create.append({
-                'salesman_id': salesman_id,
-                'product_material_id': self.env['shoes.model.material'].search([('name', '=', item.get('Artículo'))], limit=1).id,
-                'ranking_name': item.get('Nombre modelo'),
-                'net_pairs': item.get('pairs_count_net'),
-                'net_sales': item.get('sale_net_amount'),
-                'total_pairs': item.get('pairs_count_sale'),
-                'cancelled_pairs': item.get('pairs_count_cancel'),
+                'partner_id': item.get('partner_id'),
+                'ranking_value': item.get('ranking_value'),
+                'product_material_id': item.get('shoes_model_material_id'),
+                'ranking_name': item.get('product_name'),
+                'total_pairs': item.get('pedidos'),
+                'cancelled_pairs': item.get('anulados'),
+                'net_pairs': item.get('venta_neta'),
                 'analysis_id': self.id,
+                'campaign_id': self.shoes_campaign_id.id,
             })
+        return lines_to_create
+
+    def _parse_customer_comparison_data(self, json_data):
+        """
+        Parsea los datos JSON para el informe 'customer_comparison'.
+        """
+        lines_to_create = []
+        for partner_data in json_data:
+            for brand_data in partner_data.get('brands', []):
+                for campaign_data in brand_data.get('campaigns', []):
+                    lines_to_create.append({
+                        'partner_id': partner_data.get('partner_id'),
+                        'brand_name': brand_data.get('brand_name'),
+                        'campaign_id': campaign_data.get('campaign_id'),
+                        'net_pairs': campaign_data.get('net_pairs'),
+                        'net_sales': campaign_data.get('net_sales'),
+                        'analysis_id': self.id,
+                    })
         return lines_to_create

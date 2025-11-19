@@ -12,132 +12,100 @@ class SaleOrderLine(models.Model):
         readonly=True
     )
 
-    # Pares suministrados desde pedido de venta:
     shoes_pair_delivered_qty = fields.Float(
         string="Sent pairs",
-        compute="_get_shoes_pair_delivered_qty",
+        compute="_compute_shoes_pair_quantities",
         store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        digits='Product Unit of Measure'
     )
 
-    # Unidades pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     delivery_pending_qty = fields.Float(
         string="Delivery pending",
-        compute="_get_delivery_pending_qty",
+        compute="_compute_delivery_pending_qty",
         store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        digits='Product Unit of Measure'
     )
 
-    # PARES pendientes de servir desde el pedido de venta, considerando envíos cancelados:
     shoes_pair_delivery_pending_qty = fields.Float(
         string="Pending pairs",
-        compute="_get_shoes_pair_delivery_pending_qty",
+        compute="_compute_shoes_pair_quantities",
         store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        digits='Product Unit of Measure'
     )
 
-    # Unidades canceladas (vendidos - servidos - pendientes):
     cancelled_qty = fields.Float(
-        string="Delivery pending",
-        compute="_get_cancelled_qty",
+        string="Cancelled Qty",
+        compute="_compute_cancelled_qty",
         store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        digits='Product Unit of Measure'
     )
 
-    # PARES cancelados (vendidos - servidos - pendientes):
     shoes_pair_cancelled_qty = fields.Float(
         string="Cancelled pairs",
-        compute="_get_shoes_pair_cancelled_qty",
+        compute="_compute_shoes_pair_quantities",
         store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        digits='Product Unit of Measure'
     )
 
-    # RESERVADOS EN ALBARÁN:
     reserved_qty = fields.Float(
         string="Reserved",
-        compute="_get_reserved_qty",
-        #store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        compute="_compute_reserved_qty",
+        store=True,
+        digits='Product Unit of Measure'
     )
 
-    # PARES RESERVADOS EN ALBARÁN):
     shoes_pair_reserved_qty = fields.Float(
         string="Reserved pairs",
-        compute="_get_shoes_pair_reserved_qty",
-        #store=True,
-        compute_sudo=True,
-        digits='Product Unit of Measure' # Usa la precisión de UoM
+        compute="_compute_shoes_pair_quantities",
+        store=True,
+        digits='Product Unit of Measure'
     )
 
-
-    # PARES ENTREGADOS:
-    @api.depends('qty_delivered')
-    def _get_shoes_pair_delivered_qty(self):
-        for record in self:
-            delivery_pair_qty = 0
-            if record.product_id.is_assortment or record.product_id.is_pair:
-                delivery_pair_qty += record.qty_delivered * record.pairs_count / record.product_uom_qty
-            record.shoes_pair_delivered_qty = delivery_pair_qty
-
-    # PENDIENTES:
-    @api.depends('move_ids', 'move_ids.product_uom_qty', 'move_ids.state')
-    def _get_delivery_pending_qty(self):
-        for record in self:
-            pending_qty = 0
-            for move in record.move_ids:
-                # Sumamos solo los movimientos que aún se espera procesar
-                if move.state not in ('done', 'cancel'):
-                    pending_qty += move.product_uom_qty
-            record.delivery_pending_qty = pending_qty
-
-    @api.depends('delivery_pending_qty')
-    def _get_shoes_pair_delivery_pending_qty(self):
-        for record in self:
-            pending_pair_qty = 0
-            if record.product_id.is_assortment or record.product_id.is_pair:
-                pending_pair_qty = record.delivery_pending_qty * record.pairs_count / record.product_uom_qty
-            record.shoes_pair_delivery_pending_qty = pending_pair_qty
-
-    # CANCELADOS:
-    @api.depends('product_uom_qty', 'qty_delivered', 'delivery_pending_qty')
-    def _get_cancelled_qty(self):
-        for record in self:
-            record.cancelled_qty =  (record.product_uom_qty - record.qty_delivered - record.delivery_pending_qty)
-
-    @api.depends('cancelled_qty')
-    def _get_shoes_pair_cancelled_qty(self):
-        for record in self:
-            cancelled_pair_qty = 0
-            if record.product_id.is_assortment or record.product_id.is_pair:
-                cancelled_pair_qty += record.cancelled_qty * record.pairs_count / record.product_uom_qty
-            record.shoes_pair_cancelled_qty = cancelled_pair_qty
-
-
-    # RESERVADOS:
-    def _get_reserved_qty(self):
+    @api.depends('qty_delivered', 'product_uom_qty', 'pairs_count', 'move_ids.product_uom_qty', 'move_ids.state', 'move_ids.reserved_availability')
+    def _compute_shoes_pair_quantities(self):
         """
-        Calcula la cantidad reservada sumando la disponibilidad reservada
+        Calcula las cantidades en pares para entregados, pendientes, cancelados y reservados.
+        """
+        for record in self:
+            pairs_factor = record.pairs_count / record.product_uom_qty if record.product_uom_qty else 0
+            
+            # Pares entregados
+            record.shoes_pair_delivered_qty = record.qty_delivered * pairs_factor
+
+            # Pares pendientes
+            pending_qty = sum(move.product_uom_qty for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
+            record.shoes_pair_delivery_pending_qty = pending_qty * pairs_factor
+
+            # Pares cancelados
+            record.shoes_pair_cancelled_qty = (record.product_uom_qty - record.qty_delivered - pending_qty) * pairs_factor
+
+            # Pares reservados
+            reserved_qty = sum(move.reserved_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
+            record.shoes_pair_reserved_qty = reserved_qty * pairs_factor
+
+    @api.depends('move_ids.product_uom_qty', 'move_ids.state')
+    def _compute_delivery_pending_qty(self):
+        """
+        Calcula la cantidad pendiente de entrega (en unidades) sumando los movimientos
+        de stock que no están 'hechos' o 'cancelados'.
+        """
+        for record in self:
+            record.delivery_pending_qty = sum(move.product_uom_qty for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
+
+    @api.depends('product_uom_qty', 'qty_delivered', 'delivery_pending_qty')
+    def _compute_cancelled_qty(self):
+        """
+        Calcula la cantidad cancelada (en unidades) basándose en la cantidad pedida,
+        entregada y pendiente.
+        """
+        for record in self:
+            record.cancelled_qty = record.product_uom_qty - record.qty_delivered - record.delivery_pending_qty
+
+    @api.depends('move_ids.reserved_availability', 'move_ids.state')
+    def _compute_reserved_qty(self):
+        """
+        Calcula la cantidad reservada (en unidades) sumando la disponibilidad reservada
         de todos los movimientos de stock que no estén 'hechos' o 'cancelados'.
         """
-        for line in self:
-            total = 0
-            if line.move_ids.ids and line.state not in ['draft']:
-                relevant_moves = line.move_ids.filtered(
-                    lambda m: m.state not in ('done', 'cancel')
-                )
-                total = sum(relevant_moves.mapped('reserved_availability'))
-            line.shoes_pair_reserved_qty = total
-
-    def _get_shoes_pair_reserved_qty(self):
         for record in self:
-            reserved_pair_qty = 0
-            if record.product_id.is_assortment or record.product_id.is_pair:
-                reserved_pair_qty = record.reserved_qty * record.pairs_count / record.product_uom_qty
-            record.shoes_pair_reserved_qty = reserved_pair_qty
-
+            record.reserved_qty = sum(move.reserved_availability for move in record.move_ids.filtered(lambda m: m.state not in ('done', 'cancel')))

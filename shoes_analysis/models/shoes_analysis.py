@@ -25,12 +25,12 @@ class ShoesAnalysis(models.Model):
             ('manufacturer_sales', 'Ventas por Proveedor'),
             ('sales_by_country', 'Ventas por Países'),
             ('sales_by_shipping_mark', 'Ventas por Timbrado'),
-            ('customer_comparison', 'Comparativa por Cliente'),
+            ('customer_comparison', 'Ventas a cliente por campañas'),
             ('product_ranking', 'Ranking de Productos (Comparativo)'),
             ('last_ranking', 'Ranking de Hormas (Comparativo)'),
-            ('campaign_product_ranking', 'Ranking de Productos (Fichas)'),
-            ('campaign_last_ranking', 'Ranking de Hormas (Agrupado)'),
-            ('salesman_model', 'Ventas de Modelos por Cliente'),
+            ('campaign_product_ranking', 'Ranking de productos por campaña con colores'),
+            ('campaign_last_ranking', 'Ranking de hormas por campaña con modelos y colores'),
+            ('salesman_model', 'Ventas de representante por modelo'),
         ],
         string="Tipo de Informe"
     )
@@ -51,6 +51,11 @@ class ShoesAnalysis(models.Model):
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Customer'
+    )
+
+    referrer_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Referrer'
     )
 
     resume_html = fields.Html(
@@ -84,39 +89,35 @@ class ShoesAnalysis(models.Model):
 
     @api.depends('shoes_campaign_id', 'type')
     def _compute_ranking_line_ids(self):
+        """
+        Calcula las líneas de ranking a mostrar en la vista de análisis.
+        """
         for analysis in self:
-            ranking_types = ['product_ranking', 'last_ranking', 'campaign_product_ranking', 'campaign_last_ranking']
-            if analysis.type in ranking_types:
-                domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
-                if analysis.type in ['product_ranking', 'campaign_product_ranking']:
-                    domain.append(('product_tmpl_id', '!=', False))
-                elif analysis.type in ['last_ranking', 'campaign_last_ranking']:
-                    domain.append(('shoes_last_id', '!=', False))
-                analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
-            else:
-                analysis.ranking_line_ids = False
+            analysis.ranking_line_ids = False
+            if analysis.type in ('product_ranking', 'campaign_product_ranking'):
+                analysis.ranking_line_ids = self.env['shoes.ranking'].search([
+                    ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
+                    ('product_tmpl_id', '!=', False)
+                ])
+            elif analysis.type in ('last_ranking', 'campaign_last_ranking'):
+                analysis.ranking_line_ids = self.env['shoes.ranking'].search([
+                    ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
+                    ('shoes_last_id', '!=', False)
+                ])
 
     def update_shoes_analysis(self):
         """
         Punto de entrada principal para generar/actualizar el análisis.
-        1. Actualiza los datos de ranking si el informe lo requiere.
-        2. Llama al método de cómputo específico según el tipo de informe.
         """
-        reports_without_ranking = [
-            'salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 
-            'sales_by_country', 'sales_by_shipping_mark'
-        ]
-        
         for record in self:
-            if record.type not in reports_without_ranking:
+            if record.type not in [
+                'salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 
+                'sales_by_country', 'sales_by_shipping_mark'
+            ]:
                 campaigns_to_update = record.shoes_campaign_id | record.shoes_campaign_ids
-                for campaign in campaigns_to_update:
-                    self.env['shoes.ranking']._update_ranking_for_campaign(campaign)
+                self.env['shoes.ranking']._update_ranking_for_campaign(campaigns_to_update)
 
             method_name = f'_compute_{record.type}'
-            if record.type == 'product_ranking':
-                method_name = '_compute_product_sales_ranking'
-            
             if hasattr(record, method_name):
                 getattr(record, method_name)()
         return True
