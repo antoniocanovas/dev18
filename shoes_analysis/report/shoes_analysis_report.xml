@@ -24,6 +24,9 @@
                             <p>Última actualización: <span t-field="doc.write_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/></p>
                         </div>
                         
+                        <!-- Resumen HTML (si existe) -->
+                        <div class="mt-4" t-if="doc.resume_html" t-raw="doc.resume_html"/>
+
                         <!-- Contenido HTML -->
                         <div class="mt-4" t-raw="doc.analysis_html"/>
 

@@ -49,7 +49,7 @@ class ShoesAnalysis(models.Model):
         campaign_color_map = {c.id: colors[i % len(colors)] for i, c in enumerate(comparison_campaigns)}
 
         html_lines = []
-        style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;"
+        style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 0.9em;"
         style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
         
@@ -57,8 +57,8 @@ class ShoesAnalysis(models.Model):
         html_lines.append(f"""
             <thead>
                 <tr>
-                    <th style='{style_th} width: 15%; text-align: left;'>Ranking</th>
-                    <th style='{style_th} width: 10%; text-align: center;'>Imagen</th>
+                    <th style='{style_th} text-align: left;'>Ranking</th>
+                    <th style='{style_th} text-align: center;'>Imagen</th>
                     <th style='{style_th} text-align: left;'>Producto (Ref.)</th>
                     <th style='{style_th} text-align: right;'>Total Vend.</th>
                     <th style='{style_th} text-align: right;'>Total Canc.</th>
@@ -74,10 +74,10 @@ class ShoesAnalysis(models.Model):
         for line in ranking_lines:
             is_main_campaign = (line.shoes_campaign_id.id == analysis.shoes_campaign_id.id)
             font_weight_style = "bold" if is_main_campaign else "normal"
-            row_style = ""
+            row_style = "page-break-inside: avoid;"
             if not is_main_campaign:
                 color = campaign_color_map.get(line.shoes_campaign_id.id, '#ccc')
-                row_style = f"style='border-left: 5px solid {color};'"
+                row_style += f" border-left: 5px solid {color};"
             
             campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.name})</span>"
             prod_name = line.product_tmpl_id.name or "N/A"
@@ -90,13 +90,13 @@ class ShoesAnalysis(models.Model):
                 img_base64 = line.image.decode('utf-8')
                 image_html = f"<div style='text-align: center;'><img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/></div>"
 
-            html_lines.append(f"<tr {row_style}>")
+            html_lines.append(f"<tr style='{row_style}'>")
             html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
             html_lines.append(f"<td style='{style_td}'>{image_html}</td>")
             html_lines.append(f"<td style='{style_td} text-align: left;'>{prod_display}</td>")
-            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale} Pairs</td>")
-            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel} Pairs</td>")
-            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_net} Pairs</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_net}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{formatted_amount}</td>")
             html_lines.append("</tr>")
 
@@ -112,9 +112,9 @@ class ShoesAnalysis(models.Model):
         style_td_total = f"border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle; font-weight: bold; border-top: 2px solid #dee2e6;"
         html_lines.append("<tfoot><tr>")
         html_lines.append(f"<td style='{style_td_total} text-align: left;' colspan='3'>TOTALES (Campaña Principal)</td>")
-        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_sale} Pairs</td>")
-        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_cancel} Pairs</td>")
-        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_net} Pairs</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_sale}</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_cancel}</td>")
+        html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_net}</td>")
         html_lines.append(f"<td style='{style_td_total} text-align: right;'>{formatted_total_amount}</td>")
         html_lines.append("</tr></tfoot></table>")
 

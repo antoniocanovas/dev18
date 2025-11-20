@@ -67,14 +67,14 @@ class ShoesAnalysis(models.Model):
         countries = self.env['res.country'].browse(list(all_country_ids)).sorted('name')
         
         for country in countries:
-            country_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0;'>"]
+            country_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
             country_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(country.name)}</h2>")
             country_json = {'country_id': country.id, 'country_name': country.name, 'campaigns': []}
 
             campaigns_data = data_map[country.id]
             
             style_th = "padding: 8px; border-bottom: 2px solid #333;"
-            country_html.append(f"<table class='table table-sm'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
+            country_html.append(f"<table class='table table-sm' style='font-size: 0.9em;'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
             
             base_camp_stats = campaigns_data.get(analysis.shoes_campaign_id.id, {'net_pairs': 0, 'net_sales': 0})
 

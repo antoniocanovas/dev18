@@ -67,14 +67,14 @@ class ShoesAnalysis(models.Model):
         manufacturers = self.env['res.partner'].browse(list(all_manufacturer_ids)).sorted('name')
         
         for manufacturer in manufacturers:
-            manufacturer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0;'>"]
+            manufacturer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
             manufacturer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(manufacturer.name)}</h2>")
             manufacturer_json = {'manufacturer_id': manufacturer.id, 'manufacturer_name': manufacturer.name, 'campaigns': []}
 
             campaigns_data = data_map[manufacturer.id]
             
             style_th = "padding: 8px; border-bottom: 2px solid #333;"
-            manufacturer_html.append(f"<table class='table table-sm'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
+            manufacturer_html.append(f"<table class='table table-sm' style='font-size: 0.9em;'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
             
             base_camp_stats = campaigns_data.get(analysis.shoes_campaign_id.id, {'net_pairs': 0, 'net_sales': 0})
 

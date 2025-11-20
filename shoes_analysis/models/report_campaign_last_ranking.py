@@ -49,7 +49,7 @@ class ShoesAnalysis(models.Model):
         html_parts = []
         data_for_json = []
         
-        style_horma_group = "border: 2px solid #666; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f9f9f9;"
+        style_horma_group = "border: 2px solid #666; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f9f9f9; page-break-inside: avoid;"
         style_horma_header = "font-size: 32px; font-weight: bold; margin: 0 0 20px 0; border-bottom: 1px solid #ccc; padding-bottom: 10px;"
         style_total_quantity = "float: right; font-size: 32px; font-weight: bold;"
 

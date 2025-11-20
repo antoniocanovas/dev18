@@ -59,7 +59,7 @@ class ShoesAnalysis(models.Model):
         main_campaign_year = main_campaign.date.year if main_campaign.date else None
 
         for partner in partners:
-            customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0;'>"]
+            customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
             customer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(partner.name)}</h2>")
             customer_json = {'partner_id': partner.id, 'partner_name': partner.name, 'brands': []}
 
@@ -69,7 +69,7 @@ class ShoesAnalysis(models.Model):
                 campaigns_by_brand[camp.product_brand_id] |= camp
 
             for brand, campaigns in campaigns_by_brand.items():
-                brand_html = [f"<div style='margin-left: 20px; margin-bottom: 20px;'>"]
+                brand_html = [f"<div style='margin-left: 20px; margin-bottom: 20px; page-break-inside: avoid;'>"]
                 brand_html.append(f"<h3 style='font-size: 1.5em; font-weight: 600; border-bottom: 1px solid #ccc; padding-bottom: 5px;'>Marca: {html_escape(brand.name)}</h3>")
                 brand_json = {'brand_id': brand.id, 'brand_name': brand.name, 'campaigns': []}
 
@@ -83,7 +83,7 @@ class ShoesAnalysis(models.Model):
                 brand_main_stats = data_map[partner.id].get(brand_main_campaign.id, {'net_pairs': 0, 'net_sales': 0})
 
                 style_th = "padding: 8px; border-bottom: 2px solid #333;"
-                brand_html.append(f"<table class='table table-sm'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
+                brand_html.append(f"<table class='table table-sm' style='font-size: 0.9em;'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
                 
                 for camp in campaigns.sorted('date', reverse=True):
                     stats = data_map[partner.id][camp.id]

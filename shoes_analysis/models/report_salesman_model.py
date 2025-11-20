@@ -91,7 +91,7 @@ class ShoesAnalysis(models.Model):
         colors = ['#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#FF5722']
         campaign_color_map = {c.id: colors[i % len(colors)] for i, c in enumerate(analysis.shoes_campaign_ids)}
 
-        style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;"
+        style_table = "width: 100%; border-collapse: collapse; font-family: sans-serif; font-size: 0.9em;"
         style_th = "border-bottom: 2px solid #dee2e6; padding: 10px 8px; text-align: left; font-weight: 600;"
         style_td = "border-bottom: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle;"
         
@@ -99,13 +99,13 @@ class ShoesAnalysis(models.Model):
         html_parts.append(f"""
             <thead>
                 <tr>
-                    <th style='{style_th} width: 15%;'>Ranking</th>
-                    <th style='{style_th} width: 10%; text-align: center;'>Imagen</th>
-                    <th style='{style_th} width: 15%;'>Artículo</th>
-                    <th style='{style_th} width: 30%;'>Nombre modelo</th>
-                    <th style='{style_th} width: 10%; text-align: right;'>Pedidos</th>
-                    <th style='{style_th} width: 10%; text-align: right;'>Anulados</th>
-                    <th style='{style_th} width: 10%; text-align: right;'>Venta neta</th>
+                    <th style='{style_th}'>Ranking</th>
+                    <th style='{style_th} text-align: center;'>Imagen</th>
+                    <th style='{style_th}'>Artículo</th>
+                    <th style='{style_th}'>Nombre modelo</th>
+                    <th style='{style_th} text-align: right;'>Pedidos</th>
+                    <th style='{style_th} text-align: right;'>Anulados</th>
+                    <th style='{style_th} text-align: right;'>Venta neta</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,7 +117,7 @@ class ShoesAnalysis(models.Model):
             font_weight_style = "bold" if is_main_campaign else "normal"
             
             # Lógica de estilo de fila
-            styles = []
+            styles = ["page-break-inside: avoid;"]
             if not is_main_campaign:
                 color = campaign_color_map.get(item['campaign_id'], '#ccc')
                 styles.append(f"border-left: 5px solid {color};")

@@ -53,12 +53,12 @@ class ShoesAnalysis(models.Model):
 
     def _generate_product_card_html(self, line):
         # ... (el resto del método no cambia)
-        style_card = "border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; overflow: hidden; font-family: sans-serif; background-color: #fff;"
+        style_card = "border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; overflow: hidden; font-family: sans-serif; background-color: #fff; page-break-inside: avoid;"
         style_left = "float: left; width: 20%; text-align: center; min-height: 180px;"
         style_right = "float: left; width: 78%; margin-left: 2%;"
         style_header = "font-size: 24px; font-weight: bold; margin: 0; padding: 0;"
         style_subheader = "font-size: 18px; color: #555; margin: 0 0 15px 0;"
-        style_table = "width: 100%; border-collapse: collapse; font-size: 12px;"
+        style_table = "width: 100%; border-collapse: collapse; font-size: 0.9em;"
         style_th = "border-bottom: 2px solid #333; padding: 6px; text-align: left;"
         style_td = "border-bottom: 1px solid #ccc; padding: 6px;"
         style_td_num = f"{style_td} text-align: right; font-weight: bold;"
