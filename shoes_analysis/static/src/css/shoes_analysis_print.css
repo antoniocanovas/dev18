@@ -1,0 +1,18 @@
+@media print {
+    /* Asegura que el contenido del campo HTML sea visible al imprimir */
+    .o_field_html {
+        display: block !important;
+        visibility: visible !important;
+        /* Puedes añadir más estilos si es necesario para el formato de impresión */
+        -webkit-print-color-adjust: exact; /* Para asegurar que los colores de fondo se impriman */
+        color-adjust: exact;
+    }
+    /* Si el contenido está dentro de un iframe o un elemento con display:none por defecto,
+       podrías necesitar reglas más específicas o para los elementos internos.
+       Por ejemplo, si el contenido de analysis_html tiene un div principal:
+    .o_field_html > div {
+        display: block !important;
+        visibility: visible !important;
+    }
+    */
+}

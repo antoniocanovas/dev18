@@ -24,7 +24,13 @@
         'views/shoes_analysis_views.xml',
         'views/shoes_analysis_menu.xml',
         'views/product_template_views.xml',
+        'report/shoes_analysis_report.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'shoes_analysis/static/src/css/shoes_analysis_print.css',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,

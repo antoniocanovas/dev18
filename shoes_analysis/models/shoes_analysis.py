@@ -118,6 +118,13 @@ class ShoesAnalysis(models.Model):
                 getattr(record, method_name)()
         return True
 
+    def action_print_report(self):
+        """
+        Genera el informe PDF del análisis actual.
+        """
+        self.ensure_one()
+        return self.env.ref('shoes_analysis.action_report_shoes_analysis').report_action(self)
+
     def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):
         style_camp, style_net, style_rev, style_avg = "min-width: 150px;", "width: 130px;", "width: 150px;", "width: 130px;"
         html_parts = ['<div style="font-size: 1.1em; font-weight: 600; border-bottom: 2px solid #eee; margin-top: 16px; padding-bottom: 4px; margin-bottom: 8px;">Resumen General de Campañas</div>', '<table class="table table-sm o_main_table" style="width: 100%; table-layout: fixed;">', f'<thead><tr style="font-size: 0.85em; color: #555;"><th style="{style_camp}">Campaña</th><th class="text-end" style="{style_net}">Pares Netos</th><th class="text-end" style="{style_rev}">Facturación Prevista</th><th class="text-end" style="{style_avg}">Precio Medio</th></tr></thead><tbody>']
