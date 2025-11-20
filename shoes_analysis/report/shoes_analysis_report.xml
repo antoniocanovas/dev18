@@ -28,7 +28,7 @@
                         <div class="mt-4" t-if="doc.resume_html" t-raw="doc.resume_html"/>
 
                         <!-- Contenido HTML -->
-                        <div class="mt-4" t-raw="doc.analysis_html"/>
+                        <t t-raw="doc.analysis_html"/>
 
                         <!-- Pie de página incrustado -->
                         <div class="footer" style="position: fixed; bottom: 0; width: 100%;">

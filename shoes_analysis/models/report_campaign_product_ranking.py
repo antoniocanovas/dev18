@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.tools import float_is_zero
+from odoo.tools.image import image_data_uri
 from odoo.tools.misc import formatLang
 from collections import defaultdict
 import qrcode
@@ -64,9 +65,9 @@ class ShoesAnalysis(models.Model):
         style_td_num = f"{style_td} text-align: right; font-weight: bold;"
 
         img_html = ""
-        if line.image:
-            img_base64 = line.image.decode('utf-8')
-            img_html = f"<img src='data:image/png;base64,{img_base64}' style='max-width: 100%; height: auto; max-height: 180px; object-fit: contain;'/>"
+        if line.product_tmpl_id and line.product_tmpl_id.image_128:
+            image_uri = image_data_uri(line.product_tmpl_id.image_128)
+            img_html = f"<img src='{image_uri}' style='max-width: 100%; height: auto; max-height: 180px; object-fit: contain;'/>"
 
         formatted_pairs = f"{line.pairs_count_net} p"
 

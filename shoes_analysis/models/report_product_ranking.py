@@ -1,12 +1,13 @@
 import json
 from odoo import models, fields, api
 from odoo.tools import float_is_zero
+from odoo.tools.image import image_data_uri
 from odoo.tools.misc import formatLang
 
 class ShoesAnalysis(models.Model):
     _inherit = 'shoes.analysis'
 
-    def _compute_product_sales_ranking(self):
+    def _compute_product_ranking(self):
         """
         Genera el informe HTML para el ranking de productos.
         El cálculo de datos ya se ha hecho de forma centralizada.
@@ -86,9 +87,9 @@ class ShoesAnalysis(models.Model):
             formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
             
             image_html = ""
-            if line.image:
-                img_base64 = line.image.decode('utf-8')
-                image_html = f"<div style='text-align: center;'><img src='data:image/png;base64,{img_base64}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/></div>"
+            if line.product_tmpl_id and line.product_tmpl_id.image_128:
+                image_uri = image_data_uri(line.product_tmpl_id.image_128)
+                image_html = f"<div style='text-align: center;'><img src='{image_uri}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/></div>"
 
             html_lines.append(f"<tr style='{row_style}'>")
             html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
