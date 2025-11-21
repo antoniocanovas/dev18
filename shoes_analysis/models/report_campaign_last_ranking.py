@@ -69,10 +69,17 @@ class ShoesAnalysis(models.Model):
             else:
                 product_data_list = []
                 for product_line in sorted_products:
-                    html_parts.append(self._generate_product_card_html(product_line))
+                    # Calcular y ordenar las estadísticas de color UNA SOLA VEZ
+                    color_stats = self._get_color_statistics(product_line.product_tmpl_id, product_line.shoes_campaign_id)
+                    
+                    # Generar el HTML pasando los datos ya calculados
+                    html_parts.append(self._generate_product_card_html(product_line, color_stats))
+                    
+                    # Preparar datos para JSON
                     line_data = product_line.read(['name', 'ranking', 'pairs_count_net', 'product_tmpl_id'])[0]
-                    line_data['colors'] = self._get_color_statistics(product_line.product_tmpl_id, product_line.shoes_campaign_id)
+                    line_data['colors'] = color_stats  # Usar los datos ya calculados
                     product_data_list.append(line_data)
+                
                 horma_data_for_json['products'] = product_data_list
 
             html_parts.append("</div>")

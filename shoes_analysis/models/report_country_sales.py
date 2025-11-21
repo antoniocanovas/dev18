@@ -66,6 +66,10 @@ class ShoesAnalysis(models.Model):
         html_parts, json_output = [], []
         countries = self.env['res.country'].browse(list(all_country_ids)).sorted('name')
         
+        base_camp_id = analysis.shoes_campaign_id.id
+        compare_camp_ids = analysis.shoes_campaign_ids.ids
+        ordered_campaign_ids = [base_camp_id] + [cid for cid in compare_camp_ids if cid != base_camp_id]
+
         for country in countries:
             country_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
             country_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(country.name)}</h2>")
@@ -76,33 +80,36 @@ class ShoesAnalysis(models.Model):
             style_th = "padding: 8px; border-bottom: 2px solid #333;"
             country_html.append(f"<table class='table table-sm' style='font-size: 0.9em;'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
             
-            base_camp_stats = campaigns_data.get(analysis.shoes_campaign_id.id, {'net_pairs': 0, 'net_sales': 0})
+            base_camp_stats = campaigns_data.get(base_camp_id, {'net_pairs': 0, 'net_sales': 0})
 
-            for camp_id, stats in campaigns_data.items():
-                camp = self.env['project.project'].browse(camp_id)
-                is_main = (camp_id == analysis.shoes_campaign_id.id)
-                tag = "b" if is_main else "span"
-                
-                row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.name)}</{tag}></td>"
-                row_html += f"<td class='text-end'><{tag}>{int(stats['net_pairs'])}</{tag}></td>"
-                row_html += f"<td class='text-end'><{tag}>{formatLang(self.env, stats['net_sales'], currency_obj=analysis.currency_id)}</{tag}></td>"
-                
-                if is_main:
-                    row_html += "<td class='text-end'>-</td><td class='text-end'>-</td>"
-                else:
-                    row_html += self._get_objective_perc_html(base_camp_stats['net_pairs'], stats['net_pairs'], "padding: 8px;")
-                    row_html += self._get_objective_perc_html(base_camp_stats['net_sales'], stats['net_sales'], "padding: 8px;")
-                
-                row_html += "</tr>"
-                country_html.append(row_html)
-                
-                country_json['campaigns'].append({'campaign_id': camp.id, 'campaign_name': camp.name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']})
+            for camp_id in ordered_campaign_ids:
+                if camp_id in campaigns_data:
+                    stats = campaigns_data[camp_id]
+                    camp = self.env['project.project'].browse(camp_id)
+                    is_main = (camp_id == base_camp_id)
+                    tag = "b" if is_main else "span"
+                    
+                    row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.name)}</{tag}></td>"
+                    row_html += f"<td class='text-end'><{tag}>{int(stats['net_pairs'])}</{tag}></td>"
+                    row_html += f"<td class='text-end'><{tag}>{formatLang(self.env, stats['net_sales'], currency_obj=analysis.currency_id)}</{tag}></td>"
+                    
+                    if is_main:
+                        row_html += "<td class='text-end'>-</td><td class='text-end'>-</td>"
+                    else:
+                        compare_stats = campaigns_data.get(camp_id, {'net_pairs': 0, 'net_sales': 0})
+                        row_html += self._get_objective_perc_html(base_camp_stats['net_pairs'], compare_stats['net_pairs'], "padding: 8px;")
+                        row_html += self._get_objective_perc_html(base_camp_stats['net_sales'], compare_stats['net_sales'], "padding: 8px;")
+                    
+                    row_html += "</tr>"
+                    country_html.append(row_html)
+                    
+                    country_json['campaigns'].append({'campaign_id': camp.id, 'campaign_name': camp.name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']})
 
             country_html.append("</tbody></table></div>")
             html_parts.extend(country_html)
             json_output.append(country_json)
 
-        resume_html = self._generate_resume_html(campaign_totals, analysis.shoes_campaign_id.id, analysis.shoes_campaign_ids)
+        resume_html = self._generate_resume_html(campaign_totals, base_camp_id, analysis.shoes_campaign_ids)
 
         analysis.write({
             'analysis_html': "".join(html_parts),

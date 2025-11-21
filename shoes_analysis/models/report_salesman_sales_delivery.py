@@ -106,33 +106,48 @@ class ShoesAnalysis(models.Model):
         data_for_json = []
         campaign_totals = defaultdict(lambda: {'nombre': '', 'netos': 0, 'fact_prevista': 0.0})
         base_camp_id = analysis.shoes_campaign_id.id
+        
+        # Crear una lista ordenada de IDs de campaña para asegurar el orden en el informe
+        compare_camp_ids = analysis.shoes_campaign_ids.ids
+        ordered_campaign_ids = [base_camp_id]
+        for cid in compare_camp_ids:
+            if cid != base_camp_id:
+                ordered_campaign_ids.append(cid)
+
         sorted_user_data = sorted(data_map.values(), key=lambda u: u['representante'])
 
         for user_data in sorted_user_data:
-            if base_camp_id not in user_data['campanias_data']: continue
+            if base_camp_id not in user_data['campanias_data']:
+                continue
             
             json_line_data = {'representante': user_data['representante'], 'campanias': []}
-            for camp_id, totals in user_data['campanias_data'].items():
-                total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
-                total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
-                netos = total_vendidos - total_cancelados
-                asignados = totals['pairs_delivered'] + totals['pairs_reserved']
-                
-                camp_data_for_json = {
-                    'campania_id': camp_id, 'campania_nombre': campaign_name_map.get(camp_id, "N/A"),
-                    'pairs_count': totals['pairs_count'], 'total_vendidos': total_vendidos,
-                    'total_cancelados': total_cancelados, 'netos': netos, 'asignados': asignados,
-                    'pairs_delivered': totals['pairs_delivered'], 'pairs_pending': totals['pairs_pending'],
-                    'total_vendido': totals['total_sales'], 'expected_revenue': totals['expected_revenue']
-                }
-                json_line_data['campanias'].append(camp_data_for_json)
-
-                campaign_totals[camp_id]['nombre'] = campaign_name_map.get(camp_id, 'N/A')
-                campaign_totals[camp_id]['netos'] += netos
-                campaign_totals[camp_id]['fact_prevista'] += totals['expected_revenue']
             
-            data_for_json.append(json_line_data)
-            analysis_html_parts.append(self._generate_line_html(json_line_data, base_camp_id, analysis.currency_id))
+            # Iterar sobre las campañas en el orden definido para asegurar la consistencia
+            for camp_id in ordered_campaign_ids:
+                if camp_id in user_data['campanias_data']:
+                    totals = user_data['campanias_data'][camp_id]
+                    
+                    total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
+                    total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
+                    netos = total_vendidos - total_cancelados
+                    asignados = totals['pairs_delivered'] + totals['pairs_reserved']
+                    
+                    camp_data_for_json = {
+                        'campania_id': camp_id, 'campania_nombre': campaign_name_map.get(camp_id, "N/A"),
+                        'pairs_count': totals['pairs_count'], 'total_vendidos': total_vendidos,
+                        'total_cancelados': total_cancelados, 'netos': netos, 'asignados': asignados,
+                        'pairs_delivered': totals['pairs_delivered'], 'pairs_pending': totals['pairs_pending'],
+                        'total_vendido': totals['total_sales'], 'expected_revenue': totals['expected_revenue']
+                    }
+                    json_line_data['campanias'].append(camp_data_for_json)
+
+                    campaign_totals[camp_id]['nombre'] = campaign_name_map.get(camp_id, 'N/A')
+                    campaign_totals[camp_id]['netos'] += netos
+                    campaign_totals[camp_id]['fact_prevista'] += totals['expected_revenue']
+            
+            if json_line_data['campanias']:
+                data_for_json.append(json_line_data)
+                analysis_html_parts.append(self._generate_line_html(json_line_data, base_camp_id, analysis.currency_id))
 
         # --- 4. Generar HTML de Resumen y preparar JSON final ---
         resume_html = self._generate_resume_html(campaign_totals, base_camp_id, analysis.shoes_campaign_ids)
@@ -168,8 +183,11 @@ class ShoesAnalysis(models.Model):
     def _generate_line_html(self, data_dict, base_camp_id, currency_obj):
         all_camp_data = data_dict.get('campanias', [])
         base_data = next((c for c in all_camp_data if c.get('campania_id') == base_camp_id), None)
-        if not base_data: return "<p>Error: Datos no encontrados.</p>"
+        if not base_data: return "" # No hay datos para la campaña base de este representante
+        
+        # Las campañas de comparación ya vienen ordenadas desde el paso anterior
         compare_data_list = [c for c in all_camp_data if c.get('campania_id') != base_camp_id]
+        
         base_pairs, base_sales, base_netos, base_delivered, base_asignados = base_data.get('pairs_count', 0), base_data.get('total_vendido', 0.0), base_data.get('netos', 0), base_data.get('pairs_delivered', 0), base_data.get('asignados', 0)
         
         html_parts = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]

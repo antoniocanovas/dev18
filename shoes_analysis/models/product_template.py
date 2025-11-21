@@ -1,5 +1,4 @@
 # Copyright 2024 Punt Sistemes SL
-
 from odoo import api, fields, models
 
 

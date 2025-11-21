@@ -35,16 +35,23 @@ class ShoesAnalysis(models.Model):
             })
             return
         
-        html_cards = [self._generate_product_card_html(line) for line in ranking_lines]
-        
+        html_cards = []
         data_for_json = []
+
         for line in ranking_lines:
+            # Calcular y ordenar las estadísticas de color UNA SOLA VEZ
+            color_stats = self._get_color_statistics(line.product_tmpl_id, line.shoes_campaign_id)
+            
+            # Generar el HTML pasando los datos ya calculados
+            html_cards.append(self._generate_product_card_html(line, color_stats))
+            
+            # Preparar datos para JSON
             line_data = line.read([
                 'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
                 'pairs_count_net', 'sale_net_amount', 'currency_id',
                 'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
             ])[0]
-            line_data['colors'] = self._get_color_statistics(line.product_tmpl_id, line.shoes_campaign_id)
+            line_data['colors'] = color_stats  # Usar los datos ya calculados
             data_for_json.append(line_data)
 
         self.write({
@@ -52,7 +59,7 @@ class ShoesAnalysis(models.Model):
             'data': data_for_json
         })
 
-    def _generate_product_card_html(self, line):
+    def _generate_product_card_html(self, line, color_stats):
         # ... (el resto del método no cambia)
         style_card = "border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; overflow: hidden; font-family: sans-serif; background-color: #fff; page-break-inside: avoid;"
         style_left = "float: left; width: 20%; text-align: center; min-height: 180px;"
@@ -102,9 +109,8 @@ class ShoesAnalysis(models.Model):
                     </div>
                     <div style='float: left; width: 78%;'>
         """
-
-        color_stats = self._get_color_statistics(line.product_tmpl_id, line.shoes_campaign_id)
         
+        # Los datos de color_stats ya vienen calculados y ordenados
         table_html = f"<table style='{style_table}'><thead><tr>"
         table_html += f"<th style='{style_th}'>Color</th>"
         table_html += f"<th style='{style_th} text-align: right;'>Vendido</th>"

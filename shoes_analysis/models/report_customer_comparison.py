@@ -55,8 +55,8 @@ class ShoesAnalysis(models.Model):
 
         html_parts, json_output = [], []
         partners = self.env['res.partner'].browse(list(all_partner_ids)).sorted('name')
-        main_brand_id = main_campaign.product_brand_id.id
-        main_campaign_year = main_campaign.date.year if main_campaign.date else None
+        
+        base_camp_id = analysis.shoes_campaign_id.id
 
         for partner in partners:
             customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
@@ -73,19 +73,26 @@ class ShoesAnalysis(models.Model):
                 brand_html.append(f"<h3 style='font-size: 1.5em; font-weight: 600; border-bottom: 1px solid #ccc; padding-bottom: 5px;'>Marca: {html_escape(brand.name)}</h3>")
                 brand_json = {'brand_id': brand.id, 'brand_name': brand.name, 'campaigns': []}
 
-                brand_main_campaign = None
-                if brand.id == main_brand_id:
-                    brand_main_campaign = main_campaign
+                # Ordenar campañas: principal primero, luego el resto por fecha
+                sorted_campaigns = campaigns.sorted('date', reverse=True)
+                ordered_campaigns = []
+                if base_camp_id in sorted_campaigns.ids:
+                    ordered_campaigns.append(main_campaign)
+                    for camp in sorted_campaigns:
+                        if camp.id != base_camp_id:
+                            ordered_campaigns.append(camp)
                 else:
-                    same_year_campaigns = campaigns.filtered(lambda c: c.date and c.date.year == main_campaign_year)
-                    brand_main_campaign = same_year_campaigns[0] if same_year_campaigns else campaigns[0]
+                    ordered_campaigns = sorted_campaigns
 
+                brand_main_campaign = ordered_campaigns[0] if ordered_campaigns else None
+                if not brand_main_campaign: continue
+                
                 brand_main_stats = data_map[partner.id].get(brand_main_campaign.id, {'net_pairs': 0, 'net_sales': 0})
 
                 style_th = "padding: 8px; border-bottom: 2px solid #333;"
                 brand_html.append(f"<table class='table table-sm' style='font-size: 0.9em;'><thead><tr><th class='text-start' style='{style_th}'>Campaña</th><th class='text-end' style='{style_th}'>Pares Netos</th><th class='text-end' style='{style_th}'>Ventas Netas</th><th class='text-end' style='{style_th}'>% Obj. Pares</th><th class='text-end' style='{style_th}'>% Obj. Ventas</th></tr></thead><tbody>")
                 
-                for camp in campaigns.sorted('date', reverse=True):
+                for camp in ordered_campaigns:
                     stats = data_map[partner.id][camp.id]
                     is_main = (camp.id == brand_main_campaign.id)
                     tag = "b" if is_main else "span"
@@ -97,8 +104,9 @@ class ShoesAnalysis(models.Model):
                     if is_main:
                         row_html += "<td class='text-end'>-</td><td class='text-end'>-</td>"
                     else:
-                        row_html += self._get_objective_perc_html(brand_main_stats['net_pairs'], stats['net_pairs'], "padding: 8px;")
-                        row_html += self._get_objective_perc_html(brand_main_stats['net_sales'], stats['net_sales'], "padding: 8px;")
+                        compare_stats = data_map[partner.id].get(camp.id, {'net_pairs': 0, 'net_sales': 0})
+                        row_html += self._get_objective_perc_html(brand_main_stats['net_pairs'], compare_stats['net_pairs'], "padding: 8px;")
+                        row_html += self._get_objective_perc_html(brand_main_stats['net_sales'], compare_stats['net_sales'], "padding: 8px;")
                     
                     row_html += "</tr>"
                     brand_html.append(row_html)
