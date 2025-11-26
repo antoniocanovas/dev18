@@ -5,7 +5,7 @@
     'author': 'Your Name',
     'category': 'Inventory/Product',
     'depends': [
-        'shoes_analysis',
+        'shoes_analysis_old',
         'product',
         'project',
         'sale_management',

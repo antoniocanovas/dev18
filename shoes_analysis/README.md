@@ -1,30 +1,23 @@
-# Análisis de Calzado (shoes_analysis) v1.0
+# Shoes Analysis
 
-## Resumen
+Módulo de análisis e informes para distribución de calzado en Odoo 18.
 
-Este módulo proporciona una herramienta para analizar y clasificar el rendimiento de ventas de productos de calzado a través de diferentes campañas. Genera un ranking de productos basado en pares netos vendidos y permite comparar una campaña principal con otras secundarias.
+## Descripción
+Proporciona informes específicos para el sector de distribución de calzado, integrando datos de:
+- Distribuidores (shoes_dealer)
+- Campañas (shoes_campaign)
+- Asignación de lotes (purchase_lot_preasigment)
 
-## Características Principales
+## Dependencias
+- shoes_dealer
+- shoes_campaign
+- purchase_lot_preasigment
 
-*   **Ranking de Productos:** Calcula y muestra un ranking de productos ordenado por el número de pares netos vendidos (vendidos menos cancelados).
-*   **Análisis Comparativo:** Permite seleccionar una campaña de ventas principal y compararla con los resultados de una o más campañas secundarias.
-*   **Informe Visual:** Genera un informe HTML directamente en la interfaz de Odoo, mostrando el ranking con imágenes de producto, cantidades y importes.
-*   **Datos para Análisis Externo:** Almacena los datos del ranking en un campo JSON, permitiendo su exportación o uso en otras integraciones.
+## Características
+- Menú de análisis integrado en Shoes Dealer
+- Informes personalizados para el sector
 
-## Modelos de Datos
-
-*   `shoes.analysis`: Modelo principal que contiene la configuración del análisis (campañas a comparar) y muestra el informe resultante.
-*   `shoes.ranking`: Modelo que almacena las líneas de datos calculadas para cada producto en el ranking.
-
-## Uso
-
-1.  Navega al menú de "Análisis de Calzado".
-2.  Crea un nuevo registro de análisis.
-3.  Asigna un nombre descriptivo al análisis.
-4.  Selecciona la **Campaña Principal** que deseas analizar.
-5.  Opcionalmente, añade una o más **Campañas de Comparación**.
-6.  Guarda el registro. El informe de ranking se generará automáticamente en la pestaña "Análisis".
-
-## Configuración
-
-Para utilizar este módulo, simplemente instálalo desde la lista de aplicaciones de Odoo.
+## Instalación
+1. Copiar el módulo en la carpeta de addons
+2. Actualizar lista de aplicaciones
+3. Instalar "Shoes Analysis"

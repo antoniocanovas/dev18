@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción del Informe -->
+    <record id="action_report_shoes_analysis" model="ir.actions.report">
+        <field name="name">Análisis de Calzado</field>
+        <field name="model">shoes.analysis</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">shoes_analysis.report_shoes_analysis_template</field>
+        <field name="report_file">shoes_analysis.report_shoes_analysis_template</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Plantilla QWeb del Informe -->
+    <template id="report_shoes_analysis_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Título, Subtítulo y Fecha -->
+                        <div class="text-center">
+                            <h1><span t-field="doc.name"/></h1>
+                            <h3><span t-field="doc.type"/></h3>
+                            <p>Última actualización: <span t-field="doc.write_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/></p>
+                        </div>
+                        
+                        <!-- Resumen HTML (si existe) -->
+                        <div class="mt-4" t-if="doc.resume_html" t-raw="doc.resume_html"/>
+
+                        <!-- Contenido HTML -->
+                        <t t-raw="doc.analysis_html"/>
+
+                        <!-- Pie de página incrustado -->
+                        <div class="footer" style="position: fixed; bottom: 0; width: 100%;">
+                            <div class="row">
+                                <div class="col-6 text-start">
+                                    <span t-field="res_company.name"/>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item"><span class="page"/> / <span class="topage"/></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
