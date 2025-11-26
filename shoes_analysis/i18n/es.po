@@ -36,7 +36,7 @@ msgstr "Surtidos"
 #: model:ir.actions.act_window,name:shoes_analysis.action_campaign_last_ranking
 #: model:ir.ui.menu,name:shoes_analysis.menu_campaign_last_ranking
 msgid "Campaign last ranking"
-msgstr "Hormas ranking de campaña"
+msgstr "Ranking de hormas por campaña"
 
 #. module: shoes_analysis
 #: model:ir.actions.act_window,name:shoes_analysis.action_campaign_product_ranking

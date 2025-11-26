@@ -45,6 +45,7 @@ class ShoesAnalysis(models.Model):
         # 4. Agregar datos por producto y por campaña
         aggregated_data = defaultdict(lambda: defaultdict(lambda: {'pedidos': 0, 'anulados': 0}))
         product_map = {}
+        campaign_map = {}
 
         for line in sale_lines:
             product = line.product_id
@@ -52,6 +53,9 @@ class ShoesAnalysis(models.Model):
             if not target_template: continue
             
             campaign_id = line.order_id.shoes_campaign_id.id
+            if campaign_id not in campaign_map:
+                campaign_map[campaign_id] = line.order_id.shoes_campaign_id
+
             if target_template.id not in product_map:
                 product_map[target_template.id] = target_template
             
@@ -72,6 +76,7 @@ class ShoesAnalysis(models.Model):
                         'referrer_id': analysis.referrer_id.id,
                         'referrer_name': analysis.referrer_id.name,
                         'campaign_id': campaign_id,
+                        'campaign_name': campaign_map[campaign_id].display_name,
                         'product_id': product_map[tmpl_id].id,
                         'shoes_model_material_id': product_map[tmpl_id].shoes_model_material_id.id,
                         'shoes_model_material_name': product_map[tmpl_id].shoes_model_material_id.name,
@@ -129,8 +134,6 @@ class ShoesAnalysis(models.Model):
                 styles.append("background-color: #FFF9C4;") # Amarillo claro
             
             row_style = f"style='{' '.join(styles)}'" if styles else ""
-
-            campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({self.env['project.project'].browse(item['campaign_id']).name})</span>"
             
             image_html = ""
             if product.image_256:
@@ -139,10 +142,10 @@ class ShoesAnalysis(models.Model):
 
             html_parts.append(f"""
                 <tr {row_style}>
-                    <td style='{style_td} font-weight: {font_weight_style};'>{item['ranking_name']}</td>
+                    <td style='{style_td} font-weight: {font_weight_style};'>{item['campaign_name']}</td>
                     <td style='{style_td}'>{image_html}</td>
                     <td style='{style_td}'>{product.shoes_model_material_id.name or ''}</td>
-                    <td style='{style_td}'>{product.name}{campaign_tag}</td>
+                    <td style='{style_td}'>{product.name}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['pedidos'])}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['anulados'])}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['venta_neta'])}</td>

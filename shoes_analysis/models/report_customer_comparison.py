@@ -97,7 +97,7 @@ class ShoesAnalysis(models.Model):
                     is_main = (camp.id == brand_main_campaign.id)
                     tag = "b" if is_main else "span"
                     
-                    row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.name)}</{tag}></td>"
+                    row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.display_name)}</{tag}></td>"
                     row_html += f"<td class='text-end'><{tag}>{int(stats['net_pairs'])}</{tag}></td>"
                     row_html += f"<td class='text-end'><{tag}>{formatLang(self.env, stats['net_sales'], currency_obj=analysis.currency_id)}</{tag}></td>"
                     
@@ -111,7 +111,7 @@ class ShoesAnalysis(models.Model):
                     row_html += "</tr>"
                     brand_html.append(row_html)
                     
-                    campaign_json = {'campaign_id': camp.id, 'campaign_name': camp.name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']}
+                    campaign_json = {'campaign_id': camp.id, 'campaign_name': camp.display_name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']}
                     brand_json['campaigns'].append(campaign_json)
 
                 brand_html.append("</tbody></table></div>")

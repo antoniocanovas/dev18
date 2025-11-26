@@ -60,7 +60,7 @@ class ShoesAnalysis(models.Model):
             data_map[salesman_id][country_id][campaign_id]['net_pairs'] += net_pairs
             data_map[salesman_id][country_id][campaign_id]['net_sales'] += net_sales
 
-            campaign_totals[campaign_id]['nombre'] = self.env['project.project'].browse(campaign_id).name
+            campaign_totals[campaign_id]['nombre'] = self.env['project.project'].browse(campaign_id).display_name
             campaign_totals[campaign_id]['netos'] += net_pairs
             campaign_totals[campaign_id]['fact_prevista'] += net_sales
 
@@ -99,7 +99,7 @@ class ShoesAnalysis(models.Model):
                         is_main = (camp_id == base_camp_id)
                         tag = "b" if is_main else "span"
                         
-                        row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.name)}</{tag}></td>"
+                        row_html = f"<tr><td class='text-start'><{tag}>{html_escape(camp.display_name)}</{tag}></td>"
                         row_html += f"<td class='text-end'><{tag}>{int(stats['net_pairs'])}</{tag}></td>"
                         row_html += f"<td class='text-end'><{tag}>{formatLang(self.env, stats['net_sales'], currency_obj=analysis.currency_id)}</{tag}></td>"
                         
@@ -114,7 +114,7 @@ class ShoesAnalysis(models.Model):
                         row_html += "</tr>"
                         country_html.append(row_html)
                         
-                        country_json['campaigns'].append({'campaign_id': camp.id, 'campaign_name': camp.name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']})
+                        country_json['campaigns'].append({'campaign_id': camp.id, 'campaign_name': camp.display_name, 'net_pairs': stats['net_pairs'], 'net_sales': stats['net_sales']})
 
                 country_html.append("</tbody></table></div>")
                 salesman_html.extend(country_html)

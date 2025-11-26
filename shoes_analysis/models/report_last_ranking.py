@@ -34,11 +34,20 @@ class ShoesAnalysis(models.Model):
             return
 
         # 1. Preparar datos para JSON
-        data_for_json = ranking_lines.read([
-            'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
-            'pairs_count_net', 'sale_net_amount', 'currency_id',
-            'shoes_last_id', 'shoes_campaign_id'
-        ])
+        data_for_json = []
+        for line in ranking_lines:
+            line_data = {
+                'name': line.shoes_campaign_id.display_name,
+                'ranking': line.ranking,
+                'pairs_count_sale': line.pairs_count_sale,
+                'pairs_count_cancel': line.pairs_count_cancel,
+                'pairs_count_net': line.pairs_count_net,
+                'sale_net_amount': line.sale_net_amount,
+                'currency_id': line.currency_id.id,
+                'shoes_last_id': line.shoes_last_id.id,
+                'shoes_campaign_id': line.shoes_campaign_id.id
+            }
+            data_for_json.append(line_data)
 
         # 2. Crear mapa de colores y generar HTML
         comparison_campaigns = analysis.shoes_campaign_ids
@@ -75,13 +84,12 @@ class ShoesAnalysis(models.Model):
                 color = campaign_color_map.get(line.shoes_campaign_id.id, '#ccc')
                 row_style += f" border-left: 5px solid {color};"
             
-            campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.name})</span>"
             last_name = line.shoes_last_id.name or "N/A"
-            last_display = f"<strong>{last_name}</strong>{campaign_tag}"
+            last_display = f"<strong>{last_name}</strong>"
             formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
 
             html_lines.append(f"<tr style='{row_style}'>")
-            html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.shoes_campaign_id.display_name}</td>")
             html_lines.append(f"<td style='{style_td} text-align: left;'>{last_display}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel}</td>")

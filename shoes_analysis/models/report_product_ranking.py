@@ -38,11 +38,22 @@ class ShoesAnalysis(models.Model):
             return
 
         # 1. Preparar datos para JSON
-        data_for_json = ranking_lines.read([
-            'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
-            'pairs_count_net', 'sale_net_amount', 'currency_id',
-            'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
-        ])
+        data_for_json = []
+        for line in ranking_lines:
+            line_data = {
+                'name': line.shoes_campaign_id.display_name,
+                'ranking': line.ranking,
+                'pairs_count_sale': line.pairs_count_sale,
+                'pairs_count_cancel': line.pairs_count_cancel,
+                'pairs_count_net': line.pairs_count_net,
+                'sale_net_amount': line.sale_net_amount,
+                'currency_id': line.currency_id.id,
+                'product_tmpl_id': line.product_tmpl_id.id,
+                'shoes_model_material_id': line.shoes_model_material_id.id,
+                'shoes_campaign_id': line.shoes_campaign_id.id
+            }
+            data_for_json.append(line_data)
+
 
         # 2. Crear mapa de colores para las campañas de comparación
         comparison_campaigns = analysis.shoes_campaign_ids
@@ -80,10 +91,10 @@ class ShoesAnalysis(models.Model):
                 color = campaign_color_map.get(line.shoes_campaign_id.id, '#ccc')
                 row_style += f" border-left: 5px solid {color};"
             
-            campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.name})</span>"
+            campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.display_name})</span>"
             prod_name = line.product_tmpl_id.name or "N/A"
             prod_ref = line.shoes_model_material_id.name or ""
-            prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>{campaign_tag}"
+            prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>"
             formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
             
             image_html = ""
@@ -92,7 +103,7 @@ class ShoesAnalysis(models.Model):
                 image_html = f"<div style='text-align: center;'><img src='{image_uri}' style='max-height: 60px; max-width: 60px; object-fit: contain;' alt='Imagen de producto'/></div>"
 
             html_lines.append(f"<tr style='{row_style}'>")
-            html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.name}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: left; font-weight: {font_weight_style};'>{line.shoes_campaign_id.display_name}</td>")
             html_lines.append(f"<td style='{style_td}'>{image_html}</td>")
             html_lines.append(f"<td style='{style_td} text-align: left;'>{prod_display}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale}</td>")

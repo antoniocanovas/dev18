@@ -29,7 +29,7 @@ class ShoesAnalysis(models.Model):
         # --- 1. Lógica de cálculo ---
         product_domain_sql = "AND (pt.is_pair = TRUE OR pt.is_assortment = TRUE)"
         company_currency = self.env.company.currency_id
-        campaign_name_map = {c.id: c.name for c in all_campaigns}
+        campaign_name_map = {c.id: c.display_name for c in all_campaigns}
 
         # (Consultas SQL y de read_group se mantienen igual)
         query_monetary = """
