@@ -222,7 +222,7 @@ msgstr "Tipo de horma"
 #: model_terms:ir.ui.view,arch_db:shoes_analysis.view_shoes_analysis_form
 #: model_terms:ir.ui.view,arch_db:shoes_analysis.view_shoes_analysis_list
 msgid "Shoes Analysis"
-msgstr "Análisis de zapatos"
+msgstr "Informes de distribuidores de calzado"
 
 #. module: shoes_analysis
 #: model:ir.model.fields,field_description:shoes_analysis.field_account_invoice_report__pnt_shoes_model_material_id
