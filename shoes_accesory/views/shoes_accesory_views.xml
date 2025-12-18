@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- SEARCH VIEW -->
+    <record id="shoes_accesory_search" model="ir.ui.view">
+        <field name="name">shoes.accesory.search</field>
+        <field name="model">shoes.accesory</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="task_id"/>
+                <field name="shoes_campaign_id" string="Campaign"/>
+                <field name="manufacturer_id"/>
+                <group expand="1" string="Group By">
+                    <filter name="group_by_manufacturer" string="Manufacturer" context="{'group_by': 'manufacturer_id'}"/>
+                    <filter name="group_by_product" string="Product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACCIONES DE VENTANA: -->
+    <record id="shoes_accesory_act_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes Accesories</field>
+        <field name="res_model">shoes.accesory</field>
+        <field name="search_view_id" ref="shoes_accesory_search"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- SHOES ACCESORY MENU: -->
+    <record id="shoes_accesory_menu" model="ir.ui.menu">
+        <field name="action" ref="shoes_accesory_act_window"/>
+        <field name="active" eval="True"/>
+        <field name="name">Accesory</field>
+        <field name="parent_id" ref="shoes_dealer.shoes_dealer_main_menu"/>
+        <field name="sequence">40</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <!-- TREE VIEW: -->
+    <record id="shoes_accesory_default_list" model="ir.ui.view">
+        <field name="name">shoes.accesory.default.list</field>
+        <field name="model">shoes.accesory</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="shoes_campaign_id" optional="show"/>
+                <field name="task_id" optional="show"/>
+                <field name="name"/>
+                <field name="qty" sum="Total Qty"/>
+                <field name="manufacturer_id" optional="show"/>
+                <field name="manufacturer_location_id" optional="show"/>
+                <field name="pairs_campaign_sold" optional="show" sum="Total Sold"/>
+                <field name="pairs_campaign_pending" optional="show" sum="Total Pending"/>
+                <field name="accesory_campaign_sold_qty" optional="show" sum="Total Acc. Sold"/>
+                <field name="accesory_campaign_pending_qty" optional="show" sum="Total Acc. Pending"/>
+                <field name="accesory_manufacturer_stock" optional="show" decoration-success="accesory_manufacturer_stock > 0" decoration-danger="accesory_manufacturer_stock &lt; 0" sum="Total Man. Stock"/>
+                <field name="accesory_stock" optional="show" decoration-success="accesory_stock > 0" decoration-danger="accesory_stock &lt; 0" sum="Total Stock"/>
+                <field name="accesory_supplier_pending" optional="show" sum="Total Supp. Pending"/>
+                <field name="accesory_manufacturer_status" optional="show" decoration-success="accesory_manufacturer_status >= 0" decoration-danger="accesory_manufacturer_status &lt; 0" sum="Total Status"/>
+                <field name="product_id" column_invisible="1"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

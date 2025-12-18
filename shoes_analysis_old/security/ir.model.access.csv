@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_shoes_analysis_sales_user,access.shoes.analysis.sales.user,model_shoes_analysis,sales_team.group_sale_salesman,1,1,1,1
-access_shoes_analysis_sales_manager,access.shoes.analysis.sales.manager,model_shoes_analysis,sales_team.group_sale_manager,1,1,1,1
-access_shoes_ranking_user,access.shoes.ranking.user,model_shoes_ranking,sales_team.group_sale_salesman,1,1,1,1
-access_shoes_ranking_manager,access.shoes.ranking.manager,model_shoes_ranking,sales_team.group_sale_manager,1,1,1,1

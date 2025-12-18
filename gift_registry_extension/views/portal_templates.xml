@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portal: My Account Link -->
+    <template id="portal_my_home_menu_gift_registry" name="Portal My Home: Gift Registries"
+              inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <a class="list-group-item list-group-item-action" href="/my/gift_registries">
+                <i class="fa fa-gift"/> My Gift Registries
+            </a>
+        </xpath>
+    </template>
+
+    <!-- Portal: Gift Registries List View -->
+    <template id="portal_my_gift_registries" name="My Gift Registries">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Gift Registries</t>
+            </t>
+            <div class="o_portal_content">
+                <t t-if="not registries">
+                    <div class="alert alert-info" role="alert">
+                        You do not have any gift registries yet. You can create one by adding products to your wishlist from the shop.
+                    </div>
+                </t>
+                <t t-if="registries">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Your Gift Registries</h3>
+                        </div>
+                        <div class="list-group">
+                            <t t-foreach="registries" t-as="registry">
+                                <a t-att-href="registry.get_portal_url()" class="list-group-item">
+                                    <span t-esc="registry.name"/>
+                                    <span class="pull-right">
+                                        <span class="badge" t-esc="registry.state"/>
+                                    </span>
+                                </a>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Modify "Add to Cart" button to include "Add to Wishlist" -->
+    <template id="product_add_to_cart_gift_registry" inherit_id="website_sale.product_add_to_cart">
+        <xpath expr="//a[@id='add_to_cart']" position="after">
+            <a href="#" class="btn btn-secondary btn-lg mt-3 d-block d-sm-inline-block" id="add_to_gift_registry">
+                <i class="fa fa-heart"/> Add to Wishlist
+            </a>
+            <script type="text/javascript">
+                odoo.define('gift_registry_extension.wishlist_button', function (require) {
+                    'use strict';
+                    var publicWidget = require('web.public.widget');
+
+                    publicWidget.registry.WebsiteSale.include({
+                        _onClickAdd: function (ev) {
+                            if (ev.currentTarget.id === 'add_to_gift_registry') {
+                                this._submitForm(true);
+                            } else {
+                                this._super.apply(this, arguments);
+                            }
+                        },
+                        
+                        _submitForm: function (isGiftRegistry) {
+                            const $form = this.$('form');
+                            if (isGiftRegistry) {
+                                $form.append($('<input/>', {
+                                    'type': 'hidden',
+                                    'name': 'is_gift_registry_add',
+                                    'value': '1'
+                                }));
+                            }
+                            this._super.apply(this, arguments);
+                        }
+                    });
+                });
+            </script>
+        </xpath>
+    </template>
+</odoo>

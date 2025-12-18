@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sale Order Form View Extension -->
+    <record id="view_order_form_gift_registry" model="ir.ui.view">
+        <field name="name">sale.order.form.gift.registry</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add 'is_gift_whishlist' field to the form view -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="is_gift_whishlist"/>
+            </xpath>
+
+            <!-- Add "Load Gift Registry" button -->
+            <xpath expr="//header" position="inside">
+                 <button name="action_load_gift_registry"
+                        string="Load Gift Registry"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': ['|', ('is_gift_whishlist', '=', True), ('state', '!=', 'draft')]}"/>
+            </xpath>
+
+            <!-- Modify the order line tree view to show gift registry fields -->
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                <field name="gift_registry_qty_remaining"
+                       string="Registry Remaining"
+                       attrs="{'column_invisible': [('parent.is_gift_whishlist', '=', True)]}"
+                       optional="show"/>
+                <field name="qty_purchased"
+                       string="Purchased"
+                       attrs="{'column_invisible': [('parent.is_gift_whishlist', '=', False)]}"
+                       optional="show"/>
+                <field name="qty_remaining"
+                       string="Remaining"
+                       attrs="{'column_invisible': [('parent.is_gift_whishlist', '=', False)]}"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sale Order List View - Add Quick Filter -->
+    <record id="view_sales_order_filter_gift_registry" model="ir.ui.view">
+        <field name="name">sale.order.list.select.gift.registry</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter string="Gift Registries" name="filter_gift_registries"
+                        domain="[('is_gift_whishlist', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action to open the wizard for loading gift registry lines -->
+    <record id="action_load_gift_registry_wizard" model="ir.actions.act_window">
+        <field name="name">Load Gift Registry Lines</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">tree</field>
+        <field name="target">new</field>
+        <field name="domain">[('order_id.is_gift_whishlist', '=', True), ('order_id.partner_id', '=', active_id), ('qty_remaining', '>', 0)]</field>
+    </record>
+</odoo>

@@ -6,16 +6,25 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    # Redefinir el campo para sobrescribir las dependencias del módulo padre
+    estimated_landed_cost = fields.Float(
+        string="Estimated landed cost",
+        compute="_compute_estimated_landed_cost2",
+        store=True,
+        digits="Product Price",
+        help="Estimated cost including duties (standard_price * (1 + duty/100))",
+    )
+
     estimated_pair_landed_cost = fields.Monetary(
         "Pair landed cost €",
         help="Estimated pair landed cost, based on intrastat duty.",
-        compute="_get_estimated_pair_landed_cost",
+        compute="_get_estimated_pair_landed_cost2",
     )
 
     # Calcula el valor de estimated_pair_landed_cost basado en la moneda y duty
     # estimation:
     @api.onchange("exwork_single")
-    def _get_estimated_pair_landed_cost(self):
+    def _get_estimated_pair_landed_cost2(self):
         for record in self:
             amount = 0
             duty_percent = (
@@ -36,3 +45,14 @@ class ProductTemplate(models.Model):
             )
             duty_amount = (product.exwork or 0.0) * duty_percent / 100
             product.recommended_sale_price += duty_amount
+
+    @api.depends("standard_price", "intrastat_duty_id", "exwork_single")
+    def _compute_estimated_landed_cost2(self):
+        """Override to change depends from intrastat_duty_id.duty to intrastat_duty_id"""
+        for template in self:
+            duty_percent = (
+                template.intrastat_duty_id.duty if template.intrastat_duty_id else 0.0
+            )
+            template.estimated_landed_cost = template.standard_price * (
+                1 + duty_percent / 100
+            )
