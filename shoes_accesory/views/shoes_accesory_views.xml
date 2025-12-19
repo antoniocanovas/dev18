@@ -62,8 +62,8 @@
                 <field name="pairs_campaign_pending" optional="show" sum="Total Pending"/>
                 <field name="accesory_campaign_sold_qty" optional="show" sum="Total Acc. Sold"/>
                 <field name="accesory_campaign_pending_qty" optional="show" sum="Total Acc. Pending"/>
-                <field name="accesory_manufacturer_stock" optional="show" decoration-success="accesory_manufacturer_stock > 0" decoration-danger="accesory_manufacturer_stock &lt; 0" sum="Total Man. Stock"/>
                 <field name="accesory_stock" optional="show" decoration-success="accesory_stock > 0" decoration-danger="accesory_stock &lt; 0" sum="Total Stock"/>
+                <field name="accesory_manufacturer_stock" optional="show" decoration-success="accesory_manufacturer_stock > 0" decoration-danger="accesory_manufacturer_stock &lt; 0" sum="Total Man. Stock"/>
                 <field name="accesory_supplier_pending" optional="show" sum="Total Supp. Pending"/>
                 <field name="accesory_manufacturer_status" optional="show" decoration-success="accesory_manufacturer_status >= 0" decoration-danger="accesory_manufacturer_status &lt; 0" sum="Total Status"/>
                 <field name="product_id" column_invisible="1"/>
