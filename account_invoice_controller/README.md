@@ -89,7 +89,12 @@ curl -X POST http://localhost:8069/api/a7k9m3x2w8v5n1q6z4r0 \
 
 ## Respuestas
 
-### Éxito
+El webhook siempre devuelve un objeto JSON para indicar el resultado de la operación.
+
+### Respuesta de Éxito
+
+Cuando la factura y el cliente se crean correctamente, la respuesta incluye los detalles de los registros creados.
+
 ```json
 {
   "status": "success",
@@ -102,12 +107,50 @@ curl -X POST http://localhost:8069/api/a7k9m3x2w8v5n1q6z4r0 \
 }
 ```
 
-### Error
+### Respuestas de Error
+
+Si ocurre un problema, la respuesta tendrá `status: "error"` y un `message` descriptivo.
+
+#### 1. Error de Autorización
+
+Ocurre si el token no es válido, ha caducado o la IP no está permitida. En este caso, se incluye el campo `"code": "UNAUTHORIZED"`.
+
 ```json
 {
   "status": "error",
-  "message": "Descripción del error",
+  "message": "Acceso no autorizado: El token ha expirado.",
   "code": "UNAUTHORIZED"
+}
+```
+
+#### 2. Error en los Datos de Entrada
+
+Ocurre cuando los datos JSON enviados no superan las validaciones internas. El mensaje especificará el problema concreto.
+
+**Ejemplo: Falta un campo obligatorio**
+```json
+{
+  "status": "error",
+  "message": "El JSON debe incluir un objeto 'partner' con un campo 'vat'."
+}
+```
+
+**Ejemplo: Un producto no se encuentra**
+```json
+{
+  "status": "error",
+  "message": "Producto con referencia 'REF_INEXISTENTE' no encontrado."
+}
+```
+
+#### 3. Error Interno del Servidor
+
+Para cualquier otro error inesperado durante el proceso (ej. un tipo de dato incorrecto). El mensaje puede contener detalles técnicos de la excepción capturada por el servidor.
+
+```json
+{
+  "status": "error",
+  "message": "Odoo Server Error: El tipo de dato del campo 'pnt_limit_contract_date' no es válido."
 }
 ```
 
