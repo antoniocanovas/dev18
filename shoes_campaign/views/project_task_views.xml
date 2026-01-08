@@ -50,19 +50,6 @@
                         </group>
                     </group>
 
-                    <group name="shoes_accesories" invisible="not is_shoes_campaign">
-                        <field name="shoes_accesory_ids">
-                            <list editable="bottom">
-                                <field name="product_id"
-                                    domain="[('type','=','consu'),('is_pair','=',False),('is_assortment','=',False)]"
-                                />
-                                <field name="qty"/>
-                                <field name="task_id" column_invisible="1"/>
-                            </list>
-                        </field>
-
-                    </group>
-
                     <group name="material_variants" string="Material variants" invisible="not is_shoes_campaign">
                         <field name="shoes_default_last_id"/>
                         <field name="shoes_model_material_ids" readonly="not manufacturer_id"
@@ -111,6 +98,7 @@
                 </xpath>
                 <xpath expr="//label[@for='date_deadline']" position="before">
                     <field name="shoes_default_code_prefix" class="h2"/>
+                    <field name="shoes_default_code_sufix" class="h2"/>
                 </xpath>
             </data>
 

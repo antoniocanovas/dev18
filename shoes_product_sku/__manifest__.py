@@ -20,32 +20,26 @@
 ##############################################################################
 
 {
-    "name": "Shoes Dealer Campaign",
+    "name": "Shoes Product SKU",
     "version": "18.0",
     "depends": [
+        "base",
         "product",
-        "project",
-        "product_brand",
-        "stock_delivery",
         "shoes_dealer",
-        "intrastat_duty",
+        "shoes_campaign",
+        "shoes_color_chart",
     ],
     "author": "Punt Sistemes",
     "category": "Project",
     "website": "https://www.puntsistemes.es",
     "description": """
-        Project attributes to shoes dealer campaign and product creation from tasks. 
+        Shoes product auto SKU. 
     """,
     "data": [
-        "views/project_project_views.xml",
-        "views/product_template_views.xml",
-        "views/shoes_product_creation_wizard_views.xml",
-        "views/project_task_views.xml",
-        "views/shoes_model_material_views.xml",
-        "views/shoes_type_views.xml",
-        "views/res_company_views.xml",
-        "views/shoes_closure_views.xml",
         "security/ir.model.access.csv",
+        "data/shoes_product_sku_item.xml",
+        "views/res_company_views.xml",
+        "data/server_actions.xml",
     ],
     "demo": [],
     "installable": True,

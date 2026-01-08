@@ -19,14 +19,14 @@ class ProductTemplate(models.Model):
     def _get_pair_and_variants_sync(self):
         super()._get_pair_and_variants_sync()
         if self.intrastat_duty_id:
-            country = (self.intrastat_duty_id.country_id,)
-            intrastat = (self.intrastat_duty_id.intrastat_id,)
+            country_id = self.intrastat_duty_id.country_id.id
+            intrastat_id = self.intrastat_duty_id.intrastat_id.id
 
             self.product_tmpl_single_id.write(
                 {
                     "intrastat_duty_id": self.intrastat_duty_id.id,
                     "hs_code": self.hs_code,
-                    "country_of_origin": country,
+                    "country_of_origin": country_id,
                     "image_1920": self.image_1920,
                 }
             )
@@ -35,16 +35,16 @@ class ProductTemplate(models.Model):
                 for assortment in self.product_variant_ids:
                     assortment.write(
                         {
-                            "intrastat_code_id": intrastat,
-                            "intrastat_origin_country_id": country,
+                            "intrastat_code_id": intrastat_id,
+                            "intrastat_origin_country_id": country_id,
                         }
                     )
 
                 for pair in self.product_tmpl_single_id.product_variant_ids:
                     pair.write(
                         {
-                            "intrastat_code_id": intrastat,
-                            "intrastat_origin_country_id": country,
+                            "intrastat_code_id": intrastat_id,
+                            "intrastat_origin_country_id": country_id,
                         }
                     )
 
@@ -71,16 +71,5 @@ class ProductTemplate(models.Model):
                 record.product_tmpl_single_id.write(
                     {"shoes_model_material_id": shoes_model_material.id}
                 )
-            # Si el producto tiene accesorios, se crea el BOM para el producto PAR, para poder planificar compras:
-            if record.shoes_task_id.shoes_accesory_ids.ids:
-                accesory_bom = self.env['mrp.bom'].create({
-                    'product_tmpl_id': record.product_tmpl_single_id.id,
-                })
-                for accessory in record.shoes_task_id.shoes_accesory_ids:
-                    newbomline = self.env['mrp.bom.line'].create({
-                        'product_id': accessory.product_id.id,
-                        'product_qty': accessory.qty,
-                        'bom_id': accesory_bom.id,
-                    })
         # 3) Devolvemos lo que devolvía el super (si lo hubiera)
         return res

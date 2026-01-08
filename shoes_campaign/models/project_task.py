@@ -12,6 +12,19 @@ class ProjectTask(models.Model):
     # Para componer el default_code del producto automáticamente:
     shoes_default_code_prefix = fields.Char("Internal ref. prefix")
 
+    shoes_default_code_sufix = fields.Char(
+        "Internal ref. sufix",
+        readonly=False,
+        compute="_get_shoes_default_code_sufix"
+    )
+    @api.depends('project_id.name')
+    def _get_shoes_default_code_sufix(self):
+        for record in self:
+            name = record.env.company.shoes_sufix_model_code_prefix
+            if record.project_id.name:
+                name += record.project_id.name
+            record.shoes_default_code_sufix = name
+
     # Datos comunes para creación de productos desde tareas:
 
     product_brand_id = fields.Many2one(
@@ -43,11 +56,6 @@ class ProjectTask(models.Model):
     # Para pasar valor por defecto a líneas de materiales:
     shoes_default_last_id = fields.Many2one(
         "shoes.last", string="Default last", ondelete="restrict"
-    )
-
-    shoes_accesory_ids = fields.One2many(
-        "shoes.accesory", "task_id",
-        string="Accesories"
     )
 
     @api.constrains("create_date")

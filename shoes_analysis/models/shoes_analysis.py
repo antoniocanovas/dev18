@@ -87,6 +87,13 @@ class ShoesAnalysis(models.Model):
         default=lambda self: self.env.company.currency_id
     )
 
+    public = fields.Boolean(
+        string='Public Report',
+        default=False,
+        help='If checked, this report will be visible to all sales users, '
+             'even if they are not the referrer.'
+    )
+
     @api.depends('shoes_campaign_id', 'type')
     def _compute_ranking_line_ids(self):
         """
