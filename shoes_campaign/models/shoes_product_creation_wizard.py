@@ -25,7 +25,7 @@ class ShoesProductCreationWizard(models.TransientModel):
         for record in self:
             # Asignar nombre con códigos de fabricante y producto al final.
             for li in record.material_ids:
-                name = "$$." + record.task_id.name
+                name = record.task_id.name
                 if record.manufacturer_id.ref and li.material_id.code:
                     name += "-" + record.manufacturer_id.ref + li.material_id.code
                 elif not record.manufacturer_id.ref and li.material_id.code:

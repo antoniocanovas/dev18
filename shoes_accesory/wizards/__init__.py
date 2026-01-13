@@ -1,1 +1,0 @@
-from . import shoes_product_creation_wizard

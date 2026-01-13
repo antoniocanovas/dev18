@@ -15,13 +15,14 @@ class ProjectTask(models.Model):
     shoes_default_code_sufix = fields.Char(
         "Internal ref. sufix",
         readonly=False,
+        store=True,
         compute="_get_shoes_default_code_sufix"
     )
     @api.depends('project_id.name')
     def _get_shoes_default_code_sufix(self):
         for record in self:
-            name = record.env.company.shoes_sufix_model_code_prefix
-            if record.project_id.name:
+            name = record.env.company.shoes_sufix_model_code_prefix or ""
+            if record.project_id.id and record.project_id.name:
                 name += record.project_id.name
             record.shoes_default_code_sufix = name
 

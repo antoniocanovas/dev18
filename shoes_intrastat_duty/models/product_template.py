@@ -6,25 +6,16 @@ from odoo import api, fields, models
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    # Redefinir el campo para sobrescribir las dependencias del módulo padre
-    estimated_landed_cost = fields.Float(
-        string="Estimated landed cost",
-        compute="_compute_estimated_landed_cost2",
-        store=True,
-        digits="Product Price",
-        help="Estimated cost including duties (standard_price * (1 + duty/100))",
-    )
-
     estimated_pair_landed_cost = fields.Monetary(
         "Pair landed cost €",
         help="Estimated pair landed cost, based on intrastat duty.",
-        compute="_get_estimated_pair_landed_cost2",
+        compute="_get_estimated_pair_landed_cost",
     )
 
     # Calcula el valor de estimated_pair_landed_cost basado en la moneda y duty
     # estimation:
-    @api.onchange("exwork_single")
-    def _get_estimated_pair_landed_cost2(self):
+    @api.depends("exwork_single", "intrastat_duty_id")
+    def _get_estimated_pair_landed_cost(self):
         for record in self:
             amount = 0
             duty_percent = (
@@ -36,23 +27,39 @@ class ProductTemplate(models.Model):
                 amount = record.exwork_euro * (1 + duty_percent / 100)
             record.estimated_pair_landed_cost = amount
 
-    @api.depends("exwork", "sale_margin")
+    @api.depends("exwork", "sale_margin","estimated_pair_landed_cost")
     def _compute_recommended_sale_price(self):
         super()._compute_recommended_sale_price()
         for product in self:
-            duty_percent = (
-                product.intrastat_duty_id.duty if product.intrastat_duty_id else 0.0
+            amount = product.estimated_pair_landed_cost or 0.0
+            amount += (
+                (product.estimated_pair_landed_cost or 0.0) * product.sale_margin / 100
             )
-            duty_amount = (product.exwork or 0.0) * duty_percent / 100
-            product.recommended_sale_price += duty_amount
+            product.recommended_sale_price = amount
 
-    @api.depends("standard_price", "intrastat_duty_id", "exwork_single")
-    def _compute_estimated_landed_cost2(self):
-        """Override to change depends from intrastat_duty_id.duty to intrastat_duty_id"""
-        for template in self:
-            duty_percent = (
-                template.intrastat_duty_id.duty if template.intrastat_duty_id else 0.0
-            )
-            template.estimated_landed_cost = template.standard_price * (
-                1 + duty_percent / 100
-            )
+    @api.onchange("intrastat_duty_id")
+    def _sync_intrastat_duty(self):
+        # Prevenir bucle infinito usando contexto
+        if self.env.context.get("skip_intrastat_sync"):
+            return
+
+        for record in self:
+            intrastat_id = record.intrastat_duty_id.id
+
+            # Actualizar product_tmpl_set_id solo si es diferente
+            if (
+                record.product_tmpl_set_id.id
+                and record.product_tmpl_set_id.intrastat_duty_id.id != intrastat_id
+            ):
+                record.product_tmpl_set_id.with_context(
+                    skip_intrastat_sync=True
+                ).intrastat_duty_id = intrastat_id
+
+            # Actualizar product_tmpl_single_id solo si es diferente
+            if (
+                record.product_tmpl_single_id.id
+                and record.product_tmpl_single_id.intrastat_duty_id.id != intrastat_id
+            ):
+                record.product_tmpl_single_id.with_context(
+                    skip_intrastat_sync=True
+                ).intrastat_duty_id = intrastat_id
