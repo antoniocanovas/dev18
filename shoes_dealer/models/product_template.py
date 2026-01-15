@@ -539,7 +539,7 @@ class ProductTemplate(models.Model):
                     p.create_set_bom()
 
     @api.depends('exwork_euro', 'exwork_single_euro')
-    def _update_standard_price_on_variants(self):
+    def update_standard_price_on_variants(self):
         for record in self:
             # Caso de actualizar el precio desde el PAR:
             if record.is_pair and record.product_tmpl_set_id.id:

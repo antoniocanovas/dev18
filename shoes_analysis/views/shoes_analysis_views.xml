@@ -63,7 +63,7 @@
                         <group>
                             <field name="manufacturer_ids"
                                    widget="many2many_tags"
-                                   invisible="type not in ['campaign_product_ranking', 'campaign_last_ranking']"/>
+                                   invisible="type not in ['campaign_product_ranking', 'campaign_last_ranking', 'campaign_manufacturer']"/>
                             <field name="public"
                                    widget="boolean_toggle"
                                    string="Informe Público"/>
@@ -205,6 +205,15 @@
         <field name="res_model">shoes.analysis</field>
         <field name="context">{'default_type': 'campaign_last_ranking'}</field>
         <field name="domain">[('type','=','campaign_last_ranking')]</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Acción 14: Manufacturar campaign -->
+    <record id="action_campaign_manufacturer" model="ir.actions.act_window">
+        <field name="name">Manufacturer campaign</field>
+        <field name="res_model">shoes.analysis</field>
+        <field name="context">{'default_type': 'campaign_manufacturer'}</field>
+        <field name="domain">[('type','=','campaign_manufacturer')]</field>
         <field name="view_mode">list,form</field>
     </record>
 </odoo>

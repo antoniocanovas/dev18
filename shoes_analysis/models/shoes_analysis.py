@@ -31,6 +31,7 @@ class ShoesAnalysis(models.Model):
             ('campaign_product_ranking', 'Ranking de productos por campaña con colores'),
             ('campaign_last_ranking', 'Ranking de hormas por campaña con modelos y colores'),
             ('salesman_model', 'Ventas de representante por modelo'),
+            ('campaign_manufacturer', 'Manufacturar campaign'),
         ],
         string="Tipo de Informe"
     )
@@ -111,7 +112,7 @@ class ShoesAnalysis(models.Model):
             if analysis.manufacturer_ids:
                 domain.append(('manufacturer_id', 'in', analysis.manufacturer_ids.ids))
 
-            if analysis.type in ('product_ranking', 'campaign_product_ranking'):
+            if analysis.type in ('product_ranking', 'campaign_product_ranking', 'campaign_manufacturer'):
                 domain.append(('product_tmpl_id', '!=', False))
                 analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
             elif analysis.type in ('last_ranking', 'campaign_last_ranking'):

@@ -52,6 +52,10 @@ class ShoesAnalysis(models.Model):
                 "view_id": "shoes_analysis_export.shoes_analysis_export_campaign_last_ranking_list_view",
                 "parser": "_parse_campaign_last_ranking_data",
             },
+            "campaign_manufacturer": {
+                "view_id": "shoes_analysis_export.shoes_analysis_export_campaign_manufacturer_list_view",
+                "parser": "_parse_campaign_manufacturer_data",
+            },
             "salesman_model": {
                 "view_id": "shoes_analysis_export.shoes_analysis_export_salesman_model_list_view",
                 "parser": "_parse_salesman_model_data",
@@ -291,6 +295,32 @@ class ShoesAnalysis(models.Model):
                         "sold_pairs": color.get("sold"),
                         "produced_pairs": color.get("produced"),
                         "estimated_stock": color.get("stock"),
+                        "analysis_id": self.id,
+                        "campaign_id": self.shoes_campaign_id.id,
+                    }
+                )
+        return lines_to_create
+
+    def _parse_campaign_manufacturer_data(self, json_data):
+        """
+        Parsea los datos JSON para el informe 'campaign_manufacturer'.
+        """
+        lines_to_create = []
+        for item in json_data:
+            for color in item.get("colors", []):
+                lines_to_create.append(
+                    {
+                        "ranking_value": item.get("ranking"),
+                        "ranking_name": item.get("name"),
+                        "product_material_id": item.get("shoes_model_material_id")[0]
+                        if item.get("shoes_model_material_id")
+                        else False,
+                        "color_value_id": self.env["product.attribute.value"]
+                        .search([("name", "=", color.get("color_name"))], limit=1)
+                        .id,
+                        "sold_pairs": color.get("sold"),
+                        "cost_price": color.get("standard_price"),
+                        "total_cost": color.get("total_amount"),
                         "analysis_id": self.id,
                         "campaign_id": self.shoes_campaign_id.id,
                     }

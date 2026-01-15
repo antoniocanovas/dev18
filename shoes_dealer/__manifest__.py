@@ -36,6 +36,8 @@
     "data": [
         "views/menu_views.xml",
         "data/shoes_data.xml",
+        "data/server_actions.xml",
+        "data/automatic_actions.xml",
         "security/ir.model.access.csv",
         "views/shoes_assortment_views.xml",
         "views/product_template_views.xml",

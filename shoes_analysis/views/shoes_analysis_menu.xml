@@ -79,6 +79,14 @@
               sequence="60"
               groups="base.group_user"/>
 
+    <!-- Manufacturar campaign -->
+    <menuitem id="menu_campaign_manufacturer"
+              name="Manufacturer campaign"
+              parent="menu_shoes_analysis_root"
+              action="action_campaign_manufacturer"
+              sequence="65"
+              groups="base.group_user"/>
+
     <!-- Ventas de representante por modelo -->
     <menuitem id="menu_model_sales_by_rep_position"
               name="Ventas de representante por modelo"

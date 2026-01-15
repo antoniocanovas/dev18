@@ -163,6 +163,24 @@
         </field>
     </record>
 
+    <!-- Vista de Lista para las líneas de exportación de Manufacturer Campaign -->
+    <record id="shoes_analysis_export_campaign_manufacturer_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.campaign_manufacturer.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="product_material_id"/>
+                <field name="color_value_id"/>
+                <field name="sold_pairs" sum="false"/>
+                <field name="cost_price" sum="false"/>
+                <field name="total_cost" sum="false"/>
+            </list>
+        </field>
+    </record>
+
     <!-- Vista de Lista para las líneas de exportación de Ventas de Modelos por Representante -->
     <record id="shoes_analysis_export_salesman_model_list_view" model="ir.ui.view">
         <field name="name">shoes.analysis.export.salesman_model.list</field>

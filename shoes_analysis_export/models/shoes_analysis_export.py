@@ -33,3 +33,5 @@ class ShoesAnalysisExport(models.TransientModel):
     sold_pairs = fields.Integer("Vendido")
     produced_pairs = fields.Integer("En Producción")
     estimated_stock = fields.Integer("Stock Estimado")
+    cost_price = fields.Float("Precio de Coste")
+    total_cost = fields.Float("Coste Total")
