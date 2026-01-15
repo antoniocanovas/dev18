@@ -65,6 +65,13 @@
 <!--                            <h1><span t-field="doc.name"/></h1>-->
                             <h3><span t-field="doc.type"/></h3>
                             <p>Última actualización: <span t-field="doc.write_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/></p>
+                            <div t-if="doc.manufacturer_ids" class="mt-2 mb-3">
+                                <t t-foreach="doc.manufacturer_ids" t-as="manufacturer">
+                                    <span class="me-1" style="padding: 4px 12px; background-color: #f0f0f0; color: #000; border-radius: 50rem;">
+                                        <t t-esc="manufacturer.name"/>
+                                    </span>
+                                </t>
+                            </div>
                         </div>
 
                         <!-- Resumen HTML (si existe) -->

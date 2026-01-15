@@ -26,6 +26,12 @@ class ShoesRanking(models.Model):
         string='Producto',
     )
 
+    manufacturer_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Manufacturer',
+        store=True,
+    )
+
     shoes_last_id = fields.Many2one(
         'shoes.last',
         string='Shoes last'
@@ -94,18 +100,22 @@ class ShoesRanking(models.Model):
                         date=order_date
                     )
 
-                # Agregación por Producto
-                product_agg_data[target_template.id]["pairs_count_sale"] += line_pairs_gross
-                product_agg_data[target_template.id]["pairs_count_cancel"] += line_pairs_cancelled
-                product_agg_data[target_template.id]["pairs_count_net"] += line_pairs_net
-                product_agg_data[target_template.id]["sale_net_amount"] += line_amount_company_currency
+                manufacturer_id = line.manufacturer_id.id if line.manufacturer_id else None
 
-                # Agregación por Horma
+                # Agregación por Producto y Fabricante
+                product_key = (target_template.id, manufacturer_id)
+                product_agg_data[product_key]["pairs_count_sale"] += line_pairs_gross
+                product_agg_data[product_key]["pairs_count_cancel"] += line_pairs_cancelled
+                product_agg_data[product_key]["pairs_count_net"] += line_pairs_net
+                product_agg_data[product_key]["sale_net_amount"] += line_amount_company_currency
+
+                # Agregación por Horma y Fabricante
                 if target_template.shoes_last_id:
-                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_sale"] += line_pairs_gross
-                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_cancel"] += line_pairs_cancelled
-                    last_agg_data[target_template.shoes_last_id.id]["pairs_count_net"] += line_pairs_net
-                    last_agg_data[target_template.shoes_last_id.id]["sale_net_amount"] += line_amount_company_currency
+                    last_key = (target_template.shoes_last_id.id, manufacturer_id)
+                    last_agg_data[last_key]["pairs_count_sale"] += line_pairs_gross
+                    last_agg_data[last_key]["pairs_count_cancel"] += line_pairs_cancelled
+                    last_agg_data[last_key]["pairs_count_net"] += line_pairs_net
+                    last_agg_data[last_key]["sale_net_amount"] += line_amount_company_currency
 
             # Procesar ranking por producto y por horma
             cls._process_ranking_type(campaign, product_agg_data, 'product_tmpl_id')
@@ -122,13 +132,14 @@ class ShoesRanking(models.Model):
         # 1. Obtener registros existentes y mapearlos
         domain = [('shoes_campaign_id', '=', campaign.id), (field_name, '!=', False)]
         existing_lines = cls.search(domain)
-        existing_map = {line[field_name].id: line for line in existing_lines}
+        existing_map = {(line[field_name].id, line.manufacturer_id.id if line.manufacturer_id else None): line for line in existing_lines}
         
-        processed_ids = set()
+        processed_keys = set()
 
         # 2. Lógica de UPSERT
-        for entity_id, data in aggregated_data.items():
-            processed_ids.add(entity_id)
+        for key, data in aggregated_data.items():
+            processed_keys.add(key)
+            entity_id, manufacturer_id = key
             vals = {
                 'pairs_count_sale': data["pairs_count_sale"],
                 'pairs_count_cancel': data["pairs_count_cancel"],
@@ -136,17 +147,18 @@ class ShoesRanking(models.Model):
                 'sale_net_amount': data["sale_net_amount"],
                 'currency_id': cls.env.company.currency_id.id,
             }
-            if entity_id in existing_map:
-                existing_map[entity_id].write(vals)
+            if key in existing_map:
+                existing_map[key].write(vals)
             else:
                 vals['shoes_campaign_id'] = campaign.id
                 vals[field_name] = entity_id
+                vals['manufacturer_id'] = manufacturer_id
                 cls.create(vals)
 
         # 3. Lógica de DELETE
-        ids_to_delete = set(existing_map.keys()) - processed_ids
-        if ids_to_delete:
-            lines_to_delete = cls.browse([existing_map[id_].id for id_ in ids_to_delete])
+        keys_to_delete = set(existing_map.keys()) - processed_keys
+        if keys_to_delete:
+            lines_to_delete = cls.browse([existing_map[key].id for key in keys_to_delete])
             lines_to_delete.unlink()
 
         # 4. Recalcular el ranking para este tipo

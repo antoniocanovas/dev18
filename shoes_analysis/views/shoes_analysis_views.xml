@@ -61,6 +61,9 @@
                             <field name="write_date"/>
                         </group>
                         <group>
+                            <field name="manufacturer_ids"
+                                   widget="many2many_tags"
+                                   invisible="type not in ['campaign_product_ranking', 'campaign_last_ranking']"/>
                             <field name="public"
                                    widget="boolean_toggle"
                                    string="Informe Público"/>

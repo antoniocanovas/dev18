@@ -9,18 +9,14 @@ class ShoesAnalysis(models.Model):
         Orquesta la creación del informe que agrupa productos por el ranking de su horma.
         """
         for analysis in self:
-            campaign_id = analysis.shoes_campaign_id.id
-            
-            horma_lines_domain = [
-                ('shoes_campaign_id', '=', campaign_id),
-                ('shoes_last_id', '!=', False)
-            ]
+            base_domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
+            if analysis.manufacturer_ids:
+                base_domain.append(('manufacturer_id', 'in', analysis.manufacturer_ids.ids))
+
+            horma_lines_domain = base_domain + [('shoes_last_id', '!=', False)]
             horma_lines = self.env['shoes.ranking'].search(horma_lines_domain, order='ranking asc')
 
-            product_lines_domain = [
-                ('shoes_campaign_id', '=', campaign_id),
-                ('product_tmpl_id', '!=', False)
-            ]
+            product_lines_domain = base_domain + [('product_tmpl_id', '!=', False)]
             product_lines = self.env['shoes.ranking'].search(product_lines_domain)
 
             analysis._generate_campaign_last_ranking_html(horma_lines, product_lines)

@@ -48,6 +48,11 @@ class ShoesAnalysis(models.Model):
         domain=[('is_shoes_campaign', '=', True)],
     )
 
+    manufacturer_ids = fields.Many2many(
+        comodel_name='res.partner',
+        string='Manufacturers'
+    )
+
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Customer'
@@ -58,6 +63,7 @@ class ShoesAnalysis(models.Model):
         string='Referrer'
     )
 
+    # Campo utilizado para consolidación de datos en algunos informes:
     resume_html = fields.Html(
         string='Resume',
         store=True,
@@ -94,18 +100,22 @@ class ShoesAnalysis(models.Model):
              'even if they are not the referrer.'
     )
 
-    @api.depends('shoes_campaign_id', 'type')
+    @api.depends('shoes_campaign_id', 'type', 'manufacturer_ids')
     def _compute_ranking_line_ids(self):
         """
         Calcula las líneas de ranking a mostrar en la vista de análisis.
         """
         for analysis in self:
             analysis.ranking_line_ids = False
+            domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id)]
+            if analysis.manufacturer_ids:
+                domain.append(('manufacturer_id', 'in', analysis.manufacturer_ids.ids))
+
             if analysis.type in ('product_ranking', 'campaign_product_ranking'):
-                domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id), ('product_tmpl_id', '!=', False)]
+                domain.append(('product_tmpl_id', '!=', False))
                 analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
             elif analysis.type in ('last_ranking', 'campaign_last_ranking'):
-                domain = [('shoes_campaign_id', '=', analysis.shoes_campaign_id.id), ('shoes_last_id', '!=', False)]
+                domain.append(('shoes_last_id', '!=', False))
                 analysis.ranking_line_ids = self.env['shoes.ranking'].search(domain)
 
     def update_shoes_analysis(self):

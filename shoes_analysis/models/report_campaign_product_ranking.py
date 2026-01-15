@@ -15,12 +15,7 @@ class ShoesAnalysis(models.Model):
         Genera el informe HTML y los datos JSON para el ranking de productos por campaña.
         """
         for analysis in self:
-            ranking_lines_domain = [
-                ('shoes_campaign_id', '=', analysis.shoes_campaign_id.id),
-                ('product_tmpl_id', '!=', False)
-            ]
-            product_ranking_lines = self.env['shoes.ranking'].search(ranking_lines_domain)
-            analysis._generate_campaign_product_ranking_html(product_ranking_lines)
+            analysis._generate_campaign_product_ranking_html(analysis.ranking_line_ids)
         return True
 
     def _generate_campaign_product_ranking_html(self, ranking_lines):
