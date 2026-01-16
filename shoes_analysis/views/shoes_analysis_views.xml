@@ -38,7 +38,7 @@
                                 string="Imprimir"
                                 class="oe_stat_button"
                                 icon="fa-print"
-                                invisible="not analysis_html"/>
+                                invisible="not data"/>
                     </div>
                     <div class="oe_title">
                         <h1>

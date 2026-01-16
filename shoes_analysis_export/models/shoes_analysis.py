@@ -12,7 +12,7 @@ class ShoesAnalysis(models.Model):
         """
         self.ensure_one()
         if not self.analysis_html:
-            return False
+            raise UserError("Nada que exportar.")
 
         # Mapeo de tipos de informe a sus vistas de lista y métodos de parseo
         export_config = {
@@ -137,6 +137,8 @@ class ShoesAnalysis(models.Model):
     def _parse_salesman_country_data(self, json_data):
         """Parsea los datos JSON para el informe 'salesman_country'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for (
             salesman_data
         ) in json_data:  # La estructura JSON es una lista de representantes
@@ -169,6 +171,8 @@ class ShoesAnalysis(models.Model):
     def _parse_manufacturer_sales_data(self, json_data):
         """Parsea los datos JSON para el informe 'manufacturer_sales'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for (
             manufacturer_data
         ) in json_data:  # La estructura JSON es una lista de fabricantes
@@ -194,6 +198,8 @@ class ShoesAnalysis(models.Model):
     def _parse_sales_by_country_data(self, json_data):
         """Parsea los datos JSON para el informe 'sales_by_country'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for country_data in json_data:  # La estructura JSON es una lista de países
             country_id = (
                 self.env["res.country"]
@@ -215,6 +221,8 @@ class ShoesAnalysis(models.Model):
     def _parse_sales_by_shipping_mark_data(self, json_data):
         """Parsea los datos JSON para el informe 'sales_by_shipping_mark'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for mark_data in json_data:  # La estructura JSON es una lista de timbrados
             sale_type_id = (
                 self.env["sale.order.type"]
@@ -236,6 +244,8 @@ class ShoesAnalysis(models.Model):
     def _parse_product_ranking_data(self, json_data):
         """Parsea los datos JSON para el informe 'product_ranking'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             lines_to_create.append(
                 {
@@ -256,6 +266,8 @@ class ShoesAnalysis(models.Model):
     def _parse_last_ranking_data(self, json_data):
         """Parsea los datos JSON para el informe 'last_ranking'."""
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             lines_to_create.append(
                 {
@@ -279,6 +291,8 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'campaign_product_ranking'.
         """
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             for color in item.get("colors", []):
                 lines_to_create.append(
@@ -305,6 +319,8 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'campaign_manufacturer'.
         """
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             for color in item.get("colors", []):
                 lines_to_create.append(
@@ -331,6 +347,8 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'campaign_last_ranking'.
         """
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             for product in item.get("products", []):
                 for color in product.get("colors", []):
@@ -366,6 +384,8 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'salesman_model'.
         """
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for item in json_data:
             lines_to_create.append(
                 {
@@ -387,6 +407,8 @@ class ShoesAnalysis(models.Model):
         Parsea los datos JSON para el informe 'customer_comparison'.
         """
         lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
         for partner_data in json_data:
             for brand_data in partner_data.get("brands", []):
                 for campaign_data in brand_data.get("campaigns", []):

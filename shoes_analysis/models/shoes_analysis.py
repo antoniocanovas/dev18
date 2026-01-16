@@ -146,6 +146,8 @@ class ShoesAnalysis(models.Model):
         Genera el informe PDF del análisis actual.
         """
         self.ensure_one()
+        if not self.data:
+            raise UserError("Nada que imprimir.")
         return self.env.ref('shoes_analysis.action_report_shoes_analysis').report_action(self)
 
     def _generate_resume_html(self, campaign_totals, base_camp_id, comparison_campaigns):
