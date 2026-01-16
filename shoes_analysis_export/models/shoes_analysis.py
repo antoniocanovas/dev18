@@ -241,11 +241,10 @@ class ShoesAnalysis(models.Model):
                 {
                     "ranking_name": item.get("name"),
                     "ranking_value": item.get("ranking"),
-                    "product_tmpl_id": item.get("product_tmpl_id")[0]
-                    if item.get("product_tmpl_id")
-                    else False,
+                    "product_tmpl_id": item.get("product_tmpl_id"),
                     "campaign_id": self.shoes_campaign_id.id,
                     "net_pairs": item.get("pairs_count_net"),
+                    "cost_price": item.get("price"),
                     "net_sales": item.get("sale_net_amount"),
                     "total_pairs": item.get("pairs_count_sale"),
                     "cancelled_pairs": item.get("pairs_count_cancel"),

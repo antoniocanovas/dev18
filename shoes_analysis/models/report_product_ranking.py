@@ -20,17 +20,36 @@ class ShoesAnalysis(models.Model):
             ]
             all_ranking_lines = self.env['shoes.ranking'].search(ranking_lines_domain)
             sorted_lines = all_ranking_lines.sorted(key=lambda r: r.pairs_count_net, reverse=True)
-            analysis._generate_ranking_html(sorted_lines)
+            
+            recalculated_lines = []
+            for line in sorted_lines:
+                product_template = line.product_tmpl_id
+                product_product = product_template.product_variant_id
+                
+                price = 0.0
+                if analysis.pricelist_id:
+                    price = analysis.pricelist_id._get_product_price(product_product, quantity=1)
+                else:
+                    price = product_product.lst_price
+
+                recalculated_line = {
+                    'line': line,
+                    'price': price,
+                    'sale_net_amount': line.pairs_count_net * price,
+                }
+                recalculated_lines.append(recalculated_line)
+            
+            analysis._generate_ranking_html(recalculated_lines)
         return True
 
-    def _generate_ranking_html(self, ranking_lines):
+    def _generate_ranking_html(self, ranking_data):
         """
         Genera el informe HTML y los datos JSON basados en los registros 'shoes.ranking'.
         """
         self.ensure_one()
         analysis = self
 
-        if not ranking_lines:
+        if not ranking_data:
             analysis.write({
                 'analysis_html': "<p>No hay datos de ranking para mostrar.</p>",
                 'data': False
@@ -39,14 +58,17 @@ class ShoesAnalysis(models.Model):
 
         # 1. Preparar datos para JSON
         data_for_json = []
-        for line in ranking_lines:
+        for data in ranking_data:
+            line = data['line']
+            
             line_data = {
                 'name': line.shoes_campaign_id.display_name,
                 'ranking': line.ranking,
                 'pairs_count_sale': line.pairs_count_sale,
                 'pairs_count_cancel': line.pairs_count_cancel,
                 'pairs_count_net': line.pairs_count_net,
-                'sale_net_amount': line.sale_net_amount,
+                'price': data['price'],
+                'sale_net_amount': data['sale_net_amount'],
                 'currency_id': line.currency_id.id,
                 'product_tmpl_id': line.product_tmpl_id.id,
                 'shoes_model_material_id': line.shoes_model_material_id.id,
@@ -75,6 +97,7 @@ class ShoesAnalysis(models.Model):
                     <th style='{style_th} text-align: right;'>Total Vend.</th>
                     <th style='{style_th} text-align: right;'>Total Canc.</th>
                     <th style='{style_th} text-align: right;'>Netos</th>
+                    <th style='{style_th} text-align: right;'>Price</th>
                     <th style='{style_th} text-align: right;'>Importe Neto</th>
                 </tr>
             </thead>
@@ -83,7 +106,11 @@ class ShoesAnalysis(models.Model):
 
         total_sale, total_cancel, total_net, total_amount = 0.0, 0.0, 0.0, 0.0
 
-        for line in ranking_lines:
+        for data in ranking_data:
+            line = data['line']
+            price = data['price']
+            sale_net_amount = data['sale_net_amount']
+
             is_main_campaign = (line.shoes_campaign_id.id == analysis.shoes_campaign_id.id)
             font_weight_style = "bold" if is_main_campaign else "normal"
             row_style = "page-break-inside: avoid;"
@@ -95,7 +122,8 @@ class ShoesAnalysis(models.Model):
             prod_name = line.product_tmpl_id.name or "N/A"
             prod_ref = line.shoes_model_material_id.name or ""
             prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>"
-            formatted_amount = formatLang(analysis.env, line.sale_net_amount, currency_obj=analysis.currency_id)
+            formatted_price = formatLang(analysis.env, price, currency_obj=analysis.currency_id)
+            formatted_amount = formatLang(analysis.env, sale_net_amount, currency_obj=analysis.currency_id)
             
             image_html = ""
             if line.product_tmpl_id and line.product_tmpl_id.image_128:
@@ -109,6 +137,7 @@ class ShoesAnalysis(models.Model):
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_sale}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_cancel}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{line.pairs_count_net}</td>")
+            html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{formatted_price}</td>")
             html_lines.append(f"<td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{formatted_amount}</td>")
             html_lines.append("</tr>")
 
@@ -116,7 +145,7 @@ class ShoesAnalysis(models.Model):
                 total_sale += line.pairs_count_sale
                 total_cancel += line.pairs_count_cancel
                 total_net += line.pairs_count_net
-                total_amount += line.sale_net_amount
+                total_amount += sale_net_amount
 
         html_lines.append("</tbody>")
         
@@ -127,6 +156,7 @@ class ShoesAnalysis(models.Model):
         html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_sale}</td>")
         html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_cancel}</td>")
         html_lines.append(f"<td style='{style_td_total} text-align: right;'>{total_net}</td>")
+        html_lines.append(f"<td style='{style_td_total}'></td>")
         html_lines.append(f"<td style='{style_td_total} text-align: right;'>{formatted_total_amount}</td>")
         html_lines.append("</tr></tfoot></table>")
 

@@ -101,6 +101,7 @@
                 <field name="ranking_name"/>
                 <field name="product_tmpl_id"/>
                 <field name="net_pairs" sum="false"/>
+                <field name="cost_price" sum="false"/>
                 <field name="net_sales" sum="false"/>
                 <field name="total_pairs" sum="false"/>
                 <field name="cancelled_pairs" sum="false"/>
