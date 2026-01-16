@@ -1,43 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- ========================================== -->
-    <!-- Categoría de permisos: Mayorista de Calzado -->
-    <!-- ========================================== -->
     <record id="module_category_shoes_dealer" model="ir.module.category">
         <field name="name">Shoes dealer</field>
         <field name="description">Gestión de permisos para el sistema de mayorista de calzado</field>
         <field name="sequence">6</field>
     </record>
 
-    <!-- ========================================== -->
-    <!-- Grupos de Seguridad - Informes de Análisis -->
-    <!-- ========================================== -->
-
-    <!-- Grupo: Comercial - Solo mis clientes (Nivel básico) -->
     <record id="group_shoes_analysis_user" model="res.groups">
         <field name="name">Solo mis clientes e informes públicos</field>
         <field name="category_id" ref="module_category_shoes_dealer"/>
-        <field name="comment">Acceso de solo lectura a informes propios (donde es referrer) o informes públicos</field>
     </record>
 
-    <!-- Grupo: Comercial (Nivel intermedio) -->
     <record id="group_shoes_analysis_manager" model="res.groups">
-        <field name="name">Comercial</field>
+        <field name="name">Gestor</field>
         <field name="category_id" ref="module_category_shoes_dealer"/>
-        <field name="comment">Puede crear y actualizar todos los informes, pero no eliminar</field>
+        <field name="implied_ids" eval="[(4, ref('group_shoes_analysis_user'))]"/>
     </record>
 
-    <!-- Grupo: Director Comercial (Nivel completo) -->
     <record id="group_shoes_analysis_director" model="res.groups">
         <field name="name">Director</field>
         <field name="category_id" ref="module_category_shoes_dealer"/>
-        <field name="comment">Acceso completo a todos los informes (crear, leer, escribir, eliminar)</field>
+        <field name="implied_ids" eval="[(4, ref('group_shoes_analysis_manager'))]"/>
     </record>
 
-    <!-- Modificación de los grupos de Odoo para que hereden nuestros grupos -->
     <record id="sales_team.group_sale_salesman" model="res.groups">
         <field name="implied_ids" eval="[(4, ref('shoes_analysis.group_shoes_analysis_user'))]"/>
     </record>
+
     <record id="sales_team.group_sale_manager" model="res.groups">
         <field name="implied_ids" eval="[(4, ref('shoes_analysis.group_shoes_analysis_director'))]"/>
     </record>
