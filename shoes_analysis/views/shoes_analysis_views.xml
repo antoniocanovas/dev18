@@ -53,6 +53,8 @@
                             <field name="partner_id"
                                    invisible="type != 'customer_comparison'"
                                    required="type == 'customer_comparison'"/>
+                            <field name="pricelist_id"
+                                   invisible="type != 'product_ranking'"/>
                             <field name="referrer_id"
                                    string="Representante"
                                    invisible="type != 'salesman_model'"

@@ -129,7 +129,7 @@ class ShoesAnalysis(models.Model):
                     
                     total_vendidos = totals['pairs_count'] + totals['pairs_order_cancelled']
                     total_cancelados = totals['pairs_line_cancelled'] + totals['pairs_order_cancelled']
-                    netos = total_vendidos - total_cancelados
+                    netos = total_vendidos + total_cancelados
                     asignados = totals['pairs_delivered'] + totals['pairs_reserved']
                     
                     camp_data_for_json = {

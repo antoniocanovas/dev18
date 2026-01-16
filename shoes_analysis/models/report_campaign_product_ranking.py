@@ -161,7 +161,7 @@ class ShoesAnalysis(models.Model):
             color_val = line.color_value_id
             key = color_val.id
             if key not in color_map: color_map[key] = color_val
-            color_aggr[key]['sold'] += (line.product_uom_qty * line.pairs_count) - line.shoes_pair_cancelled_qty
+            color_aggr[key]['sold'] += (line.product_uom_qty * line.pairs_count) + line.shoes_pair_cancelled_qty
             color_aggr[key]['produced'] += line.qty_delivered * line.pairs_count
         
         final_stats = []

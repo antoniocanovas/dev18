@@ -59,6 +59,11 @@ class ShoesAnalysis(models.Model):
         string='Customer'
     )
 
+    pricelist_id = fields.Many2one(
+        comodel_name='product.pricelist',
+        string='Pricelist'
+    )
+
     referrer_id = fields.Many2one(
         comodel_name='res.users',
         string='Referrer'

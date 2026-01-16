@@ -49,7 +49,7 @@ class ShoesAnalysis(models.Model):
             partner_id = group['order_partner_id'][0]
             campaign_id = group['shoes_campaign_id'][0]
             all_partner_ids.add(partner_id)
-            net_pairs = (group['product_uom_qty'] * group.get('pairs_count', 1)) - group.get('shoes_pair_cancelled_qty', 0)
+            net_pairs = (group['product_uom_qty'] * group.get('pairs_count', 1)) + group.get('shoes_pair_cancelled_qty', 0)
             data_map[partner_id][campaign_id]['net_pairs'] += net_pairs
             data_map[partner_id][campaign_id]['net_sales'] += group['price_subtotal']
 

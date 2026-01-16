@@ -87,7 +87,7 @@ class ShoesRanking(models.Model):
 
                 line_pairs_gross = line.product_uom_qty * line.pairs_count
                 line_pairs_cancelled = line.shoes_pair_cancelled_qty
-                line_pairs_net = line_pairs_gross - line_pairs_cancelled
+                line_pairs_net = line_pairs_gross + line_pairs_cancelled
                 
                 line_amount_company_currency = 0.0
                 if not float_is_zero(line.price_subtotal, precision_rounding=company_currency.rounding):

@@ -69,7 +69,7 @@ class ShoesAnalysis(models.Model):
         processed_list = []
         for campaign_id, products_data in aggregated_data.items():
             for tmpl_id, data in products_data.items():
-                venta_neta = data['pedidos'] - data['anulados']
+                venta_neta = data['pedidos'] + data['anulados']
                 if venta_neta > 0:
                     ranking_line = product_rank_map.get(campaign_id, {}).get(tmpl_id)
                     processed_list.append({
