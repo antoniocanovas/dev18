@@ -15,3 +15,4 @@ from . import report_country_sales
 from . import report_shipping_mark_sales
 from . import product_template
 from . import report_campaign_manufacturer
+from . import report_salesman_customers

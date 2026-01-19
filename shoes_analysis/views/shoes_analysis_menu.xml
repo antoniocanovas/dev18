@@ -103,5 +103,12 @@
               sequence="80"
               groups="base.group_user"/>
 
+    <!-- Clientes por representante -->
+    <menuitem id="menu_salesman_customers"
+              name="Clientes por representante"
+              parent="menu_shoes_analysis_root"
+              action="action_salesman_customers"
+              sequence="81"
+              groups="base.group_user"/>
 
 </odoo>

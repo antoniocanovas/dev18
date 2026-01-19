@@ -26,6 +26,7 @@ class ShoesAnalysis(models.Model):
             ('sales_by_country', 'Ventas por Países'),
             ('sales_by_shipping_mark', 'Ventas por Timbrado'),
             ('customer_comparison', 'Ventas a cliente por campañas'),
+            ('salesman_customers', 'Clientes por representante'),
             ('product_ranking', 'Ranking de Productos (Comparativo)'),
             ('last_ranking', 'Ranking de Hormas (Comparativo)'),
             ('campaign_product_ranking', 'Ranking de productos por campaña con colores'),
@@ -130,8 +131,8 @@ class ShoesAnalysis(models.Model):
         """
         for record in self:
             if record.type not in [
-                'salesman_sales_delivery', 'salesman_country', 'manufacturer_sales', 
-                'sales_by_country', 'sales_by_shipping_mark'
+                'salesman_sales_delivery', 'salesman_country', 'manufacturer_sales',
+                'sales_by_country', 'sales_by_shipping_mark', 'customer_comparison', 'salesman_customers'
             ]:
                 campaigns_to_update = record.shoes_campaign_id | record.shoes_campaign_ids
                 self.env['shoes.ranking']._update_ranking_for_campaign(campaigns_to_update)

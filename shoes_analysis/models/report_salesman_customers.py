@@ -13,9 +13,9 @@ class ShoesAnalysis(models.Model):
         color = 'green' if perc >= 1.0 else 'red'
         return f'<td class="text-end" style="{style_str} color: {color};"><b>{perc:.1%}</b></td>'
 
-    def _compute_customer_comparison(self):
+    def _compute_salesman_customers(self):
         """
-        Genera el informe HTML y los datos JSON para la comparativa de ventas por cliente.
+        Genera el informe HTML y los datos JSON para la comparativa de ventas por cliente de un representante.
         """
         self.ensure_one()
         analysis = self
@@ -29,7 +29,7 @@ class ShoesAnalysis(models.Model):
         domain = [
             ('order_id.shoes_campaign_id', 'in', all_campaigns.ids),
             ('order_id.state', 'in', ['sale', 'done']),
-            ('order_partner_id', '=', analysis.partner_id.id),
+            ('order_id.user_id', '=', analysis.referrer_id.id),
             '|',
                 '&', ('product_id.is_pair', '=', True), ('product_id.product_tmpl_id', '!=', False),
                 '&', ('product_id.is_assortment', '=', True), ('product_id.product_tmpl_single_id', '!=', False),
@@ -60,7 +60,11 @@ class ShoesAnalysis(models.Model):
 
         for partner in partners:
             customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
-            customer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(partner.name)}</h2>")
+            customer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 0px;'>{html_escape(partner.name)}</h2>")
+            if analysis.referrer_id:
+                customer_html.append(f"<div style='margin-bottom: 20px;'><span class='badge rounded-pill text-bg-primary' style='font-size: 0.8em;'>{html_escape(analysis.referrer_id.name)}</span></div>")
+            else:
+                customer_html.append("<div style='margin-bottom: 20px;'></div>")
             customer_json = {'partner_id': partner.id, 'partner_name': partner.name, 'brands': []}
 
             partner_campaigns = self.env['project.project'].browse(list(data_map[partner.id].keys()))
