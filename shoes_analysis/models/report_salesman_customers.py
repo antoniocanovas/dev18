@@ -60,11 +60,7 @@ class ShoesAnalysis(models.Model):
 
         for partner in partners:
             customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
-            customer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 0px;'>{html_escape(partner.name)}</h2>")
-            if analysis.referrer_id:
-                customer_html.append(f"<div style='margin-bottom: 20px;'><span class='badge rounded-pill text-bg-primary' style='font-size: 0.8em;'>{html_escape(analysis.referrer_id.name)}</span></div>")
-            else:
-                customer_html.append("<div style='margin-bottom: 20px;'></div>")
+            customer_html.append(f"<h2 style='font-size: 2em; font-weight: bold; margin-bottom: 20px;'>{html_escape(partner.name)}</h2>")
             customer_json = {'partner_id': partner.id, 'partner_name': partner.name, 'brands': []}
 
             partner_campaigns = self.env['project.project'].browse(list(data_map[partner.id].keys()))
