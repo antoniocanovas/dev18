@@ -64,6 +64,10 @@ class ShoesAnalysis(models.Model):
                 "view_id": "shoes_analysis_export.shoes_analysis_export_customer_comparison_list_view",
                 "parser": "_parse_customer_comparison_data",
             },
+            "salesman_customers": {
+                "view_id": "shoes_analysis_export.shoes_analysis_export_salesman_customers_list_view",
+                "parser": "_parse_salesman_customers_data",
+            },
         }
 
         config = export_config.get(self.type)
@@ -414,6 +418,29 @@ class ShoesAnalysis(models.Model):
                 for campaign_data in brand_data.get("campaigns", []):
                     lines_to_create.append(
                         {
+                            "partner_id": partner_data.get("partner_id"),
+                            "brand_name": brand_data.get("brand_name"),
+                            "campaign_id": campaign_data.get("campaign_id"),
+                            "net_pairs": campaign_data.get("net_pairs"),
+                            "net_sales": campaign_data.get("net_sales"),
+                            "analysis_id": self.id,
+                        }
+                    )
+        return lines_to_create
+
+    def _parse_salesman_customers_data(self, json_data):
+        """
+        Parsea los datos JSON para el informe 'salesman_customers'.
+        """
+        lines_to_create = []
+        if not isinstance(json_data, list):
+            return lines_to_create
+        for partner_data in json_data:
+            for brand_data in partner_data.get("brands", []):
+                for campaign_data in brand_data.get("campaigns", []):
+                    lines_to_create.append(
+                        {
+                            "referrer_id": self.referrer_id.id,
                             "partner_id": partner_data.get("partner_id"),
                             "brand_name": brand_data.get("brand_name"),
                             "campaign_id": campaign_data.get("campaign_id"),

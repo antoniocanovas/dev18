@@ -215,4 +215,20 @@
             </list>
         </field>
     </record>
+
+    <!-- Vista de lista para 'salesman_customers' -->
+    <record id="shoes_analysis_export_salesman_customers_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.salesman.customers.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="referrer_id"/>
+                <field name="partner_id"/>
+                <field name="brand_name"/>
+                <field name="campaign_id"/>
+                <field name="net_pairs"/>
+                <field name="net_sales"/>
+            </list>
+        </field>
+    </record>
 </odoo>
