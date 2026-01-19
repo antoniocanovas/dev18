@@ -32,7 +32,7 @@ class ShoesAnalysis(models.Model):
             ('campaign_product_ranking', 'Ranking de productos por campaña con colores'),
             ('campaign_last_ranking', 'Ranking de hormas por campaña con modelos y colores'),
             ('salesman_model', 'Ventas de representante por modelo'),
-            ('campaign_manufacturer', 'Manufacturar campaign'),
+            ('campaign_manufacturer', 'Campaña por fabricante(s)'),
         ],
         string="Tipo de Informe"
     )

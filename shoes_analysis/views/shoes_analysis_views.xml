@@ -210,7 +210,7 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <!-- Acción 14: Manufacturar campaign -->
+    <!-- Acción 14: Manufacturer campaign -->
     <record id="action_campaign_manufacturer" model="ir.actions.act_window">
         <field name="name">Manufacturer campaign</field>
         <field name="res_model">shoes.analysis</field>
