@@ -10,6 +10,7 @@ class ProductMaterial(models.Model):
     _description = "Product material"
 
     name = fields.Char("Name", translate=True)
+    code = fields.Char("Code")
     image = fields.Binary("Image", copy=False)
     comment = fields.Html("Comments", copy=False, translate=True)
     is_skin = fields.Boolean("Skin", copy=False)
