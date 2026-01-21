@@ -1574,7 +1574,7 @@ msgstr "Coste envío individual"
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.product_template_shoes_dealer_inh_search
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.shoes_dealer_view_order_product_search
 msgid "Shoes Campaign"
-msgstr "Campaña"
+msgstr "Campaña de calzado"
 
 #. module: shoes_dealer
 #: model:ir.model.fields,field_description:shoes_dealer.field_sale_order_line__color_attribute_id
@@ -1612,7 +1612,7 @@ msgstr "Línea de informe de ventas"
 #: model:ir.model.fields,field_description:shoes_dealer.field_shoes_sale_report__shoes_campaign_id
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.invoice_shoes_dealer_report_line_search
 msgid "Shoes campaign"
-msgstr "Campaña zap"
+msgstr "Campaña de calzado"
 
 #. module: shoes_dealer
 #: model_terms:ir.ui.view,arch_db:shoes_dealer.res_company_product_attribute_auto_bom_inh_form

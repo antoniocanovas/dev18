@@ -57,6 +57,7 @@ class ShoesAnalysis(models.Model):
         partners = self.env['res.partner'].browse(list(all_partner_ids)).sorted('name')
         
         base_camp_id = analysis.shoes_campaign_id.id
+        main_brand = main_campaign.product_brand_id
 
         for partner in partners:
             customer_html = [f"<div style='border: 2px solid #333; border-radius: 5px; margin-bottom: 30px; padding: 20px; background-color: #f0f0f0; page-break-inside: avoid;'>"]
@@ -68,7 +69,10 @@ class ShoesAnalysis(models.Model):
             for camp in partner_campaigns:
                 campaigns_by_brand[camp.product_brand_id] |= camp
 
-            for brand, campaigns in campaigns_by_brand.items():
+            sorted_brands = sorted(campaigns_by_brand.keys(), key=lambda b: b.id != main_brand.id)
+
+            for brand in sorted_brands:
+                campaigns = campaigns_by_brand[brand]
                 brand_html = [f"<div style='margin-left: 20px; margin-bottom: 20px; page-break-inside: avoid;'>"]
                 brand_html.append(f"<h3 style='font-size: 1.5em; font-weight: 600; border-bottom: 1px solid #ccc; padding-bottom: 5px;'>Marca: {html_escape(brand.name)}</h3>")
                 brand_json = {'brand_id': brand.id, 'brand_name': brand.name, 'campaigns': []}

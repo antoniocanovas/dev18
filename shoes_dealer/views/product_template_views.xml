@@ -182,7 +182,7 @@
                     <separator/>
                 </field>
                 <xpath expr="//group/filter[@name='type']" position="after">
-                    <filter string="Shoes Campaign" name="campaign" context="{'group_by':'shoes_campaign_id'}"/>
+                    <filter string="Shoes Campaign" name="group_shoes_campaign" context="{'group_by':'shoes_campaign_id'}"/>
                     <filter string="Model" name="Model" context="{'group_by':'product_tmpl_model_id'}"/>
                 </xpath>
             </data>
