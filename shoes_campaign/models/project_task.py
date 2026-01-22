@@ -148,3 +148,64 @@ class ProjectTask(models.Model):
            if record.manufacturer_id.ref:
                name += record.manufacturer_id.ref
            record["shoes_model_material"] = name
+
+
+    # Creación de producto desde tarea:
+    def shoes_create_product(self):
+        for record in self:
+            # Asignar nombre con códigos de fabricante y producto al final.
+            name = record.name
+            if record.manufacturer_id.ref and record.shoes_material_id.code:
+                name += "-" + record.manufacturer_id.ref + record.shoes_material_id.code
+            elif not record.manufacturer_id.ref and record.material_id.code:
+                name += "-" + record.shoes_material_id.code
+            elif record.manufacturer_id.ref and not record.material_id.code:
+                name += "-" + record.manufacturer_id.ref
+
+            # Creación de productos:
+            newproduct = (
+                self.env["product.template"]
+                .with_context(default_task_id=False, default_project_id=False)
+                .create(
+                    {
+                        "name": name,
+                        "shoes_campaign_id": record.project_id.id,
+                        "shoes_campaign_ids": [
+                            (6, 0, [record.project_id.id])
+                        ],
+                        "product_brand_id": record.product_brand_id.id,
+                        "manufacturer_id": record.manufacturer_id.id,
+                        "gender": record.gender,
+                        "shoes_pair_weight_id": (
+                            record.shoes_pair_weight_id.id
+                        ),
+                        "material_id": record.shoes_material_id.id,
+                        "shoes_last_id": record.shoes_last_id.id,
+                        "shoes_task_id": record.id,
+                        "type": "consu",
+                        "is_storable": True,
+                        "tracking": self.env.company.shoes_assortment_tracking,
+                        "service_tracking": "no",
+                        "product_add_mode": "matrix",
+                        "intrastat_duty_id": record.intrastat_duty_id.id,
+                        "intrastat_code_id": (
+                            record.intrastat_duty_id.intrastat_id.id
+                        ),
+                        "intrastat_origin_country_id": (
+                            record.intrastat_duty_id.country_id.id
+                        ),
+                        "hs_code": (
+                            record.intrastat_duty_id.intrastat_id.code
+                        ),
+                        "country_of_origin": (
+                            record.intrastat_duty_id.country_id.id
+                        ),
+                        "exwork": record.exwork,
+                        "sale_margin": record.project_id.default_sale_margin
+                        or 0.0,
+                        "image_1920": record.displayed_image_id.datas,
+                        "categ_id": record.product_categ_id.id,
+                    }
+                )
+            )
+            record["shoes_product_tmpl_id"] = newproduct.id

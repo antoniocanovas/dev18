@@ -1,15 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
-    <!-- WIZARD creación de productos (window action): -->
-    <record id="shoes_product_creation_wizard_action_window" model="ir.actions.act_window">
-        <field name="name">Product creation</field>
-        <field name="res_model">shoes.product.creation.wizard</field>
-        <field name="view_id" ref="shoes_product_creation_wizard_form"/>
-        <field name="context">{'default_task_id':active_id}</field>
-        <field name="target">new</field>
-    </record>
-
     <!-- Task customization : -->
     <record id="shoes_campaign_task_inh_form" model="ir.ui.view">
         <field name="name">shoes.dealer.campaign.task.inh.form</field>
@@ -21,10 +12,10 @@
 
                 <xpath expr="//header" position="inside">
                     <button
-                            name="%(shoes_campaign.shoes_product_creation_wizard_action_window)s"
+                            name="shoes_create_product"
                             invisible="not is_shoes_campaign"
-                            string="Products creation"
-                            type="action"
+                            string="Create product"
+                            type="object"
                             groups="project.group_project_user"
                     >
                     </button>
@@ -59,7 +50,7 @@
                         <field name="shoes_url" widget="url"/>
                     </group>
                     <group string="Histórico para eliminar">
-                        # Para eliminar una vez migrados datos:
+                        <!-- Para eliminar una vez migrados datos: -->
                         <field name="shoes_default_last_id"/>
                         <field name="shoes_model_material_ids" readonly="not manufacturer_id"
                                invisible="not is_shoes_campaign"
@@ -77,7 +68,7 @@
                             </list>
                         </field>
                     </group>
-                    # Eliminar hasta aquí.
+                    <!-- Eliminar hasta aquí. -->
 
                     <group name="shoes_model_details" string="Shoes details" invisible="not is_shoes_campaign">
                         <group name="shoes_detail_left">

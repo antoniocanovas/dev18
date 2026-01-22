@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Punt Sistemes SL
-#    Copyright (C) 2024 - Punt Sistemes (http://www.puntsistemes.es).
-#    All Rights Reserved
+#    Copyright (C) 2024 - Punt Sistemes (http://www.puntsistemes.es). All Rights Reserved
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,32 +20,33 @@
 ##############################################################################
 
 {
-    "name": "Shoes Dealer Campaign",
-    "version": "18.0",
+    "name": 'Shoes Color Chart',
+    "version": '18.0.1.0.0',
     "depends": [
-        "product",
-        "project",
-        "product_brand",
-        "stock_delivery",
-        "shoes_dealer",
-        "intrastat_duty",
+        'product',
+        'project',
+        'partner_product_attribute_value',
+        'shoes_dealer',
+        'shoes_campaign',
     ],
     "author": "Punt Sistemes",
-    "category": "Project",
+    "category": 'Project',
     "website": "https://www.puntsistemes.es",
     "description": """
-        Project attributes to shoes dealer campaign and product creation from tasks. 
+        Shoes color chart by campaign. 
     """,
     "data": [
-        "views/project_project_views.xml",
-        "views/product_template_views.xml",
-        "views/shoes_product_creation_wizard_views.xml",
-        "views/project_task_views.xml",
-        #"views/shoes_model_material_views.xml",
-        "views/shoes_type_views.xml",
-        "views/res_company_views.xml",
-        "views/shoes_closure_views.xml",
         "security/ir.model.access.csv",
+        'views/shoes_color_chart_wizard_views.xml',
+        'views/shoes_color_chart_copy_wizard_views.xml',
+        'views/shoes_color_chart_item_views.xml',
+        'views/project_project_views.xml',
+        'views/project_task_views.xml',
+        'views/product_template_views.xml',
+        'views/product_attribute_views.xml',
+        'views/product_material_views.xml',
+        'views/res_company_views.xml',
+        'views/shoes_last_views.xml',
     ],
     "demo": [],
     "installable": True,
