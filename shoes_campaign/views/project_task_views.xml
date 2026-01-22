@@ -51,6 +51,15 @@
                     </group>
 
                     <group name="material_variants" string="Material variants" invisible="not is_shoes_campaign">
+                        <field name="shoes_model_material"/>
+                        <field name="shoes_manufacturer_ref"/>
+                        <field name="shoes_material_id" options="{'no_create':true, 'no_create_edit':true}"/>
+                        <field name="shoes_last_id" options="{'no_create':true, 'no_create_edit':true}"/>
+                        <field name="shoes_product_tmpl_id" readonly="1"/>
+                        <field name="shoes_url" widget="url"/>
+                    </group>
+                    <group string="Histórico para eliminar">
+                        # Para eliminar una vez migrados datos:
                         <field name="shoes_default_last_id"/>
                         <field name="shoes_model_material_ids" readonly="not manufacturer_id"
                                invisible="not is_shoes_campaign"
@@ -68,6 +77,7 @@
                             </list>
                         </field>
                     </group>
+                    # Eliminar hasta aquí.
 
                     <group name="shoes_model_details" string="Shoes details" invisible="not is_shoes_campaign">
                         <group name="shoes_detail_left">

@@ -120,3 +120,31 @@ class ProjectTask(models.Model):
             record["exwork_currency_id"] = currency
 
     exwork_currency_id = fields.Many2one("res.currency", compute="_get_exwork_currency")
+
+    # Refactorización model-material para individual por tarea:
+    shoes_model_material = fields.Char(
+       "Model material",
+       compute="_get_shoes_model_material",
+       store=True
+    )
+    shoes_manufacturer_ref = fields.Char("Manufacturer Ref")
+    shoes_material_id = fields.Many2one(
+       "product.material", string="Material", ondelete="restrict"
+    )
+    shoes_last_id = fields.Many2one("shoes.last", string="Last", ondelete="restrict")
+    shoes_product_tmpl_id = fields.Many2one("product.template", string="Product")
+    # Para añadir QR en tarifas:
+    shoes_url = fields.Char("URL")
+
+
+    @api.depends("shoes_material_id", "shoes_manufacturer_ref", "shoes_default_code_prefix")
+    def _get_shoes_model_material(self):
+       for record in self:
+           name = ""
+           if record.shoes_default_code_prefix:
+               name += record.shoes_default_code_prefix
+           if record.shoes_material_id.code:
+               name += record.shoes_material_id.code
+           if record.manufacturer_id.ref:
+               name += record.manufacturer_id.ref
+           record["shoes_model_material"] = name
