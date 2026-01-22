@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Normal project view : -->
+    <record id="custom_navima_project_inh_form" model="ir.ui.view">
+        <field name="name">custom.navima.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_project_inh_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="tracking_sequence" required="is_shoes_campaign" invisible="not is_shoes_campaign"/>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>

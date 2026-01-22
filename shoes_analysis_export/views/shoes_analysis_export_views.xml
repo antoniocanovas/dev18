@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de Búsqueda para el Modelo de Exportación -->
+    <record id="shoes_analysis_export_search_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.search</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="campaign_id"/>
+                <field name="last_id"/>
+                <field name="referrer_id"/>
+                <field name="country_id"/>
+                <field name="sale_type_id" string="Shipping Mark"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas por Agente -->
+    <record id="shoes_analysis_export_salesman_delivery_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.salesman_delivery.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="referrer_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+                <field name="total_pairs" sum="false"/>
+                <field name="cancelled_pairs" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas por Representante y País -->
+    <record id="shoes_analysis_export_salesman_country_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.salesman_country.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="referrer_id"/>
+                <field name="country_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+                <field name="total_pairs" sum="false"/>
+                <field name="cancelled_pairs" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas por Proveedor -->
+    <record id="shoes_analysis_export_manufacturer_sales_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.manufacturer_sales.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="manufacturer_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas por País -->
+    <record id="shoes_analysis_export_sales_by_country_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.sales_by_country.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="country_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas por Timbrado -->
+    <record id="shoes_analysis_export_sales_by_shipping_mark_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.sales_by_shipping_mark.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="sale_type_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ranking de Productos -->
+    <record id="shoes_analysis_export_product_ranking_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.product_ranking.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="product_tmpl_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="cost_price" sum="false"/>
+                <field name="net_sales" sum="false"/>
+                <field name="total_pairs" sum="false"/>
+                <field name="cancelled_pairs" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ranking de Hormas -->
+    <record id="shoes_analysis_export_last_ranking_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.last_ranking.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="last_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+                <field name="total_pairs" sum="false"/>
+                <field name="cancelled_pairs" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ranking de Productos (Fichas) -->
+    <record id="shoes_analysis_export_campaign_product_ranking_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.campaign_product_ranking.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="product_material_id"/>
+                <field name="color_value_id"/>
+                <field name="sold_pairs" sum="false"/>
+                <field name="produced_pairs" sum="false"/>
+                <field name="estimated_stock" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ranking de Hormas (Fichas) -->
+    <record id="shoes_analysis_export_campaign_last_ranking_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.campaign_last_ranking.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="last_id"/>
+                <field name="product_tmpl_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="color_value_id"/>
+                <field name="sold_pairs" sum="false"/>
+                <field name="produced_pairs" sum="false"/>
+                <field name="estimated_stock" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Manufacturer Campaign -->
+    <record id="shoes_analysis_export_campaign_manufacturer_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.campaign_manufacturer.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="ranking_value"/>
+                <field name="ranking_name"/>
+                <field name="product_material_id"/>
+                <field name="color_value_id"/>
+                <field name="sold_pairs" sum="false"/>
+                <field name="cost_price" sum="false"/>
+                <field name="total_cost" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Ventas de Modelos por Representante -->
+    <record id="shoes_analysis_export_salesman_model_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.salesman_model.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="campaign_id"/>
+                <field name="referrer_id"/>
+                <field name="ranking_value"/>
+                <field name="product_material_id"/>
+                <field name="ranking_name"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+                <field name="total_pairs" sum="false"/>
+                <field name="cancelled_pairs" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de Lista para las líneas de exportación de Comparativa por Cliente -->
+    <record id="shoes_analysis_export_customer_comparison_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.customer_comparison.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list delete="false">
+                <field name="partner_id"/>
+                <field name="brand_name"/>
+                <field name="campaign_id"/>
+                <field name="net_pairs" sum="false"/>
+                <field name="net_sales" sum="false"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de lista para 'salesman_customers' -->
+    <record id="shoes_analysis_export_salesman_customers_list_view" model="ir.ui.view">
+        <field name="name">shoes.analysis.export.salesman.customers.list</field>
+        <field name="model">shoes.analysis.export</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="referrer_id"/>
+                <field name="partner_id"/>
+                <field name="brand_name"/>
+                <field name="campaign_id"/>
+                <field name="net_pairs"/>
+                <field name="net_sales"/>
+            </list>
+        </field>
+    </record>
+</odoo>

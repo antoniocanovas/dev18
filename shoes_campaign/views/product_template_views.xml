@@ -11,7 +11,7 @@
         <field name="arch" type="xml">
             <!-- Código Material-Fabricante (nombre de shoes.model.material): -->
             <xpath expr="//field[@name='pairs_sold']" position="after">
-                <field name="shoes_model_material_id" readonly="1"/>
+                <field name="shoes_model_material" readonly="1"/>
             </xpath>
             <!-- En Pestaña inicial para datos generales: -->
             <xpath expr="//field[@name='product_tmpl_set_id']" position="after">

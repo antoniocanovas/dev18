@@ -12,8 +12,9 @@ class ProductTemplate(models.Model):
         "project.task", string="Shoes model", ondelete="restrict"
     )
     shoes_last_id = fields.Many2one("shoes.last", string="Last", ondelete="restrict")
-    shoes_model_material_id = fields.Many2one(
-        "shoes.model.material", string="Model code"
+    shoes_model_material = fields.Char(
+        related="shoes_task_id.shoes_model_material",
+        string="Model code"
     )
 
     def _get_pair_and_variants_sync(self):
@@ -52,24 +53,12 @@ class ProductTemplate(models.Model):
         # 1) Ejecutamos el comportamiento original: creación de pares
         res = super().create_shoe_pairs()
         # 2) Tras crear las plantillas “single”, propagamos shoes_last_id
-        # y shoes_model_material
         for record in self:
-            shoes_model_material = self.env["shoes.model.material"].search(
-                [
-                    ("task_id", "=", record.shoes_task_id.id),
-                    ("material_id", "=", record.material_id.id),
-                ]
-            )
             if record.shoes_last_id and record.product_tmpl_single_id:
                 record.product_tmpl_single_id.write(
                     {
                         "shoes_last_id": record.shoes_last_id.id,
                     }
-                )
-            if shoes_model_material.id:
-                record.write({"shoes_model_material_id": shoes_model_material.id})
-                record.product_tmpl_single_id.write(
-                    {"shoes_model_material_id": shoes_model_material.id}
                 )
         # 3) Devolvemos lo que devolvía el super (si lo hubiera)
         return res

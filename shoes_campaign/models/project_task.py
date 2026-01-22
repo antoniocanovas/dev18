@@ -50,10 +50,6 @@ class ProjectTask(models.Model):
         "intrastat.duty", string="Duty estimation", copy=False, ondelete="restrict"
     )
 
-    # Para filtro en domain de la creación de productos (wizard):
-    shoes_model_material_ids = fields.One2many(
-        "shoes.model.material", "task_id", string="Materials"
-    )
     # Para pasar valor por defecto a líneas de materiales:
     shoes_default_last_id = fields.Many2one(
         "shoes.last", string="Default last", ondelete="restrict"
