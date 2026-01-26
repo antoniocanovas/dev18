@@ -25,7 +25,7 @@ class ShoesAnalysisExport(models.TransientModel):
 
     # Campos Específicos (pueden estar vacíos)
     product_tmpl_id = fields.Many2one("product.template", "Producto")
-    product_material_id = fields.Many2one("shoes.model.material", "Material")
+    product_material_name = fields.Char("Material")
     ranking_name = fields.Char("Nombre")
     ranking_value = fields.Integer("Posición")
     product_ranking = fields.Integer("Ranking Producto")

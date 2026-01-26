@@ -92,7 +92,7 @@ class ShoesAnalysis(models.Model):
                     "last_id": False,
                     "campaign_id": False,
                     "product_tmpl_id": False,
-                    "product_material_id": False,
+                    "product_material_name": False,
                     "color_value_id": False,
                 }
             )
@@ -277,9 +277,7 @@ class ShoesAnalysis(models.Model):
                 {
                     "ranking_name": item.get("name"),
                     "ranking_value": item.get("ranking"),
-                    "last_id": item.get("shoes_last_id")[0]
-                    if item.get("shoes_last_id")
-                    else False,
+                    "last_id": item.get("shoes_last_id"),
                     "campaign_id": self.shoes_campaign_id.id,
                     "net_pairs": item.get("pairs_count_net"),
                     "net_sales": item.get("sale_net_amount"),
@@ -303,9 +301,7 @@ class ShoesAnalysis(models.Model):
                     {
                         "ranking_value": item.get("ranking"),
                         "ranking_name": item.get("name"),
-                        "product_material_id": item.get("shoes_model_material_id")[0]
-                        if item.get("shoes_model_material_id")
-                        else False,
+                        "product_material_name": item.get("shoes_model_material"),
                         "color_value_id": self.env["product.attribute.value"]
                         .search([("name", "=", color.get("color_name"))], limit=1)
                         .id,
@@ -331,9 +327,7 @@ class ShoesAnalysis(models.Model):
                     {
                         "ranking_value": item.get("ranking"),
                         "ranking_name": item.get("name"),
-                        "product_material_id": item.get("shoes_model_material_id")[0]
-                        if item.get("shoes_model_material_id")
-                        else False,
+                        "product_material_name": item.get("shoes_model_material"),
                         "color_value_id": self.env["product.attribute.value"]
                         .search([("name", "=", color.get("color_name"))], limit=1)
                         .id,
@@ -358,19 +352,13 @@ class ShoesAnalysis(models.Model):
                 for color in product.get("colors", []):
                     lines_to_create.append(
                         {
-                            "last_id": item.get("shoes_last_id")[0]
-                            if item.get("shoes_last_id")
-                            else False,
-                            "product_tmpl_id": product.get("product_tmpl_id")[0]
-                            if product.get("product_tmpl_id")
-                            else False,
+                            "last_id": item.get("shoes_last_id")[0] if item.get("shoes_last_id") else False,
+                            "product_tmpl_id": product.get("product_tmpl_id")[0] if product.get("product_tmpl_id") else False,
                             "ranking_value": product.get("ranking"),
                             "ranking_name": product.get("name"),
-                            "product_material_id": product.get(
-                                "shoes_model_material_id"
-                            )[0]
-                            if product.get("shoes_model_material_id")
-                            else False,
+                            "product_material_name": product.get(
+                                "shoes_model_material"
+                            ),
                             "color_value_id": self.env["product.attribute.value"]
                             .search([("name", "=", color.get("color_name"))], limit=1)
                             .id,
@@ -395,7 +383,7 @@ class ShoesAnalysis(models.Model):
                 {
                     "referrer_id": item.get("referrer_id"),
                     "ranking_value": item.get("ranking_value"),
-                    "product_material_id": item.get("shoes_model_material_id"),
+                    "product_material_name": item.get("shoes_model_material"),
                     "ranking_name": item.get("product_name"),
                     "total_pairs": item.get("pedidos"),
                     "cancelled_pairs": item.get("anulados"),

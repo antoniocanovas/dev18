@@ -78,8 +78,7 @@ class ShoesAnalysis(models.Model):
                         'campaign_id': campaign_id,
                         'campaign_name': campaign_map[campaign_id].display_name,
                         'product_id': product_map[tmpl_id].id,
-                        'shoes_model_material_id': product_map[tmpl_id].shoes_model_material_id.id,
-                        'shoes_model_material_name': product_map[tmpl_id].shoes_model_material_id.name,
+                        'shoes_model_material': product_map[tmpl_id].shoes_model_material,
                         'product_name': product_map[tmpl_id].name,
                         'pedidos': data['pedidos'],
                         'anulados': data['anulados'],
@@ -144,7 +143,7 @@ class ShoesAnalysis(models.Model):
                 <tr {row_style}>
                     <td style='{style_td} font-weight: {font_weight_style};'>{item['campaign_name']}</td>
                     <td style='{style_td}'>{image_html}</td>
-                    <td style='{style_td}'>{product.shoes_model_material_id.name or ''}</td>
+                    <td style='{style_td}'>{product.shoes_model_material or ''}</td>
                     <td style='{style_td}'>{product.name}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['pedidos'])}</td>
                     <td style='{style_td} text-align: right; font-weight: {font_weight_style};'>{int(item['anulados'])}</td>

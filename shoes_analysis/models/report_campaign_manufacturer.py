@@ -44,7 +44,7 @@ class ShoesAnalysis(models.Model):
             line_data = line.read([
                 'name', 'ranking', 'pairs_count_sale', 'pairs_count_cancel', 
                 'pairs_count_net', 'sale_net_amount', 'currency_id',
-                'product_tmpl_id', 'shoes_model_material_id', 'shoes_campaign_id'
+                'product_tmpl_id', 'shoes_model_material', 'shoes_campaign_id'
             ])[0]
             line_data['colors'] = color_stats
             data_for_json.append(line_data)
@@ -74,10 +74,10 @@ class ShoesAnalysis(models.Model):
         formatted_pairs = f"{line.pairs_count_net} p"
 
         qr_code_html = ""
-        if line.shoes_model_material_id and line.shoes_model_material_id.shoes_url:
+        if line.shoes_model_material and line.product_tmpl_id.shoes_url:
             try:
                 qr = qrcode.QRCode(version=1, box_size=4, border=4)
-                qr.add_data(line.shoes_model_material_id.shoes_url)
+                qr.add_data(line.product_tmpl_id.shoes_url)
                 qr.make(fit=True)
                 img = qr.make_image(fill_color="black", back_color="white")
                 buffered = io.BytesIO()
@@ -92,7 +92,7 @@ class ShoesAnalysis(models.Model):
             <div style='{style_left}'>{img_html}</div>
             <div style='{style_right}'>
                 <div>
-                    <h2 style='{style_header}; float: left;'>{line.shoes_model_material_id.name or ''}</h2>
+                    <h2 style='{style_header}; float: left;'>{line.shoes_model_material or ''}</h2>
                     <h2 style='{style_header}; float: right; margin-right: 30px;'>{formatted_pairs}</h2>
                     <div style='clear: both;'></div>
                     <h3 style='{style_subheader}'>{line.product_tmpl_id.name or ''}</h3>

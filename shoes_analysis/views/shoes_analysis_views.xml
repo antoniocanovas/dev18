@@ -82,7 +82,7 @@
                                     <field name="ranking"/>
                                     <field name="image" widget="image" options="{'size':[0,90]}"/>
                                     <field name="product_tmpl_id"/>
-                                    <field name="shoes_model_material_id"/>
+                                    <field name="shoes_model_material"/>
                                     <field name="shoes_last_id" column_invisible="1"/>
                                     <field name="pairs_count_sale"/>
                                     <field name="pairs_count_cancel"/>

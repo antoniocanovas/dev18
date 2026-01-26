@@ -39,12 +39,9 @@ class AccountInvoiceReport(models.Model):
         help="Shoe last type",
     )
 
-    pnt_shoes_model_material_id = fields.Many2one(
-        comodel_name="shoes.model.material",
+    pnt_shoes_model_material = fields.Char(
         string="Shoes Model",
         readonly=True,
-        aggregator="count_distinct",
-        help="Shoes model",
     )
 
     pnt_assortment_count = fields.Integer(
@@ -71,7 +68,8 @@ class AccountInvoiceReport(models.Model):
 
         Añade campos personalizados relacionados con el negocio de calzado:
         - manufacturer_id desde account.move.line (campo related con store=True)
-        - material_id, shoes_last_id, shoes_model_material_id desde product.template
+        - material_id, shoes_last_id desde product.template
+        - shoes_model_material desde project.task (unido via product.template)
         - is_assortment, is_pair desde product.template
         - pairs_count desde account.move.line
         - assortment_count calculado con CASE
@@ -87,12 +85,13 @@ class AccountInvoiceReport(models.Model):
 
         # Extender el SELECT añadiendo campos adicionales
         # Los alias 'line' y 'template' ya existen en el FROM del core
+        # Se añade el alias 'pt' para 'project_task' en el método _from()
         additional_fields = SQL(
             """,
                 line.manufacturer_id                AS pnt_manufacturer_id,
                 template.material_id                AS pnt_material_id,
                 template.shoes_last_id              AS pnt_shoes_last_id,
-                template.shoes_model_material_id    AS pnt_shoes_model_material_id,
+                pt.shoes_model_material             AS pnt_shoes_model_material,
                 template.is_assortment              AS pnt_is_assortment,
                 template.is_pair                    AS pnt_is_pair,
                 line.pairs_count                    AS pnt_pairs_count,
@@ -102,3 +101,23 @@ class AccountInvoiceReport(models.Model):
         )
 
         return SQL("%s %s", select_clause, additional_fields)
+
+    def _from(self):
+        return SQL(
+            "%s LEFT JOIN project_task pt ON (template.shoes_task_id = pt.id)",
+            super()._from(),
+        )
+
+    def _group_by(self):
+        return SQL(
+            """%s,
+                line.manufacturer_id,
+                template.material_id,
+                template.shoes_last_id,
+                pt.shoes_model_material,
+                template.is_assortment,
+                template.is_pair,
+                line.pairs_count
+            """,
+            super()._group_by(),
+        )

@@ -42,10 +42,9 @@ class ShoesRanking(models.Model):
         related='product_tmpl_id.image_256',
     )
 
-    shoes_model_material_id = fields.Many2one(
-        'shoes.model.material',
+    shoes_model_material = fields.Char(
         string='Ref',
-        related='product_tmpl_id.shoes_model_material_id',
+        related='product_tmpl_id.shoes_model_material',
     )
 
     ranking = fields.Integer('Ranking')

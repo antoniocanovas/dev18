@@ -136,7 +136,7 @@
                 <field name="campaign_id"/>
                 <field name="ranking_value"/>
                 <field name="ranking_name"/>
-                <field name="product_material_id"/>
+                <field name="product_material_name"/>
                 <field name="color_value_id"/>
                 <field name="sold_pairs" sum="false"/>
                 <field name="produced_pairs" sum="false"/>
@@ -173,7 +173,7 @@
                 <field name="campaign_id"/>
                 <field name="ranking_value"/>
                 <field name="ranking_name"/>
-                <field name="product_material_id"/>
+                <field name="product_material_name"/>
                 <field name="color_value_id"/>
                 <field name="sold_pairs" sum="false"/>
                 <field name="cost_price" sum="false"/>
@@ -191,7 +191,7 @@
                 <field name="campaign_id"/>
                 <field name="referrer_id"/>
                 <field name="ranking_value"/>
-                <field name="product_material_id"/>
+                <field name="product_material_name"/>
                 <field name="ranking_name"/>
                 <field name="net_pairs" sum="false"/>
                 <field name="net_sales" sum="false"/>

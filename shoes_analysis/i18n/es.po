@@ -225,8 +225,8 @@ msgid "Shoes Analysis"
 msgstr "Informes de distribuidores de calzado"
 
 #. module: shoes_analysis
-#: model:ir.model.fields,field_description:shoes_analysis.field_account_invoice_report__pnt_shoes_model_material_id
-#: model:ir.model.fields,field_description:shoes_analysis.field_sale_report__pnt_shoes_model_material_id
+#: model:ir.model.fields,field_description:shoes_analysis.field_account_invoice_report__pnt_shoes_model_material
+#: model:ir.model.fields,field_description:shoes_analysis.field_sale_report__pnt_shoes_model_material
 #: model_terms:ir.ui.view,arch_db:shoes_analysis.view_account_invoice_report_search_inherit_shoes
 #: model_terms:ir.ui.view,arch_db:shoes_analysis.view_order_product_search_inherit_shoes
 msgid "Shoes Model"
@@ -238,8 +238,8 @@ msgid "Shoes Ranking"
 msgstr "Ranking de zapatos"
 
 #. module: shoes_analysis
-#: model:ir.model.fields,help:shoes_analysis.field_account_invoice_report__pnt_shoes_model_material_id
-#: model:ir.model.fields,help:shoes_analysis.field_sale_report__pnt_shoes_model_material_id
+#: model:ir.model.fields,help:shoes_analysis.field_account_invoice_report__pnt_shoes_model_material
+#: model:ir.model.fields,help:shoes_analysis.field_sale_report__pnt_shoes_model_material
 msgid "Shoes model"
 msgstr "Modelo"
 

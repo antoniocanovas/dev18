@@ -26,7 +26,7 @@
                 <filter string="Last" name="last"
                         context="{'group_by': 'pnt_shoes_last_id'}"/>
                 <filter string="Shoes Model" name="shoes_model"
-                        context="{'group_by': 'pnt_shoes_model_material_id'}"/>
+                        context="{'group_by': 'pnt_shoes_model_material'}"/>
             </filter>
 
             <!-- Add search fields -->
@@ -34,7 +34,7 @@
                 <field name="pnt_manufacturer_id"/>
                 <field name="pnt_material_id"/>
                 <field name="pnt_shoes_last_id"/>
-                <field name="pnt_shoes_model_material_id"/>
+                <field name="pnt_shoes_model_material"/>
             </field>
         </field>
     </record>
@@ -49,7 +49,7 @@
                 <field name="pnt_manufacturer_id" type="row"/>
                 <field name="pnt_material_id" type="row"/>
                 <field name="pnt_shoes_last_id" type="row"/>
-                <field name="pnt_shoes_model_material_id" type="row"/>
+                <field name="pnt_shoes_model_material" type="row"/>
                 <field name="pnt_pairs_count" type="measure"/>
                 <field name="pnt_assortment_count" type="measure"/>
             </field>

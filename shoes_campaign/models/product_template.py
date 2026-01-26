@@ -11,10 +11,11 @@ class ProductTemplate(models.Model):
     shoes_task_id = fields.Many2one(
         "project.task", string="Shoes model", ondelete="restrict"
     )
+    shoes_url = fields.Char(string="URL", related="shoes_task_id.shoes_url")
     shoes_last_id = fields.Many2one("shoes.last", string="Last", ondelete="restrict")
     shoes_model_material = fields.Char(
         related="shoes_task_id.shoes_model_material",
-        string="Model code"
+        string="Model code",
     )
 
     def _get_pair_and_variants_sync(self):

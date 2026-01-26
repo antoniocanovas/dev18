@@ -71,7 +71,7 @@ class ShoesAnalysis(models.Model):
                 'sale_net_amount': data['sale_net_amount'],
                 'currency_id': line.currency_id.id,
                 'product_tmpl_id': line.product_tmpl_id.id,
-                'shoes_model_material_id': line.shoes_model_material_id.id,
+                'shoes_model_material': line.shoes_model_material,
                 'shoes_campaign_id': line.shoes_campaign_id.id
             }
             data_for_json.append(line_data)
@@ -120,7 +120,7 @@ class ShoesAnalysis(models.Model):
             
             campaign_tag = "" if is_main_campaign else f"<br/><span style='color: #888; font-size: 11px;'>({line.shoes_campaign_id.display_name})</span>"
             prod_name = line.product_tmpl_id.name or "N/A"
-            prod_ref = line.shoes_model_material_id.name or ""
+            prod_ref = line.shoes_model_material or ""
             prod_display = f"<strong>{prod_name}</strong><br/><span style='color: #777; font-size: 13px;'>{prod_ref}</span>"
             formatted_price = formatLang(analysis.env, price, currency_obj=analysis.currency_id)
             formatted_amount = formatLang(analysis.env, sale_net_amount, currency_obj=analysis.currency_id)

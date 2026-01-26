@@ -33,12 +33,9 @@ class SaleReport(models.Model):
         help="Shoe last type",
     )
 
-    pnt_shoes_model_material_id = fields.Many2one(
-        comodel_name="shoes.model.material",
+    pnt_shoes_model_material = fields.Char(
         string="Shoes Model",
         readonly=True,
-        aggregator="count_distinct",
-        help="Shoes model",
     )
 
     pnt_assortment_count = fields.Integer(
@@ -78,7 +75,7 @@ class SaleReport(models.Model):
         # Campos desde product.template (alias 't')
         res["pnt_material_id"] = "t.material_id"
         res["pnt_shoes_last_id"] = "t.shoes_last_id"
-        res["pnt_shoes_model_material_id"] = "t.shoes_model_material_id"
+        res["pnt_shoes_model_material"] = "pt.shoes_model_material"
 
         # Campos booleanos desde product.template
         res["pnt_is_assortment"] = "t.is_assortment"
@@ -93,6 +90,13 @@ class SaleReport(models.Model):
         )
 
         return res
+
+    def _from_sale(self):
+        from_clause = super()._from_sale()
+        from_clause += """
+            LEFT JOIN project_task pt ON (t.shoes_task_id = pt.id)
+        """
+        return from_clause
 
     def _group_by_sale(self) -> str:
         """
@@ -112,7 +116,7 @@ class SaleReport(models.Model):
                 l.manufacturer_id,
                 t.material_id,
                 t.shoes_last_id,
-                t.shoes_model_material_id,
+                pt.shoes_model_material,
                 t.is_assortment,
                 t.is_pair,
                 l.pairs_count"""
