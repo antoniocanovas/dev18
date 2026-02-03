@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- FORM VIEW: -->
+    <record id="color_chart_inh_form" model="ir.ui.view">
+        <field name="name">color.chart.inh.form</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <field name="comment" position="before">
+                <field name="manufacturer_id"/>
+                <field name="manufacturer_code"/>
+                <field name="material_manufacturer_code"/>
+                <field name="shoes_campaign_ids" widget="many2many_tags"/>
+            </field>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" ref="shoes_dealer.product_material_default_form"/>
+        <field name="priority">16</field>
+        <field name="type">form</field>
+    </record>
+
+    <record id="shoes_color_chart_inh_list" model="ir.ui.view">
+        <field name="name">shoes.color.chart.inh.list</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <xpath expr="//list[1]/field[@name='code']" position="after">
+                <field name="material_manufacturer_code" optional="show"/>
+                <field name="manufacturer_id" optional="show"/>
+                <field name="manufacturer_code" optional="hide"/>
+                <field name="shoes_campaign_ids" widget="many2many_tags" optional="show"/>
+            </xpath>
+        </field>
+        <field name="inherit_id" ref="shoes_dealer.product_material_default_list"/>
+        <field name="priority">32</field>
+        <field name="mode">extension</field>
+        <field name="type">list</field>
+    </record>
+
+    <!-- search VIEW: -->
+    <record id="shoes_material_default_search" model="ir.ui.view">
+        <field name="name">shoes.material.default.search</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <search string="Product search">
+                <field name="name" string="Name" filter_domain="['|',('name', 'ilike', self),('material_manufacturer_code', 'ilike', self)]"/>
+                <field name="shoes_campaign_ids" string="Shoes campaign" filter_domain="[('shoes_campaign_ids', 'ilike', self)]"/>
+                <field name="manufacturer_id" string="Manufacturer" filter_domain="[('manufacturer_id', 'ilike', self)]"/>
+                <field name="code" string="Code" filter_domain="[('code', 'ilike', self)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Manufacturer" name="manufacturer_group" context="{'group_by': 'manufacturer_id'}"/>
+                    <filter string="Material code" name="material_code_group" context="{'group_by': 'code'}"/>
+                </group>
+            </search>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">search</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Task customization (NO SE USA, QUITAR !!!): -->
+    <record id="shoes_color_chart_task_inh_form" model="ir.ui.view">
+        <field name="name">shoes.color.chart.task.inh.form</field>
+        <field name="model">project.task</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='manufacturer_id']" position="attributes">
+                <attribute name="domain">[('id','in',manufacturer_value_ids)]</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='shoes_material_id']" position="attributes">
+                <attribute name="domain">[('id','in',material_value_ids)]</attribute>
+                <attribute name="readonly">not manufacturer_id or shoes_color_chart_item_ids</attribute>
+                <attribute name="force_save">True</attribute>
+            </xpath>
+
+            <field name="description" position="after">
+                <field name="manufacturer_value_ids" invisible="1"/>
+                <field name="color_value_ids" invisible="1"/>
+                <field name="project_auxiliar_material_id" invisible="1"/>
+                <field name="material_value_ids" invisible="1"/>
+            </field>
+
+            <xpath expr="//group[@name='material_variants']" position="after">
+                <group name="variant_colors">
+                    <field name="shoes_color_chart_item_ids" widget="many2many_tags"
+                           domain="[
+                           ('manufacturer_id','=',manufacturer_id),
+                           ('shoes_campaign_id','=',project_id),
+                           ('material_id','=',shoes_material_id)]"
+                           readonly="not manufacturer_id or not project_id or not shoes_material_id"
+                           invisible="shoes_product_tmpl_id"
+                    />
+                    <field name="shoes_chart_item_used_ids" widget="many2many_tags"
+                           invisible="not shoes_product_tmpl_id"
+                    />
+                </group>
+            </xpath>
+
+            <!-- Dominios para permitir sólo productos secundarios para marketing: -->
+            <xpath expr="//field[@name='shoes_material_main_id']" position="attributes">
+                <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
+            </xpath>
+            <xpath expr="//field[@name='shoes_material_external1_id']" position="attributes">
+                <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
+            </xpath>
+            <xpath expr="//field[@name='shoes_material_external2_id']" position="attributes">
+                <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
+            </xpath>
+            <xpath expr="//field[@name='shoes_material_lin_internal1_id']" position="attributes">
+                <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
+            </xpath>
+            <xpath expr="//field[@name='shoes_material_lin_internal2_id']" position="attributes">
+                <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
+            </xpath>
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+</odoo>
