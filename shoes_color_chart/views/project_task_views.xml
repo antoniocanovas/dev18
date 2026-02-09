@@ -26,8 +26,8 @@
                 <field name="material_value_ids" invisible="1"/>
             </field>
 
-            <xpath expr="//group[@name='material_variants']" position="after">
-                <group name="variant_colors">
+            <xpath expr="//group[@name='shoes_dealer_campaign']" position="after">
+                <group name="variant_colors" string="Variant colors">
                     <field name="shoes_color_chart_item_ids" widget="many2many_tags"
                            domain="[
                            ('manufacturer_id','=',manufacturer_id),
@@ -60,6 +60,17 @@
             </xpath>
         </field>
         <field name="priority">99</field>
+    </record>
+
+    <record id="shoes_color_chart_task_inh_list_view" model="ir.ui.view">
+        <field name="name">project.task.tree.inherit.shoes.color.chart</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_list_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='shoes_material_id']" position="after">
+                <field name="color_ids" widget="many2many_tags" optional="hide"/>
+            </xpath>
+        </field>
     </record>
 
 </odoo>

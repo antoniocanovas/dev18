@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <!-- Add Sizes column header in the delivery document table -->
+    <template id="report_delivery_document_inh_navima" inherit_id="stock.report_delivery_document" priority="999">
+        <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[@name='th_sml_product']" position="after">
+            <th name="th_sizes" class="text-center">
+                <strong>Sizes</strong>
+            </th>
+        </xpath>
+    </template>
+
+    <!-- Add Sizes column content in has_serial move line template -->
+    <template id="stock_report_delivery_has_serial_move_line_inh_navima" inherit_id="stock.stock_report_delivery_has_serial_move_line" priority="999">
+        <xpath expr="//td[1]" position="after">
+            <td name="td_sizes" class="text-center" style="font-size: 10px;">
+                <t t-if="move_line.lot_id and move_line.lot_id.assortment_pair">
+                    <table class="table table-bordered table-sm" style="margin: 0 auto; max-width: 250px; font-size: 9px;">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <!-- Header with sizes -->
+                                <t t-set="lot_assortment" t-value="move_line.lot_id.assortment_pair.split(';')"/>
+                                <t t-if="len(lot_assortment) >= 1">
+                                    <t t-set="tallas" t-value="lot_assortment[0].split(',')"/>
+                                    <t t-foreach="tallas" t-as="talla">
+                                        <th t-esc="talla.strip()" class="border text-center" style="padding: 1px 3px;"/>
+                                    </t>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center">
+                                <!-- Row with quantities -->
+                                <t t-if="len(lot_assortment) >= 2">
+                                    <t t-set="cantidades" t-value="lot_assortment[1].split(',')"/>
+                                    <t t-foreach="cantidades" t-as="cantidad">
+                                        <td t-esc="cantidad.strip()" class="border text-center" style="padding: 1px 3px;"/>
+                                    </t>
+                                </t>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+                <t t-else="">
+                    <small class="text-muted">-</small>
+                </t>
+            </td>
+        </xpath>
+    </template>
+
+    <!-- Add Sizes column content in aggregated move lines template -->
+    <template id="stock_report_delivery_aggregated_move_lines_inh_navima" inherit_id="stock.stock_report_delivery_aggregated_move_lines" priority="999">
+        <xpath expr="//td[1]" position="after">
+            <td name="td_sizes" class="text-center" style="font-size: 10px;">
+                <t t-if="'move' in aggregated_lines[line] and aggregated_lines[line]['move']">
+                    <t t-set="move_obj" t-value="aggregated_lines[line]['move']"/>
+                    <t t-set="lots_with_sizes" t-value="move_obj.move_line_ids.filtered(lambda ml: ml.lot_id and ml.lot_id.assortment_pair)"/>
+
+                    <t t-if="lots_with_sizes">
+                        <!-- Group by assortment_pair pattern instead of lot -->
+                        <t t-set="pattern_dict" t-value="{}"/>
+                        <t t-foreach="lots_with_sizes" t-as="ml">
+                            <t t-set="pattern_key" t-value="ml.lot_id.assortment_pair"/>
+                            <t t-if="pattern_key not in pattern_dict">
+                                <t t-set="pattern_dict" t-value="pattern_dict.update({pattern_key: {'count': 1, 'quantity': ml.quantity}}) or pattern_dict"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="current_data" t-value="pattern_dict[pattern_key]"/>
+                                <t t-set="pattern_dict" t-value="pattern_dict.update({pattern_key: {'count': current_data['count'] + 1, 'quantity': current_data['quantity'] + ml.quantity}}) or pattern_dict"/>
+                            </t>
+                        </t>
+
+                        <!-- Display one table per unique pattern with multiplied quantities -->
+                        <t t-foreach="pattern_dict.items()" t-as="pattern_item">
+                            <t t-set="assortment_pair" t-value="pattern_item[0]"/>
+                            <t t-set="pattern_data" t-value="pattern_item[1]"/>
+
+                            <div t-if="pattern_item_index > 0" style="border-top: 1px dashed #999; margin: 3px 0;"/>
+                            <table class="table table-bordered table-sm" style="margin: 0 auto; max-width: 250px; font-size: 9px;">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <t t-set="lot_assortment" t-value="assortment_pair.split(';')"/>
+                                        <t t-if="len(lot_assortment) >= 1">
+                                            <t t-set="tallas" t-value="lot_assortment[0].split(',')"/>
+                                            <t t-foreach="tallas" t-as="talla">
+                                                <th t-esc="talla.strip()" class="border text-center" style="padding: 1px 3px;"/>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="text-center">
+                                        <t t-if="len(lot_assortment) >= 2">
+                                            <t t-set="cantidades" t-value="lot_assortment[1].split(',')"/>
+                                            <!-- Multiply quantities by the total quantity -->
+                                            <t t-set="multiplier" t-value="int(pattern_data['quantity'])"/>
+                                            <t t-foreach="cantidades" t-as="cantidad">
+                                                <t t-set="qty_value" t-value="int(cantidad.strip()) * multiplier"/>
+                                                <td t-esc="qty_value" class="border text-center" style="padding: 1px 3px;"/>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <small class="text-muted">-</small>
+                    </t>
+                </t>
+                <t t-else="">
+                    <small class="text-muted">-</small>
+                </t>
+            </td>
+        </xpath>
+    </template>
+
+</odoo>

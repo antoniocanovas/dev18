@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="preassignment_label_styles">
+            <style>
+                /* Estilos generales del label */
+                .o_label_full {
+                font-family: 'Arial', sans-serif;
+                color: #333;
+                }
+
+                .page-break-after {
+                page-break-after: always;
+                }
+
+                .label-header strong {
+                color: #2c3e50;
+                font-weight: 700;
+                }
+
+
+                .style-label {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                }
+
+                .style-label span {
+                font-size: 12px;
+                color: #666;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-bottom: 5px;
+                }
+
+                .barcode-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                }
+
+
+                .color-info {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                }
+
+                .color-info span {
+                font-size: 12px;
+
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-bottom: 5px;
+                }
+
+                .color-info strong {
+                text-transform: uppercase;
+                font-weight: 700;
+                }
+
+                .image-header {
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+                }
+
+                .image-content {
+                min-height: 60mm;
+                align-items: center;
+                }
+
+                .product-image-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 50mm;
+                }
+
+                .vertical-barcode {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                }
+
+                .no-image-placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 40mm;
+                font-size: 14px;
+                }
+
+                /* Assortment section */
+                .assortment-section {
+                margin-top: 10px;
+                }
+
+                /* BOM components section - remove all borders */
+                .bom-components-section,
+                .bom-components-section * {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                }
+
+                .assortment-table {
+                width: 100%;
+                max-width: 135mm;
+                }
+
+
+                /* Responsive adjustments */
+                @media print {
+                .o_label_full {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                }
+                }
+
+                /* Utility classes */
+                .text-primary { color: #007bff !important; }
+                .text-secondary { color: #6c757d !important; }
+                .text-success { color: #28a745 !important; }
+                .text-danger { color: #dc3545 !important; }
+                .text-warning { color: #ffc107 !important; }
+                .text-info { color: #17a2b8 !important; }
+
+
+                .border-rounded { border-radius: 5px !important; }
+                .shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
+            </style>
+        </template>
+
+        <!-- Template: 1x1 A4 Lot Label (Full Page) -->
+        <template id="lot_label_1x1_a4">
+            <t t-set="barcode_size" t-value="'width:150mm;height:30mm'"/>
+            <div>
+                <!-- Incluir estilos CSS -->
+                <t t-call="report_navima.preassignment_label_styles"/>
+                <!-- Variables de configuración -->
+                <t t-set="barcode_gs1"
+                   t-value="('01' + o.product_id.barcode + '21' + o.name) if o.product_id.barcode else 'sin barcode'"/>
+                <t t-set="purchase_line"
+                   t-value="request.env['purchase.order.line'].search([
+                                  ('product_id', '=', o.product_id.id),
+                              ], limit=1)"/>
+
+
+                <t t-set="barcode_horizontal_size" t-value="'width:120mm;height:20mm'"/>
+                <t t-set="barcode_horizontal_size_lite" t-value="'width:60mm;height:10mm'"/>
+                <t t-set="barcode_horizontal_size_mini" t-value="'width:30mm;height:5mm'"/>
+                <t t-set="barcode_vertical_size" t-value="'width:40mm;height:10mm'"/>
+                <t t-set="container_style"
+                   t-value="'width:100%;height:100%; padding: 5mm; display: flex; flex-direction: column;'"/>
+
+                <div class="o_label_full" t-att-style="container_style">
+
+                    <!-- Contenedor superior: 50% - Secciones 1, 2, 3, 4 -->
+                    <div style="height: 50%; display: flex; flex-direction: column;">
+
+                        <!-- SECCIÓN 1: Header - Campaña y Código de Producto -->
+                        <div class="label-header"
+                             style="border-bottom: 2px solid black; margin-bottom: 5px; padding-bottom: 5px;">
+                            <div class="row">
+                                <!-- Nombre de la campaña -->
+                                <div class="col-8">
+                                    <strong t-if="o.product_id.shoes_campaign_id.name"
+                                            t-out="o.product_id.shoes_campaign_id.name"
+                                            style="font-size: 16px;"/>
+                                </div>
+                                <!-- Código del producto -->
+                                <div class="col-4">
+                                    <strong t-if="o.product_id.default_code"
+                                            t-out="o.product_id.default_code"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 2: Estilo y Código de Barras Principal -->
+                        <div class="label-main-info"
+                             style="border-bottom: 2px solid black; margin-bottom: 5px; padding-bottom: 5px;">
+                            <div class="row">
+                                <!-- Nombre del estilo -->
+                                <div class="col-5">
+                                    <div class="style-label">
+                                        <span>style</span>
+                                        <br/>
+                                        <strong t-out="o.product_id.shoes_model_material if o.product_id.shoes_model_material else 'N/A'"
+                                                style="font-size: 25px; margin-left: 10px;"/>
+                                    </div>
+                                </div>
+                                <!-- Código de barras horizontal -->
+                                <div class="col-7" style="text-align: center;">
+                                    <div class="barcode-section">
+                                        <span t-esc="barcode_gs1"
+                                              t-options="{'widget': 'barcode', 'img_style': barcode_horizontal_size}"/>
+                                        <br/>
+                                        <span t-esc="barcode_gs1"
+                                              style="font-size: 17px;"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 3: Color, Imagen y Código de Barras Vertical -->
+                        <div class="label-details"
+                             style=" margin-bottom: 5px; padding-bottom: 5px;">
+                            <div class="row">
+                                <!-- Información del color -->
+                                <div class="col-6">
+                                    <div class="row" style="height: 20mm;">
+                                        <t t-if="o.product_id.product_tmpl_id.product_variant_count &gt; 1">
+                                            <div class="color-info col-6">
+                                                <span>color</span>
+                                                <br/>
+                                                <strong t-out="o.product_id.color_value_id.name"
+                                                        style="font-size: 30px;"/>
+                                            </div>
+                                            <div class="color-info col-6">
+                                                <span>Pack</span>
+                                                <br/>
+                                                <strong t-out="purchase_line.product_id.product_assortment_id.name if purchase_line and purchase_line.product_id.product_assortment_id else 'ESPECIAL'"
+                                                        style="font-size: 30px;"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div class="row" style="height: 30mm;">
+                                        <t t-if="o.product_id.product_tmpl_id.product_variant_count &gt; 1">
+                                            <div class="color-info col-6">
+                                                <strong t-out="purchase_line.pnt_sale_type_id.name if purchase_line and purchase_line.pnt_sale_type_id else 'N/A'"
+                                                        style="font-size: 20px;"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div class="row">
+                                        <t t-if="o.product_id.product_tmpl_id.product_variant_count &gt; 1">
+                                            <div class="col-7"
+                                                 style="text-align: center; align-items: center; display: block;">
+                                                <div>
+                                                    <span t-esc="barcode_gs1"
+                                                          t-options="{'widget': 'barcode', 'img_style': barcode_horizontal_size_lite}"/>
+                                                    <br/>
+                                                    <span t-esc="barcode_gs1"
+                                                          style="font-size: 14px;"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <strong t-esc="o.name"
+                                                        style="font-size: 15px;"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- Sección de imagen y código de barras vertical -->
+                                <div class="col-6" style="text-align: center;">
+                                    <!-- Header con campaña y código -->
+                                    <div class="row image-header">
+                                        <div class="col-5">
+                                            <strong t-out="o.product_id.shoes_campaign_id.name"/>
+                                        </div>
+                                        <div class="col-7">
+                                            <strong t-esc="o.name"
+                                                    style="font-size: 17px;"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contenido principal: barcode + imagen -->
+                                    <div class="row image-content">
+                                        <!-- Código de barras vertical -->
+                                        <div class="col-3 d-flex justify-content-center align-items-center">
+                                            <t t-call="report_navima.vertical_barcode_section"/>
+                                        </div>
+
+                                        <!-- Imagen del producto o placeholder -->
+                                        <div class="col-8 product-image-container"
+                                             style="text-align: center; margin-left: 5px; padding: 1mm;">
+                                            <t t-call="report_navima.product_image_section"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 4: Tabla de Valores de Assortment -->
+                        <div class="assortment-section">
+                            <t t-if="purchase_line and purchase_line.product_id.product_assortment_id">
+                                <t t-call="report_navima.assortment_values_table"/>
+                            </t>
+                            <t t-if="purchase_line and not purchase_line.product_id.product_assortment_id">
+                                <t t-call="report_navima.assortment_values_table_custom"/>
+                            </t>
+
+                        </div>
+
+                    </div>
+                    <!-- Fin contenedor superior -->
+
+                    <!-- Contenedor inferior: 50% - Sección 5 BOM -->
+                    <div style="height: 50%; display: flex; flex-direction: column; margin-top: 10mm;">
+
+                        <!-- SECCIÓN 5: Tabla de Componentes BOM -->
+                        <div class="bom-components-section"
+                             style="height: 100%; border: none; padding: 0; margin: 0;">
+                            <t t-call="report_navima.bom_components_table"
+                               t-if="not purchase_line.assortment_pair_id"/>
+                            <t t-call="report_navima.bom_components_table_especial"
+                               t-if="purchase_line.assortment_pair_id"/>
+                        </div>
+
+                    </div>
+                    <!-- Fin contenedor inferior -->
+
+                </div>
+
+            </div>
+        </template>
+
+        <!-- Template auxiliar: Código de barras vertical -->
+        <template id="vertical_barcode_section">
+            <div class="vertical-barcode" style="
+                margin: auto;
+                -webkit-transform: rotate(-90deg);
+                -moz-transform: rotate(-90deg);
+                -ms-transform: rotate(-90deg);
+                -o-transform: rotate(-90deg);
+                transform: rotate(-90deg);
+                -webkit-transform-origin: center center;
+                -moz-transform-origin: center center;
+                -ms-transform-origin: center center;
+                -o-transform-origin: center center;
+                transform-origin: center center;
+                width: 40mm;
+                height: 25mm;z-index: 9999">
+                <span t-esc="barcode_gs1"
+                      t-options="{'widget': 'barcode', 'img_style': barcode_vertical_size}"/>
+                <br/>
+                <span t-esc="barcode_gs1" style="font-size: 10px;"/>
+            </div>
+        </template>
+
+        <!-- Template auxiliar: Sección de imagen del producto -->
+        <template id="product_image_section">
+            <t t-if="o.product_id.image_512">
+                <img t-att-src="'/web/image/product.product/%s/image_512' % o.product_id.id"
+                     style="width: 50mm; height: 50mm; object-fit: contain;"/>
+
+            </t>
+            <t t-else="">
+                <div class="no-image-placeholder" style="color: #888; font-style: italic; padding: 20px;">
+                    No image available - DEBUG: Check if product has image uploaded
+                </div>
+            </t>
+        </template>
+
+        <!-- Template auxiliar: Tabla de valores de assortment -->
+        <template id="assortment_values_table">
+            <div class="row">
+                <table class="assortment-table" style="border-collapse: collapse; margin: 0 auto; width: 100%;">
+                    <t t-set="assortment_lines" t-value="purchase_line.product_id.product_assortment_id.line_ids[:12]"/>
+                    <t t-set="total_quantity" t-value="0"/>
+
+                    <!-- Calcular total de cantidades -->
+                    <t t-foreach="assortment_lines" t-as="line">
+                        <t t-set="total_quantity" t-value="total_quantity + (line.quantity or 0)"/>
+                    </t>
+
+                    <!-- Fila de cabeceras -->
+                    <thead>
+                        <tr class="assortment-header-row">
+                            <!-- Cabeceras de los valores -->
+                            <t t-foreach="assortment_lines" t-as="line">
+                                <th class="assortment-header-cell" style="
+                                min-width: 15mm;
+                                height: 7mm;
+                                border: 2px solid #333;
+                                text-align: center;
+                                vertical-align: middle;
+                                font-size: 11px;
+                                font-weight: bold;
+                                padding: 1mm;
+                                color: #495057;">
+                                    <span t-out="line.value_id.name"/>
+                                </th>
+                            </t>
+                            <!-- Cabecera Total -->
+                            <th class="assortment-total-header" style="
+                            min-width: 15mm;
+                            height: 7mm;
+                            border: 2px solid #333;
+                            text-align: center;
+                            vertical-align: middle;
+                            font-size: 12px;
+                            font-weight: bold;
+                            padding: 1mm;">
+                                TOTAL
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <!-- Fila de datos -->
+                    <tbody>
+                        <tr class="assortment-data-row">
+                            <!-- Cantidades de los valores -->
+                            <t t-foreach="assortment_lines" t-as="line">
+                                <td class="assortment-data-cell" style="
+                                min-width: 15mm;
+                                height: 10mm;
+                                border: 2px solid #333;
+                                text-align: center;
+                                vertical-align: middle;
+                                font-size: 14px;
+                                font-weight: bold;
+                                padding: 1mm;">
+                                    <span t-out="line.quantity or 0"/>
+                                </td>
+                            </t>
+                            <!-- Celda Total -->
+                            <td class="assortment-total-cell" style="
+                            min-width: 15mm;
+                            height: 10mm;
+                            border: 2px solid #333;
+                            text-align: center;
+                            vertical-align: middle;
+                            font-size: 16px;
+                            font-weight: bold;
+                            padding: 2mm;">
+                                <span t-out="total_quantity"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <template id="assortment_values_table_custom">
+            <div class="row">
+                <t t-if="purchase_line.assortment_pair_id">
+                    <table class="table table-bordered table-sm mt-2 text-center assortment-table">
+                        <thead class="table-light">
+                            <tr>
+                                <!-- Cabecera con las tallas -->
+                                <t t-set="pares"
+                                   t-value="purchase_line.assortment_pair_id.custom_value.split(',')"/>
+                                <t t-set="tallas" t-value="[]"/>
+                                <t t-foreach="pares" t-as="par">
+                                    <t t-set="talla" t-value="par.split('x')[0]"/>
+                                    <t t-set="tallas" t-value="tallas + [talla]"/>
+                                    <th t-esc="talla" class="border text-center"/>
+                                </t>
+                                <th class="border text-center font-weight-bold">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!-- Fila con las cantidades -->
+                                <t t-set="cantidades" t-value="[]"/>
+                                <t t-set="total_cantidad" t-value="0"/>
+                                <t t-foreach="pares" t-as="par">
+                                    <t t-set="cantidad" t-value="int(par.split('x')[1])"/>
+                                    <t t-set="cantidades" t-value="cantidades + [cantidad]"/>
+                                    <t t-set="total_cantidad" t-value="total_cantidad + cantidad"/>
+                                    <td t-esc="cantidad" class="border text-center"/>
+                                </t>
+                                <td t-esc="total_cantidad" class="border text-center font-weight-bold bg-light"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+            </div>
+        </template>
+
+        <!-- Template auxiliar: Tabla de componentes BOM -->
+        <template id="bom_components_table">
+            <t t-set="bom_components" t-value="[]"/>
+
+            <!-- Obtener la primera lista de materiales del producto -->
+            <t t-if="o.product_id">
+                <!-- Verificar si el producto tiene assortment_pair -->
+                <t t-if="o.product_id.assortment_pair">
+                    <!-- Parsear assortment_pair: "tallas;cantidades;ids" -->
+                    <t t-set="assortment_parts" t-value="o.product_id.assortment_pair.split(';')"/>
+                    <t t-if="len(assortment_parts) == 3">
+                        <t t-set="tallas_list" t-value="assortment_parts[0].split(',')"/>
+                        <t t-set="cantidades_list" t-value="assortment_parts[1].split(',')"/>
+                        <t t-set="ids_list" t-value="assortment_parts[2].split(',')"/>
+
+                        <!-- Iterar sobre cada producto y agregarlo según su cantidad -->
+                        <t t-foreach="ids_list" t-as="product_id_str">
+                            <t t-set="product_id_str_clean" t-value="product_id_str.strip()"/>
+                            <t t-set="cantidad_str_clean" t-value="cantidades_list[product_id_str_index].strip()"/>
+
+                            <!-- Validar que no estén vacíos y no hayamos llegado al límite -->
+                            <t t-if="product_id_str_clean and cantidad_str_clean and len(bom_components) &lt; 12">
+                                <t t-set="product_id_int" t-value="int(product_id_str_clean)"/>
+                                <t t-set="cantidad" t-value="int(cantidad_str_clean)"/>
+                                <t t-set="product_var" t-value="env['product.product'].browse(product_id_int)"/>
+
+                                <!-- Repetir el producto según la cantidad, pero sin exceder 12 -->
+                                <t t-foreach="range(cantidad)" t-as="repeticion">
+                                    <t t-if="len(bom_components) &lt; 12">
+                                        <t t-set="bom_components" t-value="bom_components + [product_var]"/>
+                                    </t>
+                                </t>
+                            </t>
+                        </t>
+                    </t>
+                </t>
+                <t t-else="">
+                    <!-- Lógica original: usar BOM -->
+                    <t t-set="product_boms"
+                       t-value="env['mrp.bom'].search([('product_id', '=', o.product_id.id)], limit=1)"/>
+                    <t t-if="not product_boms">
+                        <t t-set="product_boms"
+                           t-value="env['mrp.bom'].search([('product_tmpl_id', '=', o.product_id.product_tmpl_id.id)], limit=1)"/>
+                    </t>
+
+                    <t t-if="product_boms">
+                        <!-- Recopilar componentes con barcode -->
+                        <t t-foreach="product_boms.bom_line_ids" t-as="bom_line">
+                            <t t-if="bom_line.product_id and len(bom_components) &lt; 12">
+                                <t t-set="bom_components" t-value="bom_components + [bom_line.product_id]"/>
+                            </t>
+                        </t>
+                    </t>
+                </t>
+            </t>
+
+            <!-- Limitar a máximo 12 componentes -->
+            <t t-set="bom_components" t-value="bom_components[:12]"/>
+
+            <div class="row" style="border: none; margin: 0; height: 100%;">
+                <div class="col-12" style="border: none; padding: 0; margin: 0; height: 100%;">
+                    <table style="width: 100%; height: 100%; border-collapse: collapse; border: none;"
+                           class="borderless">
+                        <!-- Generar 4 filas -->
+                        <t t-foreach="range(4)" t-as="row_index">
+                            <tr style="height: 25%; border: none;">
+                                <!-- Generar 3 columnas -->
+                                <t t-foreach="range(3)" t-as="col_index">
+                                    <t t-set="component_index" t-value="row_index * 3 + col_index"/>
+                                    <td style="width: 33.33%; text-align: center; vertical-align: middle; padding: 3mm; border: 1px dashed #666;">
+                                        <t t-if="component_index &lt; len(bom_components)">
+                                            <t t-set="component" t-value="bom_components[component_index]"/>
+                                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: none;">
+                                                <div class="row" style="border: none; margin: 0;">
+                                                    <div class="col-6" style="border: none; padding: 1mm;">
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <strong t-out="component.shoes_model_material"
+                                                                    style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <span t-out="component.name"
+                                                                  style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <strong t-out="component.color_value_id.name"
+                                                                    style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row"
+                                                             style="display:block; border: none; margin: 0; line-height: 0.8;">
+                                                            <span t-field="component.barcode"
+                                                                  t-options="{'widget': 'barcode', 'img_style': barcode_horizontal_size_mini}"/>
+                                                            <span t-out="component.barcode"
+                                                                  style="font-size: 8px; display: block; margin-top: 1mm;"/>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-6"
+                                                         style="border: none; padding: 1mm; position: relative;">
+                                                        <div style="background-color: #f0f0f0; padding: 1mm 3mm 1mm 3mm; border-radius: 3px; height: 25mm; display: flex; flex-direction: column; position: relative;">
+                                                            <strong t-out="component.shoes_campaign_id.name"
+                                                                    style="font-size: 12px; font-weight: bold; background-color: transparent; padding: 0; text-align: center; margin-bottom: 1.5mm;"/>
+                                                            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                                                                <t t-if="component.image_256">
+                                                                    <img t-att-src="'/web/image/product.product/%s/image_512' % component.id"
+                                                                         style="width: 20mm; height: 20mm; object-fit: contain;"/>
+
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <div class="no-image-placeholder"
+                                                                         style="color: #888; font-style: italic; padding: 10px; font-size: 10px;">
+                                                                        No image available
+                                                                    </div>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+                                                        <strong t-out="component.size_value_id.name"
+                                                                style="font-size: 14px; font-weight: bold; display: block; margin-top: 2mm;position: relative;"/>
+
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <!-- Celda vacía -->
+                                            <div style="height: 100%;"></div>
+                                        </t>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+        <template id="bom_components_table_especial">
+            <t t-set="bom_components" t-value="[]"/>
+            <t t-if="o.product_id and purchase_line and purchase_line.assortment_pair_id">
+                <!-- Extraer las tallas y cantidades del custom_value -->
+                <t t-set="custom_pairs" t-value="purchase_line.assortment_pair_id.custom_value.split(',')"/>
+                <t t-set="tallas_cantidades_dict" t-value="{}"/>
+
+                <!-- Crear un diccionario de talla -> cantidad -->
+                <t t-foreach="custom_pairs" t-as="pair">
+                    <t t-set="talla" t-value="pair.split('x')[0].strip()"/>
+                    <t t-set="cantidad" t-value="int(pair.split('x')[1].strip())"/>
+                    <t t-set="tallas_cantidades_dict"
+                       t-value="dict(list(tallas_cantidades_dict.items()) + [(talla, cantidad)])"/>
+                </t>
+
+                <!-- Obtener lista de tallas -->
+                <t t-set="tallas_lista" t-value="list(tallas_cantidades_dict.keys())"/>
+
+                <!-- Buscar variantes del producto template con mismo color y tallas en la lista -->
+                <t t-set="product_variants" t-value="env['product.product'].search([
+                    ('product_tmpl_id', '=', o.product_id.product_tmpl_single_id.id),
+                    ('color_value_id', '=', o.product_id.color_value_id.id),
+                    ('size_value_id.name', 'in', tallas_lista)
+                ])"/>
+
+                <!-- Para cada variante, repetirla según la cantidad de su talla -->
+                <t t-foreach="product_variants" t-as="variant">
+                    <!-- Solo procesar si no hemos llegado al límite -->
+                    <t t-if="len(bom_components) &lt; 12">
+                        <t t-set="talla_variant" t-value="variant.size_value_id.name"/>
+                        <t t-set="cantidad_variant" t-value="tallas_cantidades_dict.get(talla_variant, 1)"/>
+
+                        <!-- Repetir el producto según la cantidad, pero sin exceder 12 -->
+                        <t t-foreach="range(cantidad_variant)" t-as="repeticion">
+                            <t t-if="len(bom_components) &lt; 12">
+                                <t t-set="bom_components" t-value="bom_components + [variant]"/>
+                            </t>
+                        </t>
+                    </t>
+                </t>
+            </t>
+
+            <!-- Limitar a máximo 12 componentes -->
+            <t t-set="bom_components" t-value="bom_components[:12]"/>
+
+            <div class="row" style="border: none; margin: 0; height: 100%;">
+                <div class="col-12" style="border: none; padding: 0; margin: 0; height: 100%;">
+                    <table style="width: 100%; height: 100%; border-collapse: collapse; border: none;"
+                           class="borderless">
+                        <!-- Generar 4 filas -->
+                        <t t-foreach="range(4)" t-as="row_index">
+                            <tr style="height: 25%; border: none;">
+                                <!-- Generar 3 columnas -->
+                                <t t-foreach="range(3)" t-as="col_index">
+                                    <t t-set="component_index" t-value="row_index * 3 + col_index"/>
+                                    <td style="width: 33.33%; text-align: center; vertical-align: middle; padding: 3mm; border: 1px dashed #666;">
+                                        <t t-if="component_index &lt; len(bom_components)">
+                                            <t t-set="component" t-value="bom_components[component_index]"/>
+                                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: none;">
+                                                <div class="row" style="border: none; margin: 0;">
+                                                    <div class="col-6" style="border: none; padding: 1mm;">
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <strong t-out="component.shoes_model_material"
+                                                                    style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <span t-out="component.name"
+                                                                  style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row" style="border: none; margin: 0;">
+                                                            <strong t-out="component.color_value_id.name"
+                                                                    style="font-size: 10px;"/>
+                                                        </div>
+                                                        <div class="row"
+                                                             style="display:block; border: none; margin: 0; line-height: 0.8;">
+                                                            <span t-field="component.barcode"
+                                                                  t-options="{'widget': 'barcode', 'img_style': barcode_horizontal_size_mini}"/>
+                                                            <span t-out="component.barcode"
+                                                                  style="font-size: 8px; display: block; margin-top: 1mm;"/>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-6"
+                                                         style="border: none; padding: 1mm; position: relative;">
+                                                        <div style="background-color: #f0f0f0; padding: 1mm 3mm 1mm 3mm; border-radius: 3px; height: 25mm; display: flex; flex-direction: column; position: relative;">
+                                                            <strong t-out="component.shoes_campaign_id.name"
+                                                                    style="font-size: 12px; font-weight: bold; background-color: transparent; padding: 0; text-align: center; margin-bottom: 1.5mm;"/>
+                                                            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                                                                <t t-if="component.image_512">
+                                                                    <img t-att-src="'/web/image/product.product/%s/image_512' % component.id"
+                                                                         style="width: 20mm; height: 20mm; object-fit: contain;"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <div class="no-image-placeholder"
+                                                                         style="color: #888; font-style: italic; padding: 10px; font-size: 10px;">
+                                                                        No image available
+                                                                    </div>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+                                                        <strong t-out="component.size_value_id.name"
+                                                                style="font-size: 14px; font-weight: bold; display: block; margin-top: 2mm;position: relative;"/>
+
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <!-- Celda vacía -->
+                                            <div style="height: 100%;"></div>
+                                        </t>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+        <!-- Layout Template for 1x1 A4 -->
+        <template id="report_lot_label_1x1_a4">
+            <t t-call="web.html_container">
+                <t t-call="web.basic_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <div t-attf-class="page #{'' if o_last else 'page-break-after'}">
+                            <t t-call="report_navima.lot_label_1x1_a4"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

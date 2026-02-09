@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- VISTA FORM: -->
+    <record id="shoes_campaign_product_inh_form" model="ir.ui.view">
+        <field name="name">product.shoes.campaign.inh.form</field>
+        <field name="model">product.template</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_dealer.shoes_dealer_product_inh_form"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <!-- Código Material-Fabricante (nombre de shoes.model.material): -->
+            <xpath expr="//field[@name='pairs_sold']" position="after">
+                <field name="shoes_model_material" readonly="1"/>
+            </xpath>
+            <!-- En Pestaña inicial para datos generales: -->
+            <xpath expr="//field[@name='product_tmpl_set_id']" position="after">
+                <field name="shoes_task_id" readonly="shoes_task_id" force_save="1"
+                       domain="[('is_shoes_campaign','=',True),('project_id','=',shoes_campaign_id)]"/>
+            </xpath>
+            <!-- Añadir campo heredado de tarea para url" -->
+            <xpath expr="//field[@name='manufacturer_id']" position="after">
+                <field name="shoes_url" widget="url"/>
+            </xpath>
+            <!-- No editar la horma, si se ha creado desde un boceto: -->
+            <xpath expr="//field[@name='shoes_last_id']" position="attributes">
+                <attribute name="readonly">is_pair or product_tmpl_set_id or shoes_task_id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

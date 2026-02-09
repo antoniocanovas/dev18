@@ -7,7 +7,6 @@ class ProjectTask(models.Model):
     _inherit = "project.task"
 
     shoes_color_chart_id = fields.Many2one('shoes.color.chart.item')
-    manufacturer_id = fields.Many2one('res.partner', string='Manufacturer')
 
     # Campos heredados de la carta de color del proyecto para filtrar valores disponibles en los modelos:
     manufacturer_value_ids = fields.Many2many(related='project_id.manufacturer_value_ids')
@@ -24,19 +23,35 @@ class ProjectTask(models.Model):
         self.project_auxiliar_material_id = self.env.company.project_auxiliar_material_id
 
     # Colores para este modelo, en base a los disponibles en la carta de color:
-    shoes_color_chart_item_ids = fields.Many2many('shoes.color.chart.item', string='Colors')
+    shoes_color_chart_item_ids = fields.Many2many(
+        'shoes.color.chart.item',
+        string='Design colors',
+        help="Add the appropriate colors for the future creation of the product, "
+             "you will only see those for this campaign, manufacturer and material"
+             "included in this campaign color chart")
 
     shoes_chart_item_used_ids = fields.Many2many(
         'shoes.color.chart.item',
         string='Used colors',
-        compute='_compute_shoes_chart_item_used_ids'
+        compute='_compute_shoes_chart_item_used_ids',
+        help="Go to the product to add new colors."
     )
+
+    color_ids = fields.Many2many('product.attribute.value', string="Colors", compute='_compute_color_ids')
+
+    @api.depends('shoes_product_tmpl_id', 'shoes_color_chart_item_ids', 'shoes_chart_item_used_ids')
+    def _compute_color_ids(self):
+        for record in self:
+            if record.shoes_product_tmpl_id:
+                record.color_ids = record.shoes_chart_item_used_ids.mapped('color_value_id')
+            else:
+                record.color_ids = record.shoes_color_chart_item_ids.mapped('color_value_id')
 
     @api.depends('shoes_product_tmpl_id.attribute_line_ids.value_ids', 'shoes_material_id', 'manufacturer_id', 'project_id')
     def _compute_shoes_chart_item_used_ids(self):
         for record in self:
             used_chart_items_ids = []
-            if record.shoes_product_tmpl_id and record.env.company.color_attribute_id:
+            if record.shoes_product_tmpl_id and record.env.company.color_attribute_id and record.shoes_material_id:
                 product_template_attribute_line = record.shoes_product_tmpl_id.attribute_line_ids.filtered(
                     lambda line: line.attribute_id == record.env.company.color_attribute_id
                 )
@@ -56,14 +71,17 @@ class ProjectTask(models.Model):
         'product.material', string='Materials',
         compute='_get_manufacturer_campaign_materials'
     )
-    @api.depends('manufacturer_id')
+    @api.depends('manufacturer_id', 'project_id')
     def _get_manufacturer_campaign_materials(self):
-        for record in self.filtered('manufacturer_id'):
-            materials = self.env['shoes.color.chart.item'].search([
-                ('shoes_campaign_id', '=', record.project_id.id),
-                ('manufacturer_id', '=', record.manufacturer_id.id)
-            ]).mapped('material_id')
-            record.material_value_ids = [(6, 0, materials.ids)]
+        for record in self:
+            if record.project_id:
+                materials = self.env['shoes.color.chart.item'].search([
+                    ('shoes_campaign_id', '=', record.project_id.id),
+                    ('manufacturer_id', '=', record.manufacturer_id.id)
+                ]).mapped('material_id')
+                record.material_value_ids = [(6, 0, materials.ids)]
+            else:
+                record.material_value_ids = [(6, 0, [])]
 
     def shoes_create_product(self):
         if not self.shoes_color_chart_item_ids:

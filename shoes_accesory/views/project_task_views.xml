@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Task customization : -->
+    <record id="shoes_accesory_task_inh_form" model="ir.ui.view">
+        <field name="name">shoes.accesory.campaign.task.inh.form</field>
+        <field name="model">project.task</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//group[@name='model_addtional_info']" position="after">
+                    <group name="shoes_accesories" invisible="not is_shoes_campaign" string="Accesories">
+                        <field name="shoes_accesory_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id"
+                                    domain="[('type','=','consu'),('is_pair','=',False),('is_assortment','=',False)]"
+                                />
+                                <field name="qty"/>
+                                <field name="task_id" column_invisible="1"/>
+                            </list>
+                        </field>
+                    </group>
+                </xpath>
+            </data>
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+    <record id="shoes_accesory_task_inh_list_view" model="ir.ui.view">
+        <field name="name">project.task.tree.inherit.shoes.accesory</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_list_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='shoes_material_id']" position="after">
+                <field name="shoes_accesory_ids" widget="many2many_tags" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
