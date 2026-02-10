@@ -17,10 +17,10 @@ class ProjectTask(models.Model):
         self.color_value_ids = [(6,0,colors)]
 
     # Para filtrar en vistas de material auxiliar para composición a efectos de marketing:
-    project_auxiliar_material_id = fields.Many2one('project.project', string='Auxiliar material',
-                                                   compute='_get_project_auxiliar_material')
-    def _get_project_auxiliar_material(self):
-        self.project_auxiliar_material_id = self.env.company.project_auxiliar_material_id
+    # project_auxiliar_material_id = fields.Many2one('project.project', string='Auxiliar material',
+    #                                                compute='_get_project_auxiliar_material')
+    # def _get_project_auxiliar_material(self):
+    #     self.project_auxiliar_material_id = self.env.company.project_auxiliar_material_id
 
     # Colores para este modelo, en base a los disponibles en la carta de color:
     shoes_color_chart_item_ids = fields.Many2many(

@@ -22,7 +22,7 @@
             <field name="description" position="after">
                 <field name="manufacturer_value_ids" invisible="1"/>
                 <field name="color_value_ids" invisible="1"/>
-                <field name="project_auxiliar_material_id" invisible="1"/>
+                <!-- <field name="project_auxiliar_material_id" invisible="1"/> -->
                 <field name="material_value_ids" invisible="1"/>
             </field>
 
@@ -43,7 +43,7 @@
             </xpath>
 
             <!-- Dominios para permitir sólo productos secundarios para marketing: -->
-            <xpath expr="//field[@name='shoes_material_main_id']" position="attributes">
+            <!-- <xpath expr="//field[@name='shoes_material_main_id']" position="attributes">
                 <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
             </xpath>
             <xpath expr="//field[@name='shoes_material_external1_id']" position="attributes">
@@ -57,7 +57,7 @@
             </xpath>
             <xpath expr="//field[@name='shoes_material_lin_internal2_id']" position="attributes">
                 <attribute name="domain">['|',('shoes_campaign_ids','in',project_auxiliar_material_id),('shoes_campaign_ids','=',False)]</attribute>>
-            </xpath>
+            </xpath> -->
         </field>
         <field name="priority">99</field>
     </record>

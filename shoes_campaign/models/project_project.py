@@ -28,3 +28,10 @@ class ProjectProject(models.Model):
                 record.display_name = record.name
             else:
                 record.display_name = False
+
+    def update_products_sale_margin(self):
+        for record in self:
+            if record.task_ids:
+                products = record.task_ids.mapped('shoes_product_tmpl_id')
+                products.write({'sale_margin': record.default_sale_margin})
+        return True

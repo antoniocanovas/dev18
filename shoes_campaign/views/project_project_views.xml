@@ -6,7 +6,7 @@
         <field name="name">shoes.dealer.campaign.project.inh.form</field>
         <field name="model">project.project</field>
         <field name="type">form</field>
-        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="inherit_id" ref="shoes_dealer.shoes_dealer_project_inh_form"/>
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='tag_ids']" position="after">
@@ -15,8 +15,22 @@
                 <field name="task_code_prefix" required="is_shoes_campaign"/>
             </xpath>
 
+            <xpath expr="//field[@name='default_sale_margin']" position="replace">
+                <label for="default_sale_margin"/>
+                <div class="o_row">
+                    <field name="default_sale_margin" nolabel="1"/>
+                    <button name="update_products_sale_margin"
+                            icon="fa-refresh"
+                            type="object"
+                            title="Update products sale margin"
+                            invisible="is_shoes_campaign == False"
+                            groups="sales_team.group_sale_manager"
+                            help="Actualiza todos los márgenes propuestos en los productos de los bocetos de esta campaña. No cambia los precios de venta. Este botón sólo es visible por los usuarios con rol de director comercial."/>
+                </div>
+            </xpath>
+
         </field>
-        <field name="priority">99</field>
+        <field name="priority">100</field>
     </record>
 
     <!-- Simplified creation project view : -->
