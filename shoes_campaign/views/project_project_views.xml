@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Normal project view : -->
+    <record id="shoes_campaign_project_inh_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.campaign.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_dealer.shoes_dealer_project_inh_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="is_shoes_campaign"/>
+                <field name="product_brand_id" required="is_shoes_campaign"/>
+                <field name="task_code_prefix" required="is_shoes_campaign"/>
+            </xpath>
+
+            <xpath expr="//field[@name='default_sale_margin']" position="replace">
+                <label for="default_sale_margin"/>
+                <div class="o_row">
+                    <field name="default_sale_margin" nolabel="1"/>
+                    <button name="update_products_sale_margin"
+                            icon="fa-refresh"
+                            type="object"
+                            title="Update products sale margin"
+                            invisible="is_shoes_campaign == False"
+                            groups="sales_team.group_sale_manager"
+                            help="Actualiza todos los márgenes propuestos en los productos de los bocetos de esta campaña. No cambia los precios de venta. Este botón sólo es visible por los usuarios con rol de director comercial."/>
+                </div>
+            </xpath>
+
+        </field>
+        <field name="priority">100</field>
+    </record>
+
+    <!-- Simplified creation project view : -->
+    <record id="shoes_campaign_simplified_project_inh_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.campaign.simplified.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <group name="shoes_campaign">
+                    <field name="is_shoes_campaign"/>
+                    <field name="product_brand_id" required="is_shoes_campaign"/>
+                    <field name="task_code_prefix" required="is_shoes_campaign"/>
+                </group>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+    <!-- Search project view : -->
+    <record id="shoes_campaign_project_inh_search" model="ir.ui.view">
+        <field name="name">shoes.dealer.campaign.project.inh.search</field>
+        <field name="model">project.project</field>
+        <field name="type">search</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="display_name" string="Name" filter_domain="[('display_name', 'ilike', self)]"/>
+            </xpath>
+
+        </field>
+        <field name="priority">99</field>
+    </record>
+
+    <!-- 1) DOMINIO: la acción para Campaigns en menú shoes.dealer -->
+    <record id="shoes_dealer.shoes_dealer_open_shoes_dealer_campaigns" model="ir.actions.act_window">
+        <field name="res_model">project.project</field>
+        <field name="domain">[('is_shoes_campaign','=',True)]</field>
+    </record>
+</odoo>

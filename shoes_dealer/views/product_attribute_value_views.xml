@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!-- INH CUSTOM list VIEW (default form not required): -->
+    <record id="shoes_dealer_pav_inh_tree" model="ir.ui.view">
+        <field name="name">shoes.dealer.pav.inh.tree</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_list"/>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="material_id"/>
+                <field name="gender" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
