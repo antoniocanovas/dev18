@@ -1,3 +1,4 @@
+import json
 from odoo import models
 from odoo.exceptions import UserError
 
@@ -16,6 +17,10 @@ class ShoesAnalysis(models.Model):
 
         # Mapeo de tipos de informe a sus vistas de lista y métodos de parseo
         export_config = {
+            "stock_available": {
+                "view_id": "shoes_analysis_export.shoes_analysis_export_stock_available_list_view",
+                "parser": "_parse_stock_available_data",
+            },
             "salesman_sales_delivery": {
                 "view_id": "shoes_analysis_export.shoes_analysis_export_salesman_delivery_list_view",
                 "parser": "_parse_salesman_sales_delivery_data",
@@ -115,6 +120,35 @@ class ShoesAnalysis(models.Model):
             "domain": [("id", "in", records.ids)],
             "target": "current",
         }
+
+    def _parse_stock_available_data(self, json_data):
+        """Parsea los datos JSON para el informe 'stock_available'."""
+        lines_to_create = []
+        data = json.loads(json_data)
+        for model, model_data in data.items():
+            for color, color_data in model_data["colors"].items():
+                # Process assortments
+                for assortment, assortment_data in color_data.get("assortments", {}).items():
+                    lines_to_create.append({
+                        "product_material_name": model,
+                        "product_name": model_data["product_name"],
+                        "assortment_name": assortment,
+                        "pack_name": ", ".join([f"{k}:{v}" for k, v in assortment_data.get("breakdown", {}).items()]),
+                        "total_pairs": int(sum(assortment_data.get("breakdown", {}).values()) * assortment_data.get("quantity", 0)),
+                        "analysis_id": self.id,
+                    })
+                # Process single pairs
+                if color_data.get("pairs"):
+                    total_pairs = sum(color_data["pairs"].values())
+                    lines_to_create.append({
+                        "product_material_name": model,
+                        "product_name": model_data["product_name"],
+                        "assortment_name": "-",
+                        "pack_name": ", ".join([f"{k}:{v}" for k, v in color_data.get("pairs", {}).items()]),
+                        "total_pairs": int(total_pairs),
+                        "analysis_id": self.id,
+                    })
+        return lines_to_create
 
     def _parse_salesman_sales_delivery_data(self, json_data):
         """Parsea los datos JSON para el informe 'salesman_sales_delivery'."""

@@ -35,3 +35,8 @@ class ShoesAnalysisExport(models.TransientModel):
     estimated_stock = fields.Integer("Stock Estimado")
     cost_price = fields.Float("Precio de Coste")
     total_cost = fields.Float("Coste Total")
+
+    # Campos para el informe de Stock Disponible
+    product_name = fields.Char("Product Name")
+    assortment_name = fields.Char("Assortment Name")
+    pack_name = fields.Char("Pack")

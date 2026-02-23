@@ -94,15 +94,16 @@ class ShoesAnalysis(models.Model):
         style_image = "float: left; width: 128px; height: 128px;"
         style_model_header = "font-size: 24px; font-weight: bold; color: #000080;"
         style_table = "width: 100%; border-collapse: collapse; margin-top: 10px; clear: both;"
-        style_th = "background-color: #f2f2f2; text-align: left; padding: 8px; border-bottom: 2px solid #ddd;"
+        style_th = "background-color: #f2f2f2; text-align: left; padding: 4px; border-bottom: 2px solid #ddd;"
         style_th_center = style_th + " text-align: center;"
-        style_td = "padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top;"
+        style_td = "padding: 4px; border-bottom: 1px solid #ddd; vertical-align: top; font-size: 14px;"
         style_td_center = style_td + " text-align: center;"
+        style_td_pack = "padding: 0.5px 4px; border-bottom: 1px solid #ddd; vertical-align: top;"
         
         # Styles for breakdown table
-        style_breakdown_table = "width: 100%; border-collapse: collapse; text-align: center;"
-        style_breakdown_th = "background-color: #e0e0e0; padding: 4px; font-weight: bold;"
-        style_breakdown_td = "padding: 4px;"
+        style_breakdown_table = "width: 100%; border-collapse: collapse; text-align: center; font-size: 12px;"
+        style_breakdown_th = "background-color: #e0e0e0; padding: 1px; font-weight: bold;"
+        style_breakdown_td = "padding: 1px;"
 
         for model, model_data in data.items():
             html_parts.append(f'<div style="{style_model_group}">')
@@ -150,7 +151,7 @@ class ShoesAnalysis(models.Model):
                         html_parts.append(f'<td style="{style_td}" rowspan="{rowspan}">{color}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{assortment}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
-                        html_parts.append(f'<td style="{style_td}">{breakdown_html}</td>')
+                        html_parts.append(f'<td style="{style_td_pack}">{breakdown_html}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{total_pairs}</td>')
                         html_parts.append('</tr>')
                         first_row = False
@@ -158,7 +159,7 @@ class ShoesAnalysis(models.Model):
                         html_parts.append('<tr>')
                         html_parts.append(f'<td style="{style_td_center}">{assortment}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
-                        html_parts.append(f'<td style="{style_td}">{breakdown_html}</td>')
+                        html_parts.append(f'<td style="{style_td_pack}">{breakdown_html}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{total_pairs}</td>')
                         html_parts.append('</tr>')
 
@@ -175,7 +176,7 @@ class ShoesAnalysis(models.Model):
                          html_parts.append(f'<td style="{style_td}" rowspan="{rowspan}">{color}</td>')
                     html_parts.append(f'<td style="{style_td_center}">-</td>')
                     html_parts.append(f'<td style="{style_td_center}">{int(total_pairs_quantity)}</td>')
-                    html_parts.append(f'<td style="{style_td}">{pack_html}</td>')
+                    html_parts.append(f'<td style="{style_td_pack}">{pack_html}</td>')
                     html_parts.append(f'<td style="{style_td_center}">{int(total_pairs_quantity)}</td>')
                     html_parts.append('</tr>')
 
