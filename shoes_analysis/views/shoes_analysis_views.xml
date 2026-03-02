@@ -54,7 +54,7 @@
                                    invisible="type not in ['customer_comparison']"
                                    required="type == 'customer_comparison'"/>
                             <field name="pricelist_id"
-                                   invisible="type != 'product_ranking'"/>
+                                   invisible="type not in ['product_ranking', 'stock_available']"/>
                             <field name="referrer_id"
                                    string="Representante"
                                    invisible="type not in ['salesman_model', 'salesman_customers']"
