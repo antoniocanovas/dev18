@@ -29,6 +29,16 @@ class ShoesAnalysis(models.Model):
 
             model = tmpl.shoes_model_material or "Undefined Model"
             
+            # Price calculation
+            pair_price = 0
+            retail_price = 0
+            if self.pricelist_id and tmpl.product_tmpl_single_id and tmpl.product_tmpl_single_id.product_variant_ids:
+                # Get the first variant to compute the price
+                first_variant = tmpl.product_tmpl_single_id.product_variant_ids[0]
+                pair_price = self.pricelist_id._get_product_price(first_variant, quantity=1)
+                if self.pricelist_id.retail_pricelist_id:
+                    retail_price = self.pricelist_id.retail_pricelist_id._get_product_price(first_variant, quantity=1)
+
             # Initialize model data
             image_base64 = ''
             if tmpl.image_128:
@@ -38,7 +48,10 @@ class ShoesAnalysis(models.Model):
                 "product_name": tmpl.name,
                 "category": tmpl.categ_id.name,
                 "image": image_base64,
-                "colors": {}
+                "pair_price": pair_price,
+                "retail_price": retail_price,
+                "colors": {},
+                "total_boxes": 0
             }
 
             # Process assortments with stock
@@ -60,6 +73,8 @@ class ShoesAnalysis(models.Model):
                     "quantity": product.virtual_available,
                     "breakdown": breakdown
                 }
+                grouped_data[model]["total_boxes"] += int(sum(breakdown.values()) * product.virtual_available)
+
 
             # Process single pairs with stock
             for product in pair_products_with_stock:
@@ -71,6 +86,7 @@ class ShoesAnalysis(models.Model):
                 if size not in grouped_data[model]["colors"][color]["pairs"]:
                     grouped_data[model]["colors"][color]["pairs"][size] = 0
                 grouped_data[model]["colors"][color]["pairs"][size] += product.virtual_available
+                grouped_data[model]["total_boxes"] += product.virtual_available
         
         if not grouped_data:
             self.analysis_html = "<p>No products with available stock found in the selected campaign.</p>"
@@ -90,7 +106,8 @@ class ShoesAnalysis(models.Model):
         html_parts = ['<div class="container">']
         
         style_model_group = "border: 2px solid #666; border-radius: 5px; margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; page-break-inside: avoid; overflow: hidden;"
-        style_product_info = "font-size: 16px; margin-bottom: 15px; float: left; margin-left: 20px;"
+        style_product_info_left = "font-size: 16px; margin-bottom: 15px; float: left; margin-left: 20px; width: 50%;"
+        style_product_info_right = "font-size: 16px; margin-bottom: 15px; float: right; text-align: right; width: 30%;"
         style_image = "float: left; width: 128px; height: 128px;"
         style_model_header = "font-size: 24px; font-weight: bold; color: #000080;"
         style_table = "width: 100%; border-collapse: collapse; margin-top: 10px; clear: both;"
@@ -113,14 +130,23 @@ class ShoesAnalysis(models.Model):
 
             product_link = f"/web#id={model_data['product_tmpl_id']}&model=product.template&view_type=form"
             
-            html_parts.append(f'<div style="{style_product_info}">')
+            html_parts.append(f'<div style="{style_product_info_left}">')
             html_parts.append(f'<h2 style="{style_model_header}">{model}</h2>')
             html_parts.append(f'<strong>Product:</strong> <a href="{product_link}" target="_blank">{model_data["product_name"]}</a><br/>')
             html_parts.append(f'<strong>Category:</strong> {model_data["category"]}')
             html_parts.append('</div>')
+
+            if self.pricelist_id:
+                html_parts.append(f'<div style="{style_product_info_right}">')
+                html_parts.append(f'<strong>Pair Price:</strong> {model_data.get("pair_price", 0.0):.2f} €<br/>')
+                if self.pricelist_id.retail_pricelist_id:
+                    html_parts.append(f'<strong>Retail Price:</strong> {model_data.get("retail_price", 0.0):.2f} €<br/>')
+                if model_data.get("total_boxes"):
+                    html_parts.append(f'<strong>Total pairs:</strong> {int(model_data["total_boxes"])}')
+                html_parts.append('</div>')
             
             html_parts.append(f'<table style="{style_table}">')
-            html_parts.append(f'<thead><tr><th style="{style_th}">Color</th><th style="{style_th_center}">Assortment</th><th style="{style_th_center}">Quantity</th><th style="{style_th_center}">Pack</th><th style="{style_th_center}">Pairs</th></tr></thead>')
+            html_parts.append(f'<thead><tr><th style="{style_th}">Color</th><th style="{style_th_center}">Assortment</th><th style="{style_th_center}">Assorted pack</th><th style="{style_th_center}">Boxes</th><th style="{style_th_center}">Pairs</th></tr></thead>')
             html_parts.append('<tbody>')
 
             for color, color_data in model_data["colors"].items():
@@ -150,16 +176,16 @@ class ShoesAnalysis(models.Model):
                         html_parts.append('<tr>')
                         html_parts.append(f'<td style="{style_td}" rowspan="{rowspan}">{color}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{assortment}</td>')
-                        html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
                         html_parts.append(f'<td style="{style_td_pack}">{breakdown_html}</td>')
+                        html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{total_pairs}</td>')
                         html_parts.append('</tr>')
                         first_row = False
                     else:
                         html_parts.append('<tr>')
                         html_parts.append(f'<td style="{style_td_center}">{assortment}</td>')
-                        html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
                         html_parts.append(f'<td style="{style_td_pack}">{breakdown_html}</td>')
+                        html_parts.append(f'<td style="{style_td_center}">{quantity}</td>')
                         html_parts.append(f'<td style="{style_td_center}">{total_pairs}</td>')
                         html_parts.append('</tr>')
 
@@ -175,8 +201,8 @@ class ShoesAnalysis(models.Model):
                     if first_row:
                          html_parts.append(f'<td style="{style_td}" rowspan="{rowspan}">{color}</td>')
                     html_parts.append(f'<td style="{style_td_center}">-</td>')
-                    html_parts.append(f'<td style="{style_td_center}">{int(total_pairs_quantity)}</td>')
                     html_parts.append(f'<td style="{style_td_pack}">{pack_html}</td>')
+                    html_parts.append(f'<td style="{style_td_center}">{int(total_pairs_quantity)}</td>')
                     html_parts.append(f'<td style="{style_td_center}">{int(total_pairs_quantity)}</td>')
                     html_parts.append('</tr>')
 

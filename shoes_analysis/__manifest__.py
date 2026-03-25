@@ -31,6 +31,7 @@
         "views/shoes_analysis_menu.xml",
         "views/product_template_views.xml",
         "report/shoes_analysis_report.xml",
+        "report/report_stock_available_templates.xml",
     ],
     "installable": True,
     "application": False,
