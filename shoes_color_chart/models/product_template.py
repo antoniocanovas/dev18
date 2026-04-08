@@ -49,13 +49,25 @@ class ProductTemplate(models.Model):
             else:
                 raise UserError('Producto sin campaña o paleta de color.')
 
-    def action_update_variant_color(self):
-        """Server action to update color_value_id on variants."""
+    def action_update_variant_color_size_assortment(self):
+        """Server action to update color_value_id, size_value_id and
+        assortment_attribute_id on variants depending on product type."""
         for record in self:
             for variant in record.product_variant_ids:
+                vals = {}
                 color = variant._get_color_attribute_value()
                 if color:
-                    variant.write({'color_value_id': color})
+                    vals['color_value_id'] = color
+                if record.is_pair:
+                    size = variant._get_size_attribute_value()
+                    if size:
+                        vals['size_value_id'] = size
+                if record.is_assortment:
+                    assortment = variant._get_assortment_attribute_value()
+                    if assortment:
+                        vals['assortment_attribute_id'] = assortment
+                if vals:
+                    variant.write(vals)
 
     def update_all_assortment_values_by_gender(self):
         for record in self:

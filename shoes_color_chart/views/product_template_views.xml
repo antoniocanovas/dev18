@@ -49,14 +49,14 @@
         <field name="priority">99</field>
     </record>
 
-    <record id="action_update_variant_color" model="ir.actions.server">
-        <field name="name">=> Actualizar color variante</field>
+    <record id="action_update_variant_color_size_assortment" model="ir.actions.server">
+        <field name="name">=> Actualizar color/talla/surtido variante</field>
         <field name="model_id" ref="product.model_product_template"/>
         <field name="binding_model_id" ref="product.model_product_template"/>
         <field name="state">code</field>
         <field name="code">
             if records:
-                records.action_update_variant_color()
+                records.action_update_variant_color_size_assortment()
         </field>
     </record>
 
