@@ -28,6 +28,7 @@
         "report/sale_report_views.xml",
         "report/account_invoice_report_views.xml",
         "views/shoes_analysis_views.xml",
+        "views/stock_move_views.xml",
         "views/shoes_analysis_menu.xml",
         "views/product_template_views.xml",
         "report/shoes_analysis_report.xml",

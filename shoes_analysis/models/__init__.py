@@ -17,3 +17,4 @@ from . import product_template
 from . import report_campaign_manufacturer
 from . import report_salesman_customers
 from . import report_stock_available
+from . import stock_move
