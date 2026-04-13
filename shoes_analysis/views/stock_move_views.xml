@@ -22,8 +22,13 @@
                 <field name="sale_id" string="Pedido venta" optional="show"/>
                 <field name="purchase_id" string="Orden compra" optional="show"/>
                 <field name="is_mto" string="MTO" optional="hide" widget="boolean"/>
+                <field name="is_for_own_stock" string="Para stock" optional="hide" widget="boolean"/>
                 <field name="product_uom_qty" string="Demanda" optional="show"/>
                 <field name="shoes_reserved_qty" string="Reservado" optional="show"/>
+                <field name="shoes_qty_available" string="Disponible" optional="show"
+                       decoration-danger="shoes_qty_available &lt; 0"/>
+                <field name="shoes_qty_forecasted" string="Pronosticado" optional="show"
+                       decoration-danger="shoes_qty_forecasted &lt; 0"/>
                 <field name="date" string="Fecha Prevista" optional="hide"/>
                 <field name="date_deadline"
                        string="Fecha Límite Cliente"
@@ -67,6 +72,7 @@
                             <field name="product_uom_qty" string="Demanda" readonly="1"/>
                             <field name="shoes_reserved_qty" string="Reservado" readonly="1"/>
                             <field name="is_mto" string="Bajo Pedido (MTO)" readonly="1"/>
+                            <field name="is_for_own_stock" string="Para stock propio" readonly="1"/>
                             <field name="warehouse_id" readonly="1"/>
                         </group>
                         <group string="Ubicaciones">
@@ -110,16 +116,38 @@
                 <field name="location_id" string="Ubicación Origen"/>
                 <field name="location_dest_id" string="Ubicación Destino"/>
 
-                <!-- Estado -->
-                <filter name="filter_assigned"
-                        string="Disponibles / Reservados"
-                        domain="[('state', '=', 'assigned')]"/>
+                <!-- Filtro por defecto: solo calzado -->
+                <filter name="filter_shoes_products"
+                        string="Surtidos y pares"
+                        domain="['|', ('product_id.is_assortment', '=', True), ('product_id.is_pair', '=', True)]"/>
+
+                <separator/>
+
+                <!-- Estado: salidas (stock reservado para clientes) -->
+                <filter name="filter_assigned_move"
+                        string="Productos para servir"
+                        domain="[('state', '=', 'assigned'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
+                <filter name="filter_assigned_picking"
+                        string="Albaranes para servir"
+                        domain="[('picking_id.state', '=', 'assigned'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
                 <filter name="filter_partially"
                         string="Parcialmente disponibles"
-                        domain="[('state', '=', 'partially_available')]"/>
-                <filter name="filter_confirmed"
-                        string="Pendientes de recibir"
-                        domain="[('state', 'in', ['confirmed', 'waiting'])]"/>
+                        domain="[('state', '=', 'partially_available'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
+
+                <separator/>
+
+                <!-- Estado: entradas (material pendiente de recibir) -->
+                <filter name="filter_incoming_for_customer"
+                        string="Recibir para clientes"
+                        domain="[('location_id.usage', '=', 'supplier'),
+                                 ('is_for_own_stock', '=', False)]"/>
+                <filter name="filter_incoming_for_stock"
+                        string="Recibir para stock"
+                        domain="[('location_id.usage', '=', 'supplier'),
+                                 ('is_for_own_stock', '=', True)]"/>
 
                 <separator/>
 
@@ -187,6 +215,9 @@
                     <filter name="group_is_mto"
                             string="MTO / MTS"
                             context="{'group_by': 'is_mto'}"/>
+                    <filter name="group_for_stock"
+                            string="Para stock / Para cliente"
+                            context="{'group_by': 'is_for_own_stock'}"/>
                     <filter name="group_deadline"
                             string="Fecha Límite"
                             context="{'group_by': 'date_deadline:week'}"/>
@@ -206,9 +237,12 @@
         <field name="domain">[
             ('state', 'in', ['confirmed', 'waiting', 'partially_available', 'assigned']),
             ('location_id.usage', 'in', ['supplier', 'customer', 'internal', 'transit']),
-            ('location_dest_id.usage', 'in', ['internal', 'transit'])
+            '|',
+                ('location_dest_id.usage', 'in', ['internal', 'transit']),
+                ('location_dest_id.usage', '=', 'customer')
         ]</field>
         <field name="context">{
+            'search_default_filter_shoes_products': 1,
             'group_by': ['partner_id']
         }</field>
     </record>

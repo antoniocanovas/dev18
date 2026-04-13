@@ -43,6 +43,25 @@ class StockMoveShoes(models.Model):
         store=True,
         readonly=True,
     )
+    shoes_qty_available = fields.Float(
+        string='Disponible',
+        related='product_id.qty_available',
+        digits='Product Unit of Measure',
+        readonly=True,
+    )
+    shoes_qty_forecasted = fields.Float(
+        string='Pronosticado',
+        related='product_id.virtual_available',
+        digits='Product Unit of Measure',
+        readonly=True,
+    )
+    is_for_own_stock = fields.Boolean(
+        string='Para stock propio',
+        compute='_compute_is_for_own_stock',
+        store=True,
+        help="True si la recepción es para stock de la empresa (sin pedido de venta "
+             "o con pedido de venta cuyo cliente es la propia empresa).",
+    )
 
     @api.depends('procure_method')
     def _compute_is_mto(self):
@@ -53,3 +72,13 @@ class StockMoveShoes(models.Model):
     def _compute_shoes_reserved_qty(self):
         for move in self:
             move.shoes_reserved_qty = sum(move.move_line_ids.mapped('quantity'))
+
+    @api.depends('sale_id', 'sale_id.partner_id', 'company_id', 'company_id.partner_id')
+    def _compute_is_for_own_stock(self):
+        for move in self:
+            if not move.sale_id:
+                move.is_for_own_stock = True
+            else:
+                move.is_for_own_stock = (
+                    move.sale_id.partner_id == move.company_id.partner_id
+                )
