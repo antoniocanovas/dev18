@@ -338,7 +338,7 @@ class ProductTemplate(models.Model):
                     colors = ptal.value_ids.ids
             record["pt_colors_ids"] = [(6, 0, colors)]
 
-    # Actualizar el precio de los surtidos cuando cambia el precio del par:
+    # Actualizar el precio de los surtidos cuando cambia el precio del par (UI desde el par):
     @api.onchange("list_price")
     def update_set_price_by_pairs(self):
         for record in self:
@@ -349,6 +349,26 @@ class ProductTemplate(models.Model):
             if record.product_tmpl_single_id.id:
                 for pp in record.product_variant_ids:
                     pp.write({"lst_price": record.list_price * pp.pairs_count})
+
+    # Actualizar variantes del surtido cuando se edita el precio del par desde el surtido (UI):
+    @api.onchange("product_tmpl_single_list_price")
+    def _onchange_product_tmpl_single_list_price(self):
+        for record in self:
+            if record.product_tmpl_single_id:
+                for pp in record.product_variant_ids:
+                    pp.write({"lst_price": record.product_tmpl_single_list_price * pp.pairs_count})
+
+    def write(self, vals):
+        result = super().write(vals)
+        if "list_price" in vals and not self.env.context.get("_updating_variant_prices"):
+            for record in self.with_context(_updating_variant_prices=True):
+                if record.product_tmpl_set_id:
+                    for pp in record.product_tmpl_set_id.product_variant_ids:
+                        pp.write({"lst_price": record.list_price * pp.pairs_count})
+                if record.product_tmpl_single_id:
+                    for pp in record.product_variant_ids:
+                        pp.write({"lst_price": record.list_price * pp.pairs_count})
+        return result
 
     # Mantener el margen sincronizado con el surtido correspondiente:
     @api.onchange("sale_margin")
@@ -525,6 +545,10 @@ class ProductTemplate(models.Model):
                 if assortment_prefix:
                     assortment_name = str(assortment_prefix) + record.name
 
+                delivery_route = self.env['stock.warehouse'].search(
+                    [('company_id', '=', self.env.company.id)], limit=1
+                ).delivery_route_id
+                route_ids = [(4, delivery_route.id)] if delivery_route else []
                 record.write(
                     {
                         "name": assortment_name,
@@ -532,6 +556,7 @@ class ProductTemplate(models.Model):
                         "type": "consu",
                         "is_storable": True,
                         "tracking": self.env.company.shoes_assortment_tracking,
+                        "route_ids": route_ids,
                     }
                 )
                 # Creación de listas de material en surtidos, con los nuevos pares:

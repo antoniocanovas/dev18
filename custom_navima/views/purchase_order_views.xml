@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend Purchase Order Line Tree View -->
+    <record id="pnt_custom_navima_sale_purchase_link_mto_purchase_order_inh" model="ir.ui.view">
+        <field name="name">pnt.custom.navima.sale.purchase.link.mto.purchase.order.inh</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add fields after price_unit -->
+            <xpath expr="//page[@name='products']/field[@name='order_line']/list[1]/field[@name='product_id']" position="after">
+                <field name="pnt_sale_type_id" string="Type" optional="hide"
+                       help="Original sale order type"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

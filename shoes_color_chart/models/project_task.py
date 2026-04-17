@@ -11,7 +11,7 @@ class ProjectTask(models.Model):
     # Campos heredados de la carta de color del proyecto para filtrar valores disponibles en los modelos:
     manufacturer_value_ids = fields.Many2many(related='project_id.manufacturer_value_ids')
 
-    color_value_ids = fields.Many2many(string='Colors', compute='_get_color_values')
+    color_value_ids = fields.Many2many('product.attribute.value', string='Colors', compute='_get_color_values')
     def _get_color_values(self):
         colors = self.shoes_color_chart_item_ids.color_value_id.ids
         self.color_value_ids = [(6,0,colors)]
@@ -25,6 +25,7 @@ class ProjectTask(models.Model):
     # Colores para este modelo, en base a los disponibles en la carta de color:
     shoes_color_chart_item_ids = fields.Many2many(
         'shoes.color.chart.item',
+        relation='project_task_shoes_color_chart_item_rel',
         string='Design colors',
         help="Add the appropriate colors for the future creation of the product, "
              "you will only see those for this campaign, manufacturer and material"
@@ -32,6 +33,7 @@ class ProjectTask(models.Model):
 
     shoes_chart_item_used_ids = fields.Many2many(
         'shoes.color.chart.item',
+        relation='project_task_shoes_chart_item_used_rel',
         string='Used colors',
         compute='_compute_shoes_chart_item_used_ids',
         help="Go to the product to add new colors."

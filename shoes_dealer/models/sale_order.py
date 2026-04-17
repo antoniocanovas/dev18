@@ -1,7 +1,8 @@
 # Copyright 2023 Serincloud SL - Ingenieriacloud.com
 from typing import Any
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class SaleOrder(models.Model):
@@ -51,26 +52,39 @@ class SaleOrder(models.Model):
         user = self.env.user
         user.top_sales = not user.top_sales
 
-    def action_confirm(self) -> Any:
-        # Primero confirmar la orden para generar los albaranes
-        result = super().action_confirm()
-        # Después crear líneas de compra para productos assortment
+    def _action_confirm(self):
+        result = super()._action_confirm()
         self.create_purchase_lines_for_custom_products()
         return result
 
     def create_purchase_lines_for_custom_products(self):
         for record in self:
             for li in record.order_line:
-                if li.product_id.is_assortment:
-                    manufacturer = li.product_id.manufacturer_id
+                # Bug líneas de compra duplicadas:
+                if li.product_id.is_assortment and not li.purchase_line_id:
+                    seller = li.product_id._select_seller(
+                        quantity=li.product_uom_qty,
+                        date=record.date_order.date() if record.date_order else None,
+                        uom_id=li.product_uom,
+                    )
+                    if not seller:
+                        raise UserError(
+                            _(
+                                "El producto '%s' no tiene proveedor asignado. "
+                                "Asígnalo en la pestaña 'Compras' del producto antes de confirmar el pedido.",
+                                li.product_id.display_name,
+                            )
+                        )
+                    vendor = seller.partner_id
+                    price_unit = seller.price
                     draft_purchases = self.env["purchase.order"].search(
-                        [("partner_id", "=", manufacturer.id), ("state", "=", "draft")]
+                        [("partner_id", "=", vendor.id), ("state", "=", "draft")]
                     )
                     if draft_purchases.ids:
                         po = draft_purchases[0]
-                    else:  # Hay que crear un nuevo pedido
+                    else:
                         po = self.env["purchase.order"].create(
-                            {"partner_id": manufacturer.id}
+                            {"partner_id": vendor.id}
                         )
 
                     # Líneas CON atributos personalizados
@@ -82,8 +96,7 @@ class SaleOrder(models.Model):
                                 "product_id": li.product_id.id,
                                 "sale_line_id": li.id,
                                 "name": li.name,
-                                "price_unit": li.product_id.exwork_single
-                                * li.pairs_count,
+                                "price_unit": price_unit,
                                 "product_qty": li.product_uom_qty,
                                 "assortment_pair_id": assortment_pair.id,
                             }
@@ -96,8 +109,7 @@ class SaleOrder(models.Model):
                                 "product_id": li.product_id.id,
                                 "sale_line_id": li.id,
                                 "name": li.name,
-                                "price_unit": li.product_id.exwork_single
-                                * li.pairs_count,
+                                "price_unit": price_unit,
                                 "product_qty": li.product_uom_qty,
                             }
                         )
