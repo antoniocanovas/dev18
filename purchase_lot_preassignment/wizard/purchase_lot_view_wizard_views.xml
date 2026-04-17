@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista list para los lotes en el wizard -->
+    <record id="view_stock_lot_list_wizard" model="ir.ui.view">
+        <field name="name">stock.lot.list.wizard</field>
+        <field name="model">stock.lot</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="ref"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="purchase_lot_view_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.lot.view.wizard.form</field>
+        <field name="model">purchase.lot.view.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimir Etiquetas de Lotes">
+                <sheet>
+                    <group>
+                        <field name="purchase_order_id" invisible="1"/>
+                        <field name="available_lot_ids" invisible="1"/>
+                        <field name="has_available_lots" invisible="1"/>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="has_available_lots">
+                        <strong>Información:</strong> No se han encontrado pedidos de venta asociados a esta compra.
+                    </div>
+                    <group invisible="not has_available_lots">
+                        <field name="print_format" widget="radio"/>
+                    </group>
+                    <notebook invisible="not has_available_lots">
+                        <page string="Lotes para Imprimir">
+                            <field name="lot_ids" nolabel="1" widget="many2many">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="ref"/>
+                                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button string="Imprimir"
+                            name="action_print_labels"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-print"
+                            invisible="not has_available_lots"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_purchase_lot_view_wizard" model="ir.actions.act_window">
+        <field name="name">Lotes Asociados</field>
+        <field name="res_model">purchase.lot.view.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

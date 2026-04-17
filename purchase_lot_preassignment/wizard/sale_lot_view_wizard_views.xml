@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_lot_view_wizard_form" model="ir.ui.view">
+        <field name="name">sale.lot.view.wizard.form</field>
+        <field name="model">sale.lot.view.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Lotes Asociados">
+                <sheet>
+                    <group>
+                        <field name="sale_order_id" invisible="1"/>
+                        <field name="picking_id" invisible="1"/>
+                        <field name="has_lots" invisible="1"/>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="has_lots">
+                        <strong>Información:</strong> No se han encontrado lotes asociados.
+                    </div>
+                    <notebook invisible="not has_lots">
+                        <page string="Lotes Asociados">
+                            <field name="lot_ids" nolabel="1" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="ref"/>
+                                    <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sale_lot_view_wizard" model="ir.actions.act_window">
+        <field name="name">Lotes Asociados</field>
+        <field name="res_model">sale.lot.view.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Stock Lot Label PDF Reports -->
+
+        <!-- Default 4x12 Report -->
+        <record id="action_report_lot_label" model="ir.actions.report">
+            <field name="name">Lot/SN Labels (PDF)</field>
+            <field name="model">stock.lot</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">purchase_lot_preassignment.report_lot_label</field>
+            <field name="report_file">purchase_lot_preassignment.report_lot_label</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="print_report_name">'Lot Labels - %s' % object.name</field>
+            <field name="binding_model_id" ref="stock.model_stock_lot"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- 4x12 Format Report -->
+        <record id="action_report_lot_label_4x12" model="ir.actions.report">
+            <field name="name">Lot/SN Labels 4x12 (PDF)</field>
+            <field name="model">stock.lot</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">purchase_lot_preassignment.report_lot_label_4x12</field>
+            <field name="report_file">purchase_lot_preassignment.report_lot_label_4x12</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="print_report_name">'Lot Labels 4x12 - %s' % object.name</field>
+        </record>
+
+        <!-- 2x7 Format Report -->
+        <record id="action_report_lot_label_2x7" model="ir.actions.report">
+            <field name="name">Lot/SN Labels 2x7 (PDF)</field>
+            <field name="model">stock.lot</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">purchase_lot_preassignment.report_lot_label_2x7</field>
+            <field name="report_file">purchase_lot_preassignment.report_lot_label_2x7</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="print_report_name">'Lot Labels 2x7 - %s' % object.name</field>
+        </record>
+
+        <!-- 4x7 Format Report -->
+        <record id="action_report_lot_label_4x7" model="ir.actions.report">
+            <field name="name">Lot/SN Labels 4x7 (PDF)</field>
+            <field name="model">stock.lot</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">purchase_lot_preassignment.report_lot_label_4x7</field>
+            <field name="report_file">purchase_lot_preassignment.report_lot_label_4x7</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="print_report_name">'Lot Labels 4x7 - %s' % object.name</field>
+        </record>
+
+        <!-- Stock Lot Label ZPL Report -->
+        <record id="label_lot_template" model="ir.actions.report">
+            <field name="name">Lot/SN Labels (ZPL)</field>
+            <field name="model">stock.lot</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">purchase_lot_preassignment.label_lot_zpl_template</field>
+            <field name="report_file">purchase_lot_preassignment.label_lot_zpl_template</field>
+            <field name="print_report_name">'Lot Labels ZPL - %s' % object.name</field>
+            <field name="binding_model_id" ref="stock.model_stock_lot"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

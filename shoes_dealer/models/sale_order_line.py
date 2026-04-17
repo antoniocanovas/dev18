@@ -1,13 +1,72 @@
 # Copyright 2023 Serincloud SL - Ingenieriacloud.com
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    purchase_line_id = fields.Many2one("purchase.order.line", string="Purchase line")
+    purchase_line_id = fields.Many2one("purchase.order.line", string="Purchase line", copy=False)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        for line in lines:
+            if (
+                line.product_id.is_assortment
+                and not line.purchase_line_id
+                and line.order_id.state in ("sale", "done")
+            ):
+                line.order_id.create_purchase_lines_for_custom_products()
+        return lines
+
+    def write(self, vals):
+        orders_to_regenerate = self.env["sale.order"]
+        orders_to_add_lots = self.env["sale.order"]
+
+        if "product_uom_qty" in vals:
+            new_qty = vals["product_uom_qty"]
+            for line in self:
+                if (
+                    line.purchase_line_id
+                    and line.product_id.is_assortment
+                    and line.state in ("sale", "done")
+                    and new_qty != line.product_uom_qty
+                ):
+                    po = line.purchase_line_id.order_id
+                    if po.state in ("purchase", "done"):
+                        if new_qty > line.product_uom_qty:
+                            raise UserError(
+                                _(
+                                    "La compra del producto '%s' ya fue confirmada. "
+                                    "Para incrementar la cantidad, añade una nueva línea en el presupuesto.\n\n"
+                                    "Recuerda que para introducir nuevas líneas del mismo producto si el pedido "
+                                    "está confirmado, el tipo de introducción de líneas ha de ser "
+                                    "\"Product configurator\", probablemente por defecto tienes \"Matrix Grid\" "
+                                    "al principio de la nueva línea; también es buena opción hacer un nuevo pedido.",
+                                    line.product_id.display_name,
+                                )
+                            )
+                        # qty menor con PO confirmada → no hacer nada
+                    else:
+                        # PO en borrador → actualizar cantidad en compra
+                        line.purchase_line_id.product_qty = new_qty
+                        if new_qty < line.product_uom_qty:
+                            orders_to_regenerate |= line.order_id
+                        else:
+                            orders_to_add_lots |= line.order_id
+
+        result = super().write(vals)
+
+        # Se ejecutan tras el write para que product_uom_qty ya tenga el valor nuevo
+        for order in orders_to_regenerate:
+            order._delete_unused_lots()
+            order.create_lots_for_sale_order()
+        for order in orders_to_add_lots:
+            order.create_lots_for_sale_order()
+
+        return result
 
     # Comercialmente en cada pedido quieren saber cuántos pares se han vendido:
     @api.depends("product_id", "product_uom_qty", "custom_assortment_pairs")
