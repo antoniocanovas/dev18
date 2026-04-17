@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="custom_navima_project_task_kanban" model="ir.ui.view">
+        <field name="name">custom.navima.project.task.kanban</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="default_order">priority desc, name asc</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
