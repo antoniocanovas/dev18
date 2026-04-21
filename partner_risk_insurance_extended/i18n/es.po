@@ -1,0 +1,158 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* partner_risk_insurance_extended
+#
+# Translators:
+# AvanzOSC, 2026
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-20 00:00+0000\n"
+"PO-Revision-Date: 2026-04-20 00:00+0000\n"
+"Last-Translator: AvanzOSC\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: partner_risk_insurance_extended
+#: model:ir.actions.act_window,name:partner_risk_insurance_extended.action_partner_risk
+#: model:ir.ui.menu,name:partner_risk_insurance_extended.menu_partner_risk
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_list
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Partner Risks"
+msgstr "Riesgos de empresa"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_list
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Partner"
+msgstr "Empresa"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_list
+msgid "Invoice Draft Risk"
+msgstr "Riesgo facturas borrador"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Include in Risk Monitoring"
+msgstr "Incluir en seguimiento de riesgo"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Sales Orders Risk"
+msgstr "Riesgo pedidos de venta"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Draft Invoice Risk"
+msgstr "Riesgo facturas borrador"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Open Invoice Risk"
+msgstr "Riesgo facturas abiertas"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Unpaid Invoice Risk"
+msgstr "Riesgo facturas impagadas"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Account Amount Risk"
+msgstr "Riesgo importe contable"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Account Unpaid Risk"
+msgstr "Riesgo impagos contables"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Payment Return Risk"
+msgstr "Riesgo devoluciones"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Risk Exception"
+msgstr "Excepción de riesgo"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Amount Exceeded"
+msgstr "Importe excedido"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Expired Insurance Contracts"
+msgstr "Contratos de seguro vencidos"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Credit Policy Company"
+msgstr "Compañía de póliza de crédito"
+
+#. module: partner_risk_insurance_extended
+#: model_terms:ir.ui.view,arch_db:partner_risk_insurance_extended.view_partner_risk_search
+msgid "Credit Policy State"
+msgstr "Estado de póliza de crédito"
+
+#. module: partner_risk_insurance_extended
+#: model:ir.model.fields,field_description:partner_risk_insurance_extended.field_res_partner__risk_insurance_end_date
+msgid "Insurance Contract End Date"
+msgstr "Fecha de fin del contrato de seguro"
+
+#. module: partner_risk_insurance_extended
+#: model:ir.model.fields,help:partner_risk_insurance_extended.field_res_partner__risk_insurance_end_date
+msgid ""
+"End date of the financial risk insurance contract with the insurer. When "
+"this date is reached, the insured credit limit is automatically set to zero."
+msgstr ""
+"Fecha de finalización del contrato de seguro de riesgo financiero con la "
+"aseguradora. Cuando se alcanza esta fecha, el límite de crédito asegurado "
+"se establece automáticamente a cero."
+
+#. module: partner_risk_insurance_extended
+#: model:ir.model.fields,field_description:partner_risk_insurance_extended.field_res_partner__risk_insurance_expired
+msgid "Insurance Expired"
+msgstr "Seguro vencido"
+
+#. module: partner_risk_insurance_extended
+#: model:ir.model.fields,field_description:partner_risk_insurance_extended.field_res_partner__risk_remaining_value_include
+msgid "Include in Risk Monitoring"
+msgstr "Incluir en seguimiento de riesgo"
+
+#. module: partner_risk_insurance_extended
+#: model:ir.model.fields,help:partner_risk_insurance_extended.field_res_partner__risk_remaining_value_include
+msgid "Automatically enabled when at least one risk type is set to be monitored."
+msgstr "Se activa automáticamente cuando al menos un tipo de riesgo está configurado para ser monitoreado."
+
+#. module: partner_risk_insurance_extended
+#: model:ir.cron,name:partner_risk_insurance_extended.cron_reset_expired_insurance_credit_limit
+msgid "Reset expired insurance credit limits"
+msgstr "Restablecer límites de crédito de seguros vencidos"
+
+#. module: partner_risk_insurance_extended
+#: code:addons/partner_risk_insurance_extended/models/res_partner.py:0
+#, python-format
+msgid ""
+"Insurance credit limit automatically reset to 0 "
+"(was %(old_insurance)s %(currency)s). Credit limit restored "
+"to company default because the insurance contract end date "
+"%(end_date)s has been reached."
+msgstr ""
+"Límite de crédito asegurado restablecido automáticamente a 0 "
+"(era %(old_insurance)s %(currency)s). Límite de crédito restaurado "
+"al valor por defecto de la compañía porque se ha alcanzado la fecha "
+"de finalización del contrato de seguro %(end_date)s."
