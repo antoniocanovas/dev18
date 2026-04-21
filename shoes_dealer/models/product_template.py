@@ -370,10 +370,14 @@ class ProductTemplate(models.Model):
                         pp.write({"lst_price": record.list_price * pp.pairs_count})
         return result
 
-    # Mantener el margen sincronizado con el surtido correspondiente:
-    @api.onchange("sale_margin")
+    # Mantener el margen sincronizado con el surtido correspondiente y actualizar
+    # el precio recomendado en tiempo real:
+    @api.onchange("sale_margin", "exwork")
     def update_set_sale_margin(self):
         for record in self:
+            record.recommended_sale_price = (
+                record.exwork + record.exwork * record.sale_margin / 100
+            )
             if record.product_tmpl_set_id:
                 record.product_tmpl_set_id.sale_margin = record.sale_margin
             if record.product_tmpl_single_id:
@@ -563,7 +567,6 @@ class ProductTemplate(models.Model):
                 for p in record.product_variant_ids:
                     p.create_set_bom()
 
-    @api.depends('exwork_euro', 'exwork_single_euro')
     def update_standard_price_on_variants(self):
         for record in self:
             # Caso de actualizar el precio desde el PAR:

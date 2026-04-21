@@ -1,7 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_purchase_lot_view_wizard_user,purchase.lot.view.wizard.user,model_purchase_lot_view_wizard,purchase.group_purchase_user,1,1,1,1
-access_purchase_lot_view_wizard_manager,purchase.lot.view.wizard.manager,model_purchase_lot_view_wizard,purchase.group_purchase_manager,1,1,1,1
-access_sale_lot_view_wizard_sale_user,sale.lot.view.wizard.sale.user,model_sale_lot_view_wizard,sales_team.group_sale_salesman,1,1,1,1
-access_sale_lot_view_wizard_sale_manager,sale.lot.view.wizard.sale.manager,model_sale_lot_view_wizard,sales_team.group_sale_manager,1,1,1,1
-access_sale_lot_view_wizard_stock_user,sale.lot.view.wizard.stock.user,model_sale_lot_view_wizard,stock.group_stock_user,1,1,1,1
-access_sale_lot_view_wizard_stock_manager,sale.lot.view.wizard.stock.manager,model_sale_lot_view_wizard,stock.group_stock_manager,1,1,1,1

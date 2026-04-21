@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vista de lista para la exportación de Stock Disponible -->
+        <record id="shoes_analysis_export_stock_available_list_view" model="ir.ui.view">
+            <field name="name">shoes.analysis.export.stock.available.list</field>
+            <field name="model">shoes.analysis.export</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="product_material_name" string="Model"/>
+                    <field name="product_name"/>
+                    <field name="assortment_name"/>
+                    <field name="pack_name"/>
+                    <field name="total_pairs"/>
+                </list>
+            </field>
+        </record>
+    </data>
+</odoo>

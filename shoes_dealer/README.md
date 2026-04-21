@@ -60,7 +60,12 @@ Catálogo de materiales con imagen y código.
    - **Campaña**, fabricante, material, horma, peso por par
    - **Exwork** (precio de fábrica del surtido) y **Exwork single** (precio del par)
    - **Shipping** (gastos de envío)
-   - **Margen** y precio recomendado (calculado)
+   - **Margen** (`sale_margin` en %) y **precio recomendado** (calculado en tiempo real)
+
+El precio recomendado se calcula como `exwork + exwork × margen / 100`. Si el módulo
+`shoes_intrastat_duty` está instalado, la base del cálculo pasa a ser el coste de
+aterrizaje estimado (exwork + arancel aduanero) en lugar del exwork directo. Ver README
+de ese módulo para más detalle.
 3. Ejecutar la acción **"Create shoe pairs"**. El sistema:
    - Crea el `product.template` del par con atributos de color y talla
    - Crea variantes del surtido (una por color × surtido)

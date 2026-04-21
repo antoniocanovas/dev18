@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <template id="report_delivery_document_inh_navima" inherit_id="stock.report_delivery_document" priority="999">
+
+        <xpath expr="//table/tbody//tr[1]//td[1]" position="inside">
+            <t t-if="move.sale_line_id.assortment_pair">
+                <table class="table table-bordered table-sm mt-2">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <!-- Cabecera con las tallas -->
+                            <t t-set="tallas" t-value="move.sale_line_id.assortment_pair.split(';')[0].split(',')"/>
+                            <t t-foreach="tallas" t-as="talla">
+                                <th t-esc="talla" class="border text-center"/>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="text-center">
+                            <!-- Fila con las cantidades -->
+                            <t t-set="cantidades" t-value="move.sale_line_id.assortment_pair.split(';')[1].split(',')"/>
+                            <t t-foreach="cantidades" t-as="cantidad">
+                                <td t-esc="cantidad" class="border text-center"/>
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+        </xpath>
+
+    </template>
+</odoo>
