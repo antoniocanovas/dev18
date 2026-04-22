@@ -430,6 +430,7 @@ class ProductTemplate(models.Model):
                 "Assign a campaign and manufacturer before pairs creation !!"
             )
         self.create_single_products()
+        self.update_standard_price_on_variants()
         # CÓDIGO DE SURTIDO O PAR:
         self.update_product_template_campaign_code()
         # REVISAR, TIENE UN DEPENDS:

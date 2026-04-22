@@ -62,57 +62,43 @@ class SaleOrder(models.Model):
             for li in record.order_line:
                 # Bug líneas de compra duplicadas:
                 if li.product_id.is_assortment and not li.purchase_line_id:
-                    seller = li.product_id._select_seller(
-                        quantity=li.product_uom_qty,
-                        date=record.date_order.date() if record.date_order else None,
-                        uom_id=li.product_uom,
-                    )
-                    if not seller:
+                    vendor = li.product_id.manufacturer_id
+                    if not vendor:
                         raise UserError(
                             _(
-                                "El producto '%s' no tiene proveedor asignado. "
-                                "Asígnalo en la pestaña 'Compras' del producto antes de confirmar el pedido.",
+                                "El producto '%s' no tiene fabricante asignado. "
+                                "Asígnalo en la ficha del producto antes de confirmar el pedido.",
                                 li.product_id.display_name,
                             )
                         )
-                    vendor = seller.partner_id
-                    price_unit = seller.price
+
+                    # Precio por surtido: exwork × pares por unidad de surtido
+                    if li.product_custom_attribute_value_ids:
+                        pairs_per_unit = li.custom_assortment_pairs
+                    else:
+                        pairs_per_unit = li.product_id.pairs_count
+                    price_unit = li.product_id.exwork * pairs_per_unit
+
                     draft_purchases = self.env["purchase.order"].search(
                         [("partner_id", "=", vendor.id), ("state", "=", "draft")]
                     )
-                    if draft_purchases.ids:
-                        po = draft_purchases[0]
-                    else:
-                        po = self.env["purchase.order"].create(
-                            {"partner_id": vendor.id}
+                    po = draft_purchases[0] if draft_purchases.ids else self.env[
+                        "purchase.order"
+                    ].create({"partner_id": vendor.id})
+
+                    pol_vals = {
+                        "order_id": po.id,
+                        "product_id": li.product_id.id,
+                        "sale_line_id": li.id,
+                        "name": li.name,
+                        "price_unit": price_unit,
+                        "product_qty": li.product_uom_qty,
+                    }
+                    if li.product_custom_attribute_value_ids:
+                        pol_vals["assortment_pair_id"] = (
+                            li.product_custom_attribute_value_ids[0].id
                         )
 
-                    # Líneas CON atributos personalizados
-                    if li.product_custom_attribute_value_ids.ids:
-                        assortment_pair = li.product_custom_attribute_value_ids[0]
-                        purchase_line = self.env["purchase.order.line"].create(
-                            {
-                                "order_id": po.id,
-                                "product_id": li.product_id.id,
-                                "sale_line_id": li.id,
-                                "name": li.name,
-                                "price_unit": price_unit,
-                                "product_qty": li.product_uom_qty,
-                                "assortment_pair_id": assortment_pair.id,
-                            }
-                        )
-                    # Líneas SIN atributos personalizados (línea normal)
-                    else:
-                        purchase_line = self.env["purchase.order.line"].create(
-                            {
-                                "order_id": po.id,
-                                "product_id": li.product_id.id,
-                                "sale_line_id": li.id,
-                                "name": li.name,
-                                "price_unit": price_unit,
-                                "product_qty": li.product_uom_qty,
-                            }
-                        )
-
+                    purchase_line = self.env["purchase.order.line"].create(pol_vals)
                     # Indicar en SOL para que no vuelva a crear el pedido:
                     li["purchase_line_id"] = purchase_line.id

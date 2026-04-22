@@ -50,8 +50,15 @@ class SaleOrderLine(models.Model):
                             )
                         # qty menor con PO confirmada → no hacer nada
                     else:
-                        # PO en borrador → actualizar cantidad en compra
-                        line.purchase_line_id.product_qty = new_qty
+                        # PO en borrador → actualizar cantidad y precio en compra
+                        if line.product_custom_attribute_value_ids:
+                            pairs_per_unit = line.custom_assortment_pairs
+                        else:
+                            pairs_per_unit = line.product_id.pairs_count
+                        line.purchase_line_id.write({
+                            "product_qty": new_qty,
+                            "price_unit": line.product_id.exwork * pairs_per_unit,
+                        })
                         if new_qty < line.product_uom_qty:
                             orders_to_regenerate |= line.order_id
                         else:
