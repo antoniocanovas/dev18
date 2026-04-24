@@ -43,9 +43,7 @@ class PurchaseContainer(models.Model):
         )
         if not pending_pickings:
             raise UserError(
-                _(
-                    'El proveedor "%s" no tiene albaranes de recepción pendientes.'
-                )
+                _('El proveedor "%s" no tiene albaranes de recepción pendientes.')
                 % self.shipping_agent_id.name
             )
 
@@ -54,4 +52,4 @@ class PurchaseContainer(models.Model):
 
     def _process_packing_list_update(self):
         """Split pickings and update container metrics. Implemented in Task 5."""
-        pass
+        raise NotImplementedError("_process_packing_list_update not yet implemented")
