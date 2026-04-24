@@ -6,6 +6,22 @@
         <field name="inherit_id" ref="purchase_container.purchase_container_view_form"/>
         <field name="arch" type="xml">
 
+            <!-- Packing List stat button in button_box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_view_packing_list"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-list"
+                >
+                    <field
+                        name="container_line_count"
+                        widget="statinfo"
+                        string="Packing List"
+                    />
+                </button>
+            </xpath>
+
             <!-- Update button before the Lock button -->
             <xpath expr="//header/button[@name='button_lock']" position="before">
                 <button
@@ -15,39 +31,6 @@
                     class="btn-primary"
                     invisible="state == 'locked'"
                 />
-            </xpath>
-
-            <!-- Packing List section after Purchase Orders group -->
-            <xpath expr="//field[@name='purchase_order_ids']/.." position="after">
-                <group>
-                    <separator string="Packing List" colspan="4"/>
-                    <field
-                        name="container_line_ids"
-                        colspan="4"
-                        nolabel="1"
-                        context="{'default_container_id': id}"
-                    >
-                        <list editable="bottom" import="1">
-                            <field name="lot"/>
-                            <field name="name" string="Product Ref."/>
-                            <field name="color"/>
-                            <field name="assortment"/>
-                            <field name="pairs"/>
-                            <field name="purchase_order"/>
-                            <field name="shippingmark"/>
-                            <field name="assortment_gross_weight"/>
-                            <field name="volume"/>
-                            <field name="move_id" readonly="1"/>
-                            <field name="shoes_campaign" optional="hide"/>
-                            <field name="pair_net_weight" optional="hide"/>
-                            <field name="pair_gross_weight" optional="hide"/>
-                            <field name="assortment_net_weight" optional="hide"/>
-                            <field name="high" optional="hide"/>
-                            <field name="width" optional="hide"/>
-                            <field name="length" optional="hide"/>
-                        </list>
-                    </field>
-                </group>
             </xpath>
 
         </field>

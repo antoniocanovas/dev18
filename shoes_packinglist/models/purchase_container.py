@@ -1,4 +1,4 @@
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -11,6 +11,26 @@ class PurchaseContainer(models.Model):
         string="Packing List",
         copy=False,
     )
+    container_line_count = fields.Integer(
+        compute="_compute_container_line_count",
+        string="Packing List Lines",
+    )
+
+    @api.depends("container_line_ids")
+    def _compute_container_line_count(self):
+        for rec in self:
+            rec.container_line_count = len(rec.container_line_ids)
+
+    def action_view_packing_list(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Packing List"),
+            "res_model": "purchase.container.line",
+            "view_mode": "list,form",
+            "domain": [("container_id", "=", self.id)],
+            "context": {"default_container_id": self.id},
+        }
 
     def action_update_from_packing_list(self):
         self.ensure_one()
