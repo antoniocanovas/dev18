@@ -217,14 +217,13 @@ class PurchaseContainer(models.Model):
                 lambda ml: ml.lot_id == lot and ml.state not in ("done", "cancel")
             ):
                 continue
-            qty = line.pairs if line.pairs > 0 else 1.0
             self.env["stock.move.line"].create(
                 {
                     "move_id": move.id,
                     "picking_id": move.picking_id.id,
                     "product_id": lot.product_id.id,
                     "lot_id": lot.id,
-                    "quantity": qty,
+                    "quantity": 1.0,
                     "product_uom_id": move.product_uom.id,
                     "location_id": move.location_id.id,
                     "location_dest_id": move.location_dest_id.id,
