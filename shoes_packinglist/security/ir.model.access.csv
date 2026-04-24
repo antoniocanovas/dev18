@@ -4,3 +4,4 @@ access_purchase_container_line_readonly,purchase.container.line readonly,model_p
 access_purchase_container_line_invoice,purchase.container.line invoice,model_purchase_container_line,account.group_account_invoice,1,1,0,0
 access_packing_list_warning_wizard,packing.list.warning.wizard,model_packing_list_warning_wizard,purchase.group_purchase_user,1,1,1,1
 access_packing_list_warning_line,packing.list.warning.line,model_packing_list_warning_line,purchase.group_purchase_user,1,1,1,1
+access_container_validate_wizard,container.validate.wizard,model_container_validate_wizard,purchase.group_purchase_user,1,1,1,1

@@ -12,6 +12,7 @@
     "data": [
         "security/ir.model.access.csv",
         "wizard/packing_list_warning_wizard_views.xml",
+        "wizard/container_validate_wizard_views.xml",
         "views/purchase_container_line_views.xml",
         "views/purchase_container_views.xml",
     ],

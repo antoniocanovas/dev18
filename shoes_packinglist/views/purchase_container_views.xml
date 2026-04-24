@@ -22,13 +22,20 @@
                 </button>
             </xpath>
 
-            <!-- Update button before the Lock button -->
+            <!-- Update + Validate buttons before the Lock button -->
             <xpath expr="//header/button[@name='button_lock']" position="before">
                 <button
                     name="action_update_from_packing_list"
                     type="object"
                     string="Update"
                     class="btn-primary"
+                    invisible="state == 'locked'"
+                />
+                <button
+                    name="action_open_validate_wizard"
+                    type="object"
+                    string="Validate"
+                    class="btn-secondary"
                     invisible="state == 'locked'"
                 />
             </xpath>

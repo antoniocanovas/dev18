@@ -21,6 +21,17 @@ class PurchaseContainer(models.Model):
         for rec in self:
             rec.container_line_count = len(rec.container_line_ids)
 
+    def action_open_validate_wizard(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Validar albaranes"),
+            "res_model": "container.validate.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_container_id": self.id},
+        }
+
     def action_view_packing_list(self):
         self.ensure_one()
         return {
