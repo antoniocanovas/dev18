@@ -78,9 +78,12 @@ class TestContainerO2M(PackingListCommon):
         self.assertIn(line, self.container.container_line_ids)
 
     def test_line_deleted_when_container_deleted(self):
+        local_container = self.env["purchase.container"].create(
+            {"code": "CONT_CASCADE", "shipping_agent_id": self.partner.id}
+        )
         line = self.env["purchase.container.line"].create(
-            {"container_id": self.container.id, "lot": "LOT001"}
+            {"container_id": local_container.id, "lot": "LOT001"}
         )
         line_id = line.id
-        self.container.unlink()
+        local_container.unlink()
         self.assertFalse(self.env["purchase.container.line"].browse(line_id).exists())

@@ -62,6 +62,7 @@ class PurchaseContainerLine(models.Model):
         _clean_char_fields(vals)
         return super().write(vals)
 
+    @api.depends("lot")
     def _compute_display_name(self):
         for record in self:
             record.display_name = record.lot or _("Container Line #%d") % record.id
