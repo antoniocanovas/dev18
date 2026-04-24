@@ -117,22 +117,25 @@ class PurchaseContainer(models.Model):
         if not processed_lines:
             return
 
-        matched_lot_names = set(processed_lines.mapped("lot"))
         involved_pickings = processed_lines.mapped("move_id.picking_id")
 
         for picking in involved_pickings:
+            picking_matched_lines = processed_lines.filtered(
+                lambda l: l.move_id.picking_id == picking
+            )
+            picking_matched_lot_names = set(picking_matched_lines.mapped("lot"))
             all_mls = picking.move_line_ids.filtered(
                 lambda ml: ml.state not in ("done", "cancel")
             )
             matched_mls = all_mls.filtered(
-                lambda ml: ml.lot_id and ml.lot_id.name in matched_lot_names
+                lambda ml: ml.lot_id and ml.lot_id.name in picking_matched_lot_names
             )
             remaining_mls = all_mls - matched_mls
 
             if not remaining_mls:
                 picking.container_id = self.id
             else:
-                self._split_picking(picking, matched_mls, remaining_mls)
+                self._split_picking(picking, remaining_mls)
                 picking.container_id = self.id
 
         # Update container metrics
@@ -140,7 +143,7 @@ class PurchaseContainer(models.Model):
         self.volume = sum(processed_lines.mapped("volume"))
         self.package_qty = len(processed_lines)
 
-    def _split_picking(self, picking, matched_mls, remaining_mls):
+    def _split_picking(self, picking, remaining_mls):
         """
         Move remaining_mls to a new backorder picking.
         Splits stock.move records when only some of their lines go to the backorder.
@@ -165,9 +168,8 @@ class PurchaseContainer(models.Model):
                 lambda ml: ml.state not in ("done", "cancel")
             )
             if len(all_move_mls) == len(rem_lines):
-                # All lines of this move go to backorder
+                # All lines of this move go to backorder — move the move; lines follow
                 move.write({"picking_id": backorder.id})
-                rem_lines.write({"picking_id": backorder.id})
             else:
                 # Partial: create new move in backorder for remaining lines
                 remaining_qty = sum(rem_lines.mapped("quantity"))
