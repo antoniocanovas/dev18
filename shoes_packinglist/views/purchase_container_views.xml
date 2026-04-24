@@ -25,7 +25,7 @@
                         name="container_line_ids"
                         colspan="4"
                         nolabel="1"
-                        context="{'default_container_id': active_id}"
+                        context="{'default_container_id': id}"
                     >
                         <list editable="bottom" import="1">
                             <field name="lot"/>
