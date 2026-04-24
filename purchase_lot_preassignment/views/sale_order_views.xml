@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_form_view_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Añadir el botón en el header después del botón de confirmar -->
+            <xpath expr="//button[@name='action_confirm']" position="after">
+                <button type="object"
+                        name="action_view_associated_lots"
+                        string="Ver Lotes"
+                        class="btn-secondary"
+                        invisible="state != 'sale'">
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

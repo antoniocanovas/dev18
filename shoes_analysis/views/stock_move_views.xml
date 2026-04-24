@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         VISTA LIST
+    ================================================================ -->
+    <record id="view_stock_full_list" model="ir.ui.view">
+        <field name="name">stock.move.shoes.full.list</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <list string="Servicio clientes (reservado, disponible y previsto)"
+                  decoration-info="is_mto == True"
+                  decoration-success="is_mto == False and state == 'assigned'"
+                  decoration-muted="state in ('cancel', 'draft')">
+
+                <field name="warehouse_id" optional="hide"/>
+                <field name="product_id" optional="show"/>
+                <field name="location_id" string="Origen" optional="show"/>
+                <field name="location_dest_id" string="Destino" optional="show"/>
+                <field name="partner_id" string="Cliente" optional="hide"/>
+                <field name="picking_id" string="Albarán" optional="hide"/>
+                <field name="sale_id" string="Pedido venta" optional="show"/>
+                <field name="purchase_id" string="Orden compra" optional="show"/>
+                <field name="is_mto" string="MTO" optional="hide" widget="boolean"/>
+                <field name="is_for_own_stock" string="Para stock" optional="hide" widget="boolean"/>
+                <field name="product_uom_qty" string="Demanda" optional="show"/>
+                <field name="shoes_reserved_qty" string="Reservado" optional="show"/>
+                <field name="shoes_qty_available" string="Disponible" optional="show"
+                       decoration-danger="shoes_qty_available &lt; 0"/>
+                <field name="shoes_qty_forecasted" string="Pronosticado" optional="show"
+                       decoration-danger="shoes_qty_forecasted &lt; 0"/>
+                <field name="date" string="Fecha Prevista" optional="hide"/>
+                <field name="date_deadline"
+                       string="Fecha Límite Cliente"
+                       widget="remaining_days"
+                       optional="show"/>
+                <field name="state"
+                       string="Estado"
+                       widget="badge"
+                       decoration-success="state == 'assigned'"
+                       decoration-info="state in ('confirmed', 'waiting', 'partially_available')"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'cancel'"
+                       optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         VISTA FORM
+    ================================================================ -->
+    <record id="view_stock_full_form" model="ir.ui.view">
+        <field name="name">stock.move.shoes.full.form</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <form string="Movimiento de stock" create="false" delete="false">
+                <header>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="confirmed,assigned,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="product_id" string="Producto"/>
+                        <h1>
+                            <field name="product_id" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Cantidades">
+                            <field name="product_uom_qty" string="Demanda" readonly="1"/>
+                            <field name="shoes_reserved_qty" string="Reservado" readonly="1"/>
+                            <field name="is_mto" string="Bajo Pedido (MTO)" readonly="1"/>
+                            <field name="is_for_own_stock" string="Para stock propio" readonly="1"/>
+                            <field name="warehouse_id" readonly="1"/>
+                        </group>
+                        <group string="Ubicaciones">
+                            <field name="location_id" string="Origen" readonly="1"/>
+                            <field name="location_dest_id" string="Destino" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Cliente y fechas">
+                            <field name="partner_id" string="Cliente" readonly="1"/>
+                            <field name="date" string="Fecha Prevista" readonly="1"/>
+                            <field name="date_deadline" string="Fecha Límite Cliente" readonly="1"/>
+                        </group>
+                        <group string="Documentos">
+                            <field name="picking_id" string="Albarán" readonly="1"/>
+                            <field name="sale_id" string="Pedido de venta" readonly="1"/>
+                            <field name="purchase_id" string="Orden de compra" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         VISTA SEARCH
+    ================================================================ -->
+    <record id="view_stock_full_search" model="ir.ui.view">
+        <field name="name">stock.move.shoes.full.search</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <search string="Buscar movimientos de stock">
+
+                <field name="product_id" string="Producto"/>
+                <field name="partner_id" string="Cliente"/>
+                <field name="picking_id" string="Albarán"/>
+                <field name="sale_id" string="Pedido de venta"/>
+                <field name="purchase_id" string="Orden de compra"/>
+                <field name="warehouse_id" string="Almacén"/>
+                <field name="location_id" string="Ubicación Origen"/>
+                <field name="location_dest_id" string="Ubicación Destino"/>
+
+                <!-- Filtro por defecto: solo calzado -->
+                <filter name="filter_shoes_products"
+                        string="Surtidos y pares"
+                        domain="['|', ('product_id.is_assortment', '=', True), ('product_id.is_pair', '=', True)]"/>
+
+                <separator/>
+
+                <!-- Estado: salidas (stock reservado para clientes) -->
+                <filter name="filter_assigned_move"
+                        string="Productos para servir"
+                        domain="[('state', '=', 'assigned'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
+                <filter name="filter_assigned_picking"
+                        string="Albaranes para servir"
+                        domain="[('picking_id.state', '=', 'assigned'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
+                <filter name="filter_partially"
+                        string="Parcialmente disponibles"
+                        domain="[('state', '=', 'partially_available'),
+                                 ('location_dest_id.usage', '=', 'customer')]"/>
+
+                <separator/>
+
+                <!-- Estado: entradas (material pendiente de recibir) -->
+                <filter name="filter_incoming_for_customer"
+                        string="Recibir para clientes"
+                        domain="[('location_id.usage', '=', 'supplier'),
+                                 ('is_for_own_stock', '=', False)]"/>
+                <filter name="filter_incoming_for_stock"
+                        string="Recibir para stock"
+                        domain="[('location_id.usage', '=', 'supplier'),
+                                 ('is_for_own_stock', '=', True)]"/>
+
+                <separator/>
+
+                <!-- Tipo de compra -->
+                <filter name="filter_mto"
+                        string="Bajo Pedido (MTO)"
+                        domain="[('is_mto', '=', True)]"/>
+                <filter name="filter_not_mto"
+                        string="Reposición normal (MTS)"
+                        domain="[('is_mto', '=', False)]"/>
+                <filter name="filter_has_partner"
+                        string="Con cliente asignado"
+                        domain="[('partner_id', '!=', False)]"/>
+
+                <separator/>
+
+                <!-- Tipo de origen -->
+                <filter name="filter_from_supplier"
+                        string="Procedente de proveedor"
+                        domain="[('location_id.usage', '=', 'supplier')]"/>
+                <filter name="filter_from_customer"
+                        string="Devolución de cliente"
+                        domain="[('location_id.usage', '=', 'customer')]"/>
+                <filter name="filter_internal_transfer"
+                        string="Traslado interno"
+                        domain="[('location_id.usage', '=', 'internal'),
+                                 ('location_dest_id.usage', '=', 'internal')]"/>
+
+                <separator/>
+
+                <!-- Fechas -->
+                <filter name="filter_deadline_today"
+                        string="Vence hoy"
+                        domain="[('date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59')),
+                                 ('date_deadline', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter name="filter_deadline_overdue"
+                        string="Fecha límite vencida"
+                        domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_partner"
+                            string="Cliente"
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_product"
+                            string="Producto"
+                            context="{'group_by': 'product_id'}"/>
+                    <filter name="group_location"
+                            string="Ubicación Origen"
+                            context="{'group_by': 'location_id'}"/>
+                    <filter name="group_warehouse"
+                            string="Almacén"
+                            context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_location_dest"
+                            string="Ubicación Destino"
+                            context="{'group_by': 'location_dest_id'}"/>
+                    <filter name="group_state"
+                            string="Estado"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_sale"
+                            string="Pedido de venta"
+                            context="{'group_by': 'sale_id'}"/>
+                    <filter name="group_purchase"
+                            string="Orden de compra"
+                            context="{'group_by': 'purchase_id'}"/>
+                    <filter name="group_is_mto"
+                            string="MTO / MTS"
+                            context="{'group_by': 'is_mto'}"/>
+                    <filter name="group_for_stock"
+                            string="Para stock / Para cliente"
+                            context="{'group_by': 'is_for_own_stock'}"/>
+                    <filter name="group_deadline"
+                            string="Fecha Límite"
+                            context="{'group_by': 'date_deadline:week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         ACCIÓN
+    ================================================================ -->
+    <record id="action_stock_full" model="ir.actions.act_window">
+        <field name="name">Servicio clientes (reservado, disponible y previsto)</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stock_full_search"/>
+        <field name="domain">[
+            ('state', 'in', ['confirmed', 'waiting', 'partially_available', 'assigned']),
+            ('location_id.usage', 'in', ['supplier', 'customer', 'internal', 'transit']),
+            '|',
+                ('location_dest_id.usage', 'in', ['internal', 'transit']),
+                ('location_dest_id.usage', '=', 'customer')
+        ]</field>
+        <field name="context">{
+            'search_default_filter_shoes_products': 1,
+            'group_by': ['partner_id']
+        }</field>
+    </record>
+
+    <!-- Vinculación explícita de vistas a la acción -->
+    <record id="action_stock_full_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stock_full_list"/>
+        <field name="act_window_id" ref="action_stock_full"/>
+    </record>
+
+    <record id="action_stock_full_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stock_full_form"/>
+        <field name="act_window_id" ref="action_stock_full"/>
+    </record>
+
+</odoo>

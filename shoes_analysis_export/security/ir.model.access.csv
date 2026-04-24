@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_shoes_analysis_export_user,access.shoes.analysis.export.user,model_shoes_analysis_export,base.group_user,1,1,1,1

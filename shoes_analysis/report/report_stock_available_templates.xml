@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_stock_available_title" inherit_id="shoes_analysis.report_shoes_analysis_template">
+        <xpath expr="//div[hasclass('text-center')]/h3" position="replace">
+            <h3 t-if="doc.type != 'stock_available'">
+                <span t-field="doc.type"/>
+            </h3>
+            <h1 t-if="doc.type == 'stock_available'">
+                <strong>Available stock</strong>
+                <t t-if="doc.shoes_campaign_id">
+                    - <span t-esc="doc.shoes_campaign_id.name"/>
+                </t>
+                <t t-if="doc.pricelist_id">
+                    - <span t-esc="doc.pricelist_id.name"/>
+                </t>
+            </h1>
+        </xpath>
+    </template>
+</odoo>

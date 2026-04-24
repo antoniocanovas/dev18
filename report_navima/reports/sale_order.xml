@@ -1,0 +1,287 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <template id="report_saleorder_inh_navima" inherit_id="sale.report_saleorder_document" priority="999">
+
+        <!-- Hacer invisible el bloque original de doc.partner_id -->
+        <xpath expr="//t[@t-set='address']/div[@t-field='doc.partner_id']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Ocultar el párrafo del VAT del partner_id -->
+        <xpath expr="//t[@t-set='address']/p[@t-if='doc.partner_id.vat']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <!-- Añadir el bloque de Shipping Address con cabecera en el mismo lugar -->
+        <xpath expr="//t[@t-set='address']/div[@t-field='doc.partner_id']" position="after">
+            <strong>Shipping Address</strong>
+            <div t-field="doc.partner_shipping_id"
+                 t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+        </xpath>
+
+        <!-- Ocultar solo el bloque de Shipping Address dentro del information_block -->
+        <xpath expr="//t[@t-set='information_block']//strong[@class='d-block mt-3']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <xpath expr="//t[@t-set='information_block']//div[@t-field='doc.partner_shipping_id']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <!-- Aplicar tamaño de letra 12px a la tabla principal -->
+        <xpath expr="//table[hasclass('o_main_table')]" position="attributes">
+            <attribute name="style">font-size: 12px;</attribute>
+        </xpath>
+
+        <!-- Añadir columna "Num pares" después de Quantity -->
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th name="th_num_pares" class="text-end text-nowrap">Num pares</th>
+        </xpath>
+
+        <!-- Añadir columna "Pares" después de Num pares -->
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th name="th_pares" class="text-end text-nowrap">Pares</th>
+        </xpath>
+
+        <!-- Añadir columna "Tallas" en el thead -->
+        <xpath expr="//th[@name='th_priceunit']" position="before">
+            <th name="th_assortment" class="text-center">Tallas</th>
+        </xpath>
+
+
+
+        <!-- Añadir columna "Tallas" en el tbody -->
+        <xpath expr="//td[@name='td_priceunit']" position="before">
+            <td t-if="not line.display_type and line.product_template_id.is_assortment" name="td_assortment" class="text-center">
+                <t t-if="line.assortment_pair">
+                    <table class="table table-sm mb-0" style="background-color: transparent;">
+                        <thead>
+                            <tr>
+                                <!-- Cabecera con las tallas -->
+                                <t t-set="tallas" t-value="line.assortment_pair.split(';')[0].split(',')"/>
+                                <t t-foreach="tallas" t-as="talla">
+                                    <th t-esc="talla"
+                                        class="text-center"
+                                        style="background-color: #e9ecef;
+                                                   color: #495057;
+                                                   font-weight: 600;
+                                                   font-size: 11px;
+                                                   padding: 6px 8px;
+                                                   border: 1px solid #dee2e6;
+                                                   border-radius: 4px;"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!-- Fila con las cantidades -->
+                                <t t-set="cantidades" t-value="line.assortment_pair.split(';')[1].split(',')"/>
+                                <t t-foreach="cantidades" t-as="cantidad">
+                                    <td t-esc="cantidad"
+                                        class="text-center"
+                                        style="background-color: #ffffff;
+                                                   color: #212529;
+                                                   font-weight: 500;
+                                                   font-size: 11px;
+                                                   padding: 6px 8px;
+                                                   border: 1px solid #dee2e6;
+                                                   border-radius: 4px;"/>
+                                </t>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+            </td>
+            <td t-if="not line.display_type and not line.product_template_id.is_assortment" name="td_assortment" class="text-center">
+            </td>
+        </xpath>
+
+        <!-- Añadir columna "Num pares" después de Quantity -->
+        <xpath expr="//td[@name='td_quantity']" position="after">
+            <td t-if="not line.display_type and line.product_template_id.is_assortment" name="td_num_pares" class="text-end text-nowrap">
+                <span t-if="line.pairs_count" t-field="line.pairs_count">0</span>
+            </td>
+            <td t-if="not line.display_type and not line.product_template_id.is_assortment" name="td_pares" class="text-end text-nowrap">
+                <span>0</span>
+            </td>
+        </xpath>
+
+        <!-- Añadir columna "Pares" después de Quantity -->
+        <xpath expr="//td[@name='td_quantity']" position="after">
+            <td t-if="not line.display_type and line.product_template_id.is_assortment" name="td_pares" class="text-end text-nowrap">
+                <span t-if="line.pairs_count" t-esc="line.pairs_count / 2">0</span>
+            </td>
+            <td t-if="not line.display_type and not line.product_template_id.is_assortment" name="td_pares" class="text-end text-nowrap">
+                <span>0</span>
+            </td>
+        </xpath>
+        <!-- Sustituir cantidad por cantidad int() -->
+        <xpath expr="//span[@t-field='line.product_uom_qty']" position="replace">
+            <span t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else line.product_uom_qty"
+                  class="text-nowrap"/>
+        </xpath>
+        <!-- Añadir columna "Precio par" después de Quantity en thead -->
+        <xpath expr="//th[@name='th_assortment']" position="after">
+            <th name="th_precio_pares" class="text-end text-nowrap">Precio</th>
+        </xpath>
+        <!-- Heredar th de precio unitario y cambiar texto a "Precio caja" -->
+        <xpath expr="//th[@name='th_priceunit']" position="replace">
+            <th name="th_priceunit" class="text-end text-nowrap">Precio caja</th>
+        </xpath>
+        <xpath expr="//td[@name='td_priceunit']" position="before">
+            <td t-if="line.product_template_id.is_assortment"
+                name="td_num_pares" class="text-end text-nowrap">
+                <span t-esc="line.price_unit / line.pairs_count"
+                      t-options="{'widget': 'float', 'precision': 2}">0</span>
+            </td>
+            <td t-if="not line.product_template_id.is_assortment"
+                name="td_num_pares" class="text-end text-nowrap">
+                <span t-esc="line.price_unit"
+                      t-options="{'widget': 'float', 'precision': 2}"/>
+            </td>
+        </xpath>
+
+
+        <!-- Ocultar la unidad de medida en la columna de cantidad -->
+        <xpath expr="//td[@name='td_quantity']/span[@t-field='line.product_uom']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Ocultar el packaging en la columna de cantidad -->
+        <xpath expr="//td[@name='td_quantity']/span[@t-if='line.product_packaging_id']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Ocultar columna de impuestos en el thead -->
+        <xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Ocultar columna de impuestos en el tbody -->
+        <xpath expr="//td[@name='td_taxes']" position="attributes">
+            <attribute name="t-if">1==0</attribute>
+        </xpath>
+
+        <!-- Hacer invisible el nombre original del producto -->
+        <xpath expr="//td[@name='td_name']/span[@t-field='line.name']" position="attributes">
+            <attribute name="t-if">not (line.product_template_id.is_pair or line.product_template_id.is_assortment)</attribute>
+        </xpath>
+
+        <!-- Añadir el nombre personalizado: [shoes_model_material] + categ_id.name - product_brand_id.name - color_value_id.name -->
+        <xpath expr="//td[@name='td_name']/span[@t-field='line.name']" position="after">
+            <span>
+                <t t-if="line.product_template_id.is_pair or line.product_template_id.is_assortment">
+                    <t t-if="line.product_id.shoes_model_material">[<t t-esc="line.product_id.shoes_model_material"/>] </t>
+                    <t t-if="line.product_id.categ_id" t-esc="line.product_id.categ_id.name"/>
+                    <t t-if="line.product_id.product_brand_id">
+                        <t t-esc="line.product_id.product_brand_id.name"/>
+                    </t>
+                    <t t-if="line.product_id.color_value_id">
+                        <t t-if="line.product_id.categ_id or line.product_id.product_brand_id"> - </t>
+                        <t t-esc="line.product_id.color_value_id.name"/>
+                    </t>
+                </t>
+            </span>
+        </xpath>
+
+        <!-- Añadir fecha de entrega y de cancelacion después de la fecha de pedido -->
+        <xpath expr="//div[@id='informations']/div[@name='informations_date']" position="after">
+            <div t-if="doc.commitment_date" class="col" name="informations_delivery_date">
+                <strong>Fecha de entrega</strong>
+                <div t-field="doc.commitment_date" t-options='{"widget": "date"}'>2023-12-31</div>
+            </div>
+            <div t-if="doc.date_cancellation_limit" class="col" name="informations_date_cancellation_limit">
+                <strong>Fecha de cancelación</strong>
+
+                <div t-field="doc.date_cancellation_limit" t-options='{"widget": "date"}'>2023-12-31</div>
+            </div>
+        </xpath>
+
+
+        <!-- Ocultar el campo comercial original -->
+        <xpath expr="//div[@id='informations']//div[@t-field='doc.user_id']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Añadir campo comercial personalizado con nombre, teléfono y email -->
+        <xpath expr="//div[@id='informations']//div[@t-field='doc.user_id']" position="after">
+            <div>
+                <span t-field="doc.user_id.name"/>
+                <t t-if="doc.user_id.phone">
+                    <br/><span t-field="doc.user_id.phone"/>
+                </t>
+                <t t-if="doc.user_id.email">
+                    <br/><span t-field="doc.user_id.email"/>
+                </t>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@id='informations']" position="before">
+            <!-- Mostrar etiquetas imprimibles si existen -->
+            <div t-if="doc.partner_invoice_id.printed_label_ids" class="row mb-3" name="printed_labels_section">
+                <div class="col-12">
+                    <div class="mt-2">
+                        <t t-foreach="doc.partner_invoice_id.printed_label_ids" t-as="label">
+                            <!-- Colores exactos de Odoo basados en el índice -->
+                            <t t-set="odoo_colors" t-value="['#a2a2a2', '#ee2d2d', '#dc8534', '#e8bb1d', '#5794dd', '#9f628f', '#db8865', '#41a9a2', '#304be0', '#ee2f8a', '#61c36e', '#9872e6']"/>
+                            <t t-set="color_hex" t-value="odoo_colors[label.color] if label.color and label.color &lt; len(odoo_colors) else '#a2a2a2'"/>
+                            <span class="text-white"
+                                  t-attf-style="background-color: #{color_hex};
+                                                border: 1px solid #{color_hex};
+                                                padding: 4px 12px;
+                                                margin: 2px 4px 2px 0;
+                                                border-radius: 15px;
+                                                font-size: 11px;
+                                                font-weight: 500;
+                                                display: inline-block;
+                                                line-height: 1.2;">
+                                <t t-out="label.name"/>
+                            </span>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+
+    <!-- Ocultar la tabla de matriz de productos del módulo sale_product_matrix -->
+    <template id="hide_product_matrix_table" inherit_id="sale_product_matrix.grid_report_saleorder_inherit" priority="1000">
+        <xpath expr="//t[@t-call='product_matrix.matrix']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+    </template>
+
+    <!-- Cambiar la forma de mostrar la imagen del producto en sale_product_image -->
+    <template id="change_product_image_display" inherit_id="sale_product_image.report_saleorder_inherit" priority="1000">
+        <!-- Ocultar el th original de la imagen que añade sale_product_image (está después de th_description) -->
+        <xpath expr="//th[@name='th_description']/following-sibling::th[1]" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Ocultar el td original de la imagen -->
+        <xpath expr="//t[@t-foreach='lines_to_report']//td[@name='td_name']/following-sibling::td[1]" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Añadir columna de imagen ANTES de td_name en thead -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <t t-if="request.env['ir.config_parameter'].sudo().get_param('sale_product_image.is_show_product_image_in_sale_report')">
+                <th name="th_image">
+                    <strong>Image</strong>
+                </th>
+            </t>
+        </xpath>
+
+        <!-- Añadir columna de imagen ANTES de td_name en tbody -->
+        <xpath expr="//td[@name='td_name']" position="before">
+            <t t-if="request.env['ir.config_parameter'].sudo().get_param('sale_product_image.is_show_product_image_in_sale_report')">
+                <td name="td_image" style="height:100px !important;width:100px !important;">
+                    <img t-if="line.order_line_image" t-att-src="image_data_uri(line.order_line_image)" style="max-width: 100px; max-height: 100px;"/>
+                </td>
+            </t>
+        </xpath>
+    </template>
+
+
+</odoo>

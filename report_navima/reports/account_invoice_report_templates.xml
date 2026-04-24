@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia para añadir etiquetas imprimibles en informes de factura -->
+    <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <!-- Añadir etiquetas imprimibles antes del div informations -->
+        <xpath expr="//div[@id='informations']" position="before">
+            <!-- Mostrar etiquetas imprimibles si existen -->
+            <div t-if="o.partner_id.printed_label_ids" class="row mb-3" name="printed_labels_section">
+                <div class="col-12">
+                    <div class="mt-2">
+                        <t t-foreach="o.partner_id.printed_label_ids" t-as="label">
+                            <!-- Colores exactos de Odoo basados en el índice -->
+                            <t t-set="odoo_colors" t-value="['#a2a2a2', '#ee2d2d', '#dc8534', '#e8bb1d', '#5794dd', '#9f628f', '#db8865', '#41a9a2', '#304be0', '#ee2f8a', '#61c36e', '#9872e6']"/>
+                            <t t-set="color_hex" t-value="odoo_colors[label.color] if label.color and label.color &lt; len(odoo_colors) else '#a2a2a2'"/>
+                            <span class="text-white"
+                                  t-attf-style="background-color: #{color_hex};
+                                                border: 1px solid #{color_hex};
+                                                padding: 4px 12px;
+                                                margin: 2px 4px 2px 0;
+                                                border-radius: 15px;
+                                                font-size: 11px;
+                                                font-weight: 500;
+                                                display: inline-block;
+                                                line-height: 1.2;">
+                                <t t-out="label.name"/>
+                            </span>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+        <!-- Aplicar tamaño de letra 12px a la tabla principal de facturas -->
+        <xpath expr="//table[hasclass('o_main_table')]" position="attributes">
+            <attribute name="style">font-size: 12px;</attribute>
+        </xpath>
+
+        <!-- Añadir columna de imagen ANTES de th_description en thead -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_image">
+                <strong>Image</strong>
+            </th>
+        </xpath>
+
+        <!-- Añadir columna de imagen ANTES de account_invoice_line_name en tbody -->
+        <xpath expr="//td[@name='account_invoice_line_name']" position="before">
+            <td t-if="line.display_type == 'product'" name="td_image" style="height:100px !important;width:100px !important;">
+                <img t-if="line.product_id.image_128" t-att-src="image_data_uri(line.product_id.image_128)" style="max-width: 100px; max-height: 100px;"/>
+            </td>
+            <td t-if="line.display_type != 'product'" name="td_image">
+            </td>
+        </xpath>
+
+        <!-- Añadir columna "Intrastat code" después de description en thead -->
+        <xpath expr="//th[@name='th_description']" position="after">
+            <th name="th_intrastat_code" class="text-center">Intrastat code</th>
+        </xpath>
+
+        <!-- Añadir columna "Num pares" después de Quantity en thead -->
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th name="th_num_pares" class="text-end text-nowrap">Total pares</th>
+            <th name="th_num_pares" class="text-end text-nowrap">Precio</th>
+        </xpath>
+
+        <!-- Añadir columna "Cant/caja" después de Quantity en thead -->
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th name="th_pares" class="text-end text-nowrap">Cant/caja</th>
+        </xpath>
+
+        <!-- Añadir columna "Tallas" después de Quantity en el thead -->
+        <xpath expr="//th[@name='th_quantity']" position="after">
+            <th name="th_assortment" class="text-center">Tallas</th>
+        </xpath>
+
+        <!-- Añadir columna "Intrastat code" después de description en tbody -->
+        <xpath expr="//td[@name='account_invoice_line_name']" position="after">
+            <td t-if="line.display_type == 'product'" name="td_intrastat_code" class="text-center">
+                <span t-if="line.product_id.intrastat_duty_id.intrastat_id.code" t-esc="line.product_id.intrastat_duty_id.intrastat_id.code"/>
+            </td>
+            <td t-if="line.display_type != 'product'" name="td_intrastat_code" class="text-center">
+            </td>
+        </xpath>
+
+        <!-- Añadir columna "Num pares" después de Quantity en tbody -->
+        <xpath expr="//td[@name='td_quantity']" position="after">
+            <td t-if="line.display_type == 'product' and line.product_id.product_tmpl_id.is_assortment" name="td_num_pares" class="text-end text-nowrap">
+                <t t-if="line.sale_line_ids and line.sale_line_ids[0].pairs_count">
+                    <span t-esc="line.sale_line_ids[0].pairs_count * line.quantity">0</span>
+                </t>
+            </td>
+            <td t-if="line.display_type == 'product' and not line.product_id.product_tmpl_id.is_assortment" name="td_num_pares" class="text-end text-nowrap">
+                <span>0</span>
+            </td>
+            <td t-if="line.display_type == 'product' and line.product_id.product_tmpl_id.is_assortment" name="td_num_pares" class="text-end text-nowrap">
+                <t t-if="line.sale_line_ids and line.sale_line_ids[0].pairs_count > 0">
+                    <span t-esc="line.price_unit / line.sale_line_ids[0].pairs_count">0</span>
+                </t>
+            </td>
+            <td t-if="line.display_type == 'product' and not line.product_id.product_tmpl_id.is_assortment" name="td_num_pares" class="text-end text-nowrap">
+                <span t-esc="line.price_unit "></span>
+            </td>
+        </xpath>
+
+        <!-- Añadir columna "Cant/caja" después de Quantity en tbody -->
+        <xpath expr="//td[@name='td_quantity']" position="after">
+            <td t-if="line.display_type == 'product' and line.product_id.product_tmpl_id.is_assortment" name="td_pares" class="text-end text-nowrap">
+                <t t-if="line.sale_line_ids and line.sale_line_ids[0].pairs_count">
+                    <span t-esc="line.sale_line_ids[0].pairs_count">0</span>
+                </t>
+            </td>
+            <td t-if="line.display_type == 'product' and not line.product_id.product_tmpl_id.is_assortment" name="td_pares" class="text-end text-nowrap">
+                <span>0</span>
+            </td>
+        </xpath>
+
+        <!-- Sustituir cantidad por entero si la cantidad no es float -->
+        <xpath expr="//span[@t-field='line.quantity']" position="replace">
+            <span t-out="int(line.quantity) if line.quantity == int(line.quantity) else line.quantity"
+                  class="text-nowrap"/>
+        </xpath>
+
+        <!-- Añadir columna "Tallas" después de Quantity en el tbody -->
+        <xpath expr="//td[@name='td_quantity']" position="after">
+            <td t-if="line.display_type == 'product'" name="td_assortment" class="text-center" style="font-size: 10px;">
+                <!-- Get move lines with lots from sale order moves -->
+                <t t-if="line.sale_line_ids">
+                    <t t-set="all_move_lines" t-value="line.sale_line_ids.mapped('move_ids.move_line_ids').filtered(lambda ml: ml.lot_id and ml.lot_id.assortment_pair and ml.state == 'done')"/>
+
+                    <t t-if="all_move_lines">
+                        <!-- Group by assortment_pair pattern instead of lot -->
+                        <t t-set="pattern_dict" t-value="{}"/>
+                        <t t-foreach="all_move_lines" t-as="ml">
+                            <t t-set="pattern_key" t-value="ml.lot_id.assortment_pair"/>
+                            <t t-if="pattern_key not in pattern_dict">
+                                <t t-set="pattern_dict" t-value="pattern_dict.update({pattern_key: 1}) or pattern_dict"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="pattern_dict" t-value="pattern_dict.update({pattern_key: pattern_dict[pattern_key] + 1}) or pattern_dict"/>
+                            </t>
+                        </t>
+
+                        <!-- Display one table per unique pattern with multiplied quantities -->
+                        <t t-foreach="pattern_dict.items()" t-as="pattern_item">
+                            <t t-set="assortment_pair" t-value="pattern_item[0]"/>
+                            <t t-set="lot_count" t-value="pattern_item[1]"/>
+
+                            <div t-if="pattern_item_index > 0" style="border-top: 1px dashed #999; margin: 3px 0;"/>
+                            <table class="table table-bordered table-sm" style="margin: 0 auto; max-width: 250px; font-size: 9px;">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <t t-set="lot_assortment" t-value="assortment_pair.split(';')"/>
+                                        <t t-if="len(lot_assortment) >= 1">
+                                            <t t-set="tallas" t-value="lot_assortment[0].split(',')"/>
+                                            <t t-foreach="tallas" t-as="talla">
+                                                <th t-esc="talla.strip()" class="border text-center" style="padding: 1px 3px;"/>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="text-center">
+                                        <t t-if="len(lot_assortment) >= 2">
+                                            <t t-set="cantidades" t-value="lot_assortment[1].split(',')"/>
+                                            <t t-foreach="cantidades" t-as="cantidad">
+                                                <td t-esc="int(cantidad.strip())" class="border text-center" style="padding: 1px 3px;"/>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <small class="text-muted">-</small>
+                    </t>
+                </t>
+                <t t-else="">
+                    <small class="text-muted">-</small>
+                </t>
+            </td>
+        </xpath>
+
+        <!-- Ocultar la unidad de medida en la columna de cantidad -->
+        <xpath expr="//td[@name='td_quantity']/span[@t-field='line.product_uom_id']" position="attributes">
+            <attribute name="class">d-none</attribute>
+        </xpath>
+
+        <!-- Heredar th de precio unitario y cambiar texto a "Precio caja" -->
+        <xpath expr="//th[@name='th_priceunit']/span" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <xpath expr="//th[@name='th_priceunit']/span" position="after">
+            <span>Precio caja</span>
+        </xpath>
+
+        <!-- Ocultar columna de impuestos en el thead -->
+        <xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <!-- Ocultar columna de impuestos en el tbody -->
+        <xpath expr="//td[@name='td_taxes']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <!-- Hacer invisible el nombre original del producto -->
+        <xpath expr="//td[@name='account_invoice_line_name']/span[@t-field='line.name']" position="attributes">
+            <attribute name="t-if">not (line.product_id.product_tmpl_id.is_pair or line.product_id.product_tmpl_id.is_assortment)</attribute>
+        </xpath>
+
+        <!-- Añadir el nombre personalizado: [shoes_model_material] + categ_id.name - product_brand_id.name - color_value_id.name -->
+        <xpath expr="//td[@name='account_invoice_line_name']/span[@t-field='line.name']" position="after">
+            <span>
+                <t t-if="line.product_id.product_tmpl_id.is_pair or line.product_id.product_tmpl_id.is_assortment">
+                    <t t-if="line.product_id.shoes_model_material">[<t t-esc="line.product_id.shoes_model_material"/>] </t>
+                    <t t-if="line.product_id.shoes_campaign_id.name" t-esc="line.product_id.shoes_campaign_id.name"/>
+                    <t t-if="line.product_id.categ_id" t-esc="line.product_id.categ_id.name"/>
+                    <t t-if="line.product_id.product_brand_id">
+                        <t t-esc="line.product_id.product_brand_id.name"/>
+                    </t>
+                    <span> - </span>
+                    <t t-if="line.product_id.color_value_id">
+                        <t t-if="line.product_id.categ_id or line.product_id.product_brand_id"> - </t>
+                        <t t-esc="line.product_id.color_value_id.name"/>
+                    </t>
+                    <span> - </span>
+
+                    <t t-if="line.product_id.product_assortment_id.name" t-esc="line.product_id.product_assortment_id.name"/>
+                </t>
+            </span>
+        </xpath>
+
+        <!-- Añadir tabla resumen agrupada por Intrastat code después de la tabla principal -->
+        <xpath expr="//table[hasclass('o_main_table')]" position="after">
+            <div class="mt-4">
+                <h4>Resumen por Intrastat Code</h4>
+                <table class="table table-sm" style="font-size: 12px;">
+                    <thead>
+                        <tr style="background-color: #e9ecef;">
+                            <th class="text-center">Intrastat Code</th>
+                            <th class="text-center">Descripción Intrastat</th>
+                            <th class="text-end">Total Pares</th>
+                            <th class="text-end">Total Cantidad</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Agrupar líneas por Intrastat code -->
+                        <t t-set="intrastat_groups" t-value="{}"/>
+                        <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product' and l.product_id.intrastat_duty_id.intrastat_id.code)" t-as="line">
+                            <t t-set="intrastat_code" t-value="line.product_id.intrastat_duty_id.intrastat_id.code"/>
+                            <t t-set="intrastat_name" t-value="line.product_id.intrastat_duty_id.name"/>
+                            <t t-set="pairs" t-value="line.sale_line_ids[0].pairs_count if line.sale_line_ids and line.sale_line_ids[0].pairs_count else 0"/>
+                            <t t-set="quantity" t-value="line.quantity"/>
+                            <t t-set="subtotal" t-value="line.quantity * line.price_unit"/>
+
+                            <t t-if="intrastat_code not in intrastat_groups">
+                                <t t-set="intrastat_groups" t-value="intrastat_groups.update({intrastat_code: {'name': intrastat_name, 'pairs': pairs, 'quantity': quantity, 'total': subtotal}}) or intrastat_groups"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="current_data" t-value="intrastat_groups[intrastat_code]"/>
+                                <t t-set="intrastat_groups" t-value="intrastat_groups.update({intrastat_code: {'name': intrastat_name, 'pairs': current_data['pairs'] + pairs, 'quantity': current_data['quantity'] + quantity, 'total': current_data['total'] + subtotal}}) or intrastat_groups"/>
+                            </t>
+                        </t>
+
+                        <!-- Mostrar filas agrupadas -->
+                        <t t-foreach="intrastat_groups.items()" t-as="intrastat_item">
+                            <t t-set="code" t-value="intrastat_item[0]"/>
+                            <t t-set="data" t-value="intrastat_item[1]"/>
+                            <tr>
+                                <td class="text-center" t-esc="code"/>
+                                <td class="text-center" t-esc="data['name']"/>
+                                <td class="text-end" t-esc="data['pairs']"/>
+                                <td class="text-end" t-esc="data['quantity']"/>
+                                <td class="text-end" t-esc="data['total']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>

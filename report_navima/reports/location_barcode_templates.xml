@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Custom generic barcode template - Double size of Odoo original (2 columns x 3 rows per page) -->
+    <template id="report_generic_barcode_navima" name="Generic Barcode Navima">
+
+    <t t-call="web.basic_layout">
+        <t t-call="web.html_container">
+            <div class="oe_structure"/>
+            <t t-set="nRows" t-value="7"/>
+            <t t-set="nCols" t-value="2"/>
+            <t t-foreach="[docs[x:x + nRows * nCols] for x in range(0, len(docs), nRows * nCols)]" t-as="page_docs">
+                <div class="o_label_sheet" style="padding: 10mm 3mm;">
+                    <table class="my-0 table table-sm table-borderless">
+                        <t t-foreach="range(nRows)" t-as="row">
+                            <tr>
+                                <t t-foreach="range(nCols)" t-as="col">
+                                    <t t-set="barcode_index" t-value="(row * nCols + col)"/>
+                                    <t t-if="barcode_index &lt; len(page_docs)">
+                                        <t t-set="o" t-value="page_docs[barcode_index]"/>
+                                        <td>
+                                            <div class="o_label_full" style="width:96mm;height:37.1mm;border: 1px solid black;">
+                                                <div class="o_label_name text-center">
+                                                    <strong><span t-field="o.name">WH/Stock</span></strong>
+                                                </div>
+                                                <div class="text-center mt-3">
+                                                    <span t-if="o.barcode" t-field="o.barcode" style="padding:0" t-options="{'widget': 'barcode', 'humanreadable': 1, 'symbology': 'auto', 'img_style': 'width:92mm;height:20mm'}">1234567890</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </t>
+                                </t>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </t>
+        </t>
+        <div class="oe_structure"/>
+    </t>
+    </template>
+
+    <!-- Custom report for Location Barcode Navima as separate option -->
+    <template id="report_location_barcode_navima" name="Location Barcode Navima">
+        <t t-call="web.html_container">
+            <t t-call="report_navima.report_generic_barcode_navima"/>
+        </t>
+    </template>
+
+    <!-- Report action for Navima custom location barcode -->
+    <record id="action_report_location_barcode_navima" model="ir.actions.report">
+        <field name="name">Location Barcode (2x7)</field>
+        <field name="model">stock.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">report_navima.report_location_barcode_navima</field>
+        <field name="report_file">report_navima.report_location_barcode_navima</field>
+        <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+        <field name="print_report_name">'Location Barcode - %s' % object.name</field>
+        <field name="binding_model_id" ref="stock.model_stock_location"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report Definition -->
+    <record id="action_report_purchase_shoes_size_matrix" model="ir.actions.report">
+        <field name="name">Matriz de surtidos - Pedido de Compra</field>
+        <field name="model">purchase.line.shoes.pair.line</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">report_navima.report_purchase_shoes_size_matrix_document</field>
+        <field name="report_file">report_navima.report_purchase_shoes_size_matrix_document</field>
+        <field name="binding_model_id" ref="model_purchase_line_shoes_pair_line"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- Paperformat for landscape orientation -->
+    <record id="paperformat_purchase_shoes_size_matrix" model="report.paperformat">
+        <field name="name">Shoes Size Matrix - Landscape</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Update report to use landscape paperformat -->
+    <record id="action_report_purchase_shoes_size_matrix" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_purchase_shoes_size_matrix"/>
+    </record>
+
+    <!-- Custom external layout for shoes size matrix report -->
+    <template id="external_layout_shoes_size_matrix">
+        <div class="header">
+            <table class="table-borderless" style="width: 100%; table-layout: fixed; border: none;">
+                <tr>
+                    <!-- Left: Company logo/header -->
+                    <td style="width: 30%; text-align: left; vertical-align: top; border: none;">
+                        <div style="max-width: 100%; overflow: hidden;">
+                            <span t-field="o.company_id.company_details"/>
+                        </div>
+                    </td>
+                    
+                    <!-- Center: Order info -->
+                    <td style="width: 40%; text-align: center; vertical-align: top; border: none;">
+                        <h2 style="font-weight: bold; margin: 0;">
+                            <span>ORDER</span>
+                            <t t-esc="o.name" style="margin-left: 5px;"/>
+                        </h2>
+                        <h2 style="margin-top: 5px;">
+                            <t t-esc="o.partner_id.name"/>
+                        </h2>
+                    </td>
+                    
+                    <!-- Right: Print date and page number -->
+                    <td style="width: 30%; text-align: right; vertical-align: top; border: none;">
+                        <div>
+                            <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        </div>
+                        <div style="margin-top: 5px;">
+                            Página <span class="page"/> de <span class="topage"/>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="article o_report_layout_standard">
+            <t t-raw="0"/>
+        </div>
+
+        <div class="footer">
+            <div style="text-align: center; font-size: 10px; border-top: 1px solid #ccc; padding-top: 5px;">
+                <span class="page"/> / <span class="topage"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- Report Template -->
+    <template id="report_purchase_shoes_size_matrix_document">
+        <t t-call="web.html_container">
+            <t t-set="matrix_data" t-value="docs._prepare_size_matrix_data(docs)"/>
+            <t t-foreach="docs.mapped('order_id')" t-as="order">
+                <t t-set="order_lines" t-value="docs.filtered(lambda l: l.order_id == order)"/>
+                <t t-set="order_matrix_data" t-value="order_lines._prepare_size_matrix_data(order_lines)"/>
+                <t t-set="o" t-value="order"/>
+
+                <t t-call="report_navima.external_layout_shoes_size_matrix">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                    
+
+
+                    <!-- Tables for each model -->
+                    <t t-foreach="order_matrix_data['models'].items()" t-as="model_item">
+                        <t t-set="model_id" t-value="model_item[0]"/>
+                        <t t-set="model_data" t-value="model_item[1]"/>
+
+                        <!-- Model separator line (except for first model) -->
+                        <t t-if="model_item_index > 0">
+                            <div style="border-top: 2px solid black; margin-top: -7mm; margin-bottom: 5mm;"></div>
+                        </t>
+
+                        <div class="mb-4" style="page-break-inside: avoid;">
+                            <!-- Model header with image -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h3 style="font-weight: bold; font-size: 1.5em; margin-bottom: 5px; margin-left: 80mm;">
+                                        <t t-esc="model_data['model_name']"/>
+                                    </h3>
+                                    <t t-if="model_data['model_image']">
+                                        <img t-att-src="image_data_uri(model_data['model_image'])"
+                                             style="max-width: 30mm; max-height: 30mm; width: auto; height: auto; object-fit: contain; margin-left: 50mm;"/>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <table class="table table-sm table-borderless"
+                                   style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid black;">
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Modelo
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Color
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Referencia
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Marca
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Our order nbr
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Shipping Mark
+                                        </th>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Surtido
+                                        </th>
+                                        <t t-foreach="order_matrix_data['all_sizes']" t-as="size">
+                                            <th class="text-center"
+                                                style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                                <t t-esc="size"/>
+                                            </th>
+                                        </t>
+                                        <th class="text-center"
+                                            style="border-bottom: 2px solid black; border-left: none; border-right: none; border-top: none; padding: 6px 8px;">
+                                            Total
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="model_total" t-value="0"/>
+                                    <t t-foreach="model_data['assortments'].items()" t-as="assortment_item">
+                                        <t t-set="assortment_id" t-value="assortment_item[0]"/>
+                                        <t t-set="assortment_data" t-value="assortment_item[1]"/>
+                                        <t t-set="row_total" t-value="0"/>
+
+                                        <tr>
+                                            <td style="text-align: center; padding: 6px 8px;">
+                                                <t t-esc="model_data['model_name']"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 6px 8px;">
+                                                <t t-esc="assortment_data['color_name']"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 6px 8px;">
+                                                <t t-esc="assortment_data['product_code']"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 6px 8px;">
+                                                <t t-esc="assortment_data['brand_name']"/>
+                                            </td>
+                                            <!-- TODO: Rellenar con Our order nbr -->
+                                            <td style="text-align: center; padding: 6px 8px;">
+
+                                            </td>
+                                            <!-- TODO: Rellenar con Shipping Mark -->
+                                            <td style="text-align: center; padding: 6px 8px;">
+
+                                            </td>
+                                            <td style="text-align: center; padding: 6px 8px;">
+                                                <t t-esc="assortment_data['assortment_name']"/>
+                                            </td>
+                                            <t t-foreach="order_matrix_data['all_sizes']" t-as="size">
+                                                <t t-set="quantity" t-value="assortment_data['sizes'].get(size, 0)"/>
+                                                <t t-set="row_total" t-value="row_total + quantity"/>
+                                                <td style="text-align: center; padding: 6px 8px;">
+                                                    <t t-if="quantity > 0">
+                                                        <t t-esc="int(quantity) if quantity == int(quantity) else quantity"/>
+                                                    </t>
+                                                    <t t-if="quantity == 0">
+
+                                                    </t>
+                                                </td>
+                                            </t>
+                                            <t t-set="model_total" t-value="model_total + row_total"/>
+                                            <td style="text-align: center; font-weight: bold; padding: 6px 8px; font-size: 1.2em;">
+                                                <t t-esc="int(model_total) if model_total == int(model_total) else model_total"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <!-- Total row -->
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 6px 8px;"></td>
+                                        <t t-foreach="order_matrix_data['all_sizes']" t-as="size">
+                                            <td style="text-align: center; padding: 6px 8px;"></td>
+                                        </t>
+                                        <td style="text-align: center; font-weight: bold; padding: 6px 8px; font-size: 1.2em;">
+                                            <t t-esc="int(model_total) if model_total == int(model_total) else model_total"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <div class="oe_structure"/>
+                </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
