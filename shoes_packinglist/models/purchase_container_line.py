@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 _CHAR_FIELDS = [
     "shoes_campaign",
@@ -61,6 +61,10 @@ class PurchaseContainerLine(models.Model):
     def write(self, vals):
         _clean_char_fields(vals)
         return super().write(vals)
+
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = record.lot or _("Container Line #%d") % record.id
 
 
 def _clean_char_fields(vals):

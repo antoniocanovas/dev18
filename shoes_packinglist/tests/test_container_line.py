@@ -50,6 +50,12 @@ class TestContainerLineCharCleaning(PackingListCommon):
         )
         self.assertFalse(line.name)
 
+    def test_whitespace_only_char_field_becomes_false(self):
+        line = self.env["purchase.container.line"].create(
+            {"container_id": self.container.id, "lot": "LOT001", "name": "   "}
+        )
+        self.assertFalse(line.name)
+
     def test_numeric_fields_not_affected(self):
         line = self.env["purchase.container.line"].create(
             {
