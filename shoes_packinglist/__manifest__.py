@@ -7,6 +7,7 @@
     "depends": [
         "purchase_container",
         "stock",
+        "account",
     ],
     "data": [
         "security/ir.model.access.csv",
