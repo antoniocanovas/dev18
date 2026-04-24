@@ -67,3 +67,20 @@ class TestContainerLineCharCleaning(PackingListCommon):
         )
         self.assertEqual(line.pairs, 12.0)
         self.assertEqual(line.assortment_gross_weight, 5.5)
+
+
+class TestContainerO2M(PackingListCommon):
+
+    def test_container_has_container_line_ids(self):
+        line = self.env["purchase.container.line"].create(
+            {"container_id": self.container.id, "lot": "LOT001"}
+        )
+        self.assertIn(line, self.container.container_line_ids)
+
+    def test_line_deleted_when_container_deleted(self):
+        line = self.env["purchase.container.line"].create(
+            {"container_id": self.container.id, "lot": "LOT001"}
+        )
+        line_id = line.id
+        self.container.unlink()
+        self.assertFalse(self.env["purchase.container.line"].browse(line_id).exists())
