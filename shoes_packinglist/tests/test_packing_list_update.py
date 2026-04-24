@@ -71,7 +71,8 @@ class TestLotMatching(PackingListCommon):
     def test_lot_in_done_picking_not_matched(self):
         """Lots whose picking is already done must not be matched."""
         picking, _ = self._make_incoming_picking([self.lot1])
-        picking.write({"state": "done"})  # force done for test
+        # stock.picking.state is computed; force via moves
+        picking.move_ids.write({"state": "done"})
         line = self.env["purchase.container.line"].create(
             {"container_id": self.container.id, "lot": "LOT001"}
         )
