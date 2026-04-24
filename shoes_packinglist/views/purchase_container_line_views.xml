@@ -1,2 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo/>
+<odoo>
+    <record id="purchase_container_line_view_list" model="ir.ui.view">
+        <field name="name">purchase.container.line.list</field>
+        <field name="model">purchase.container.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" import="1">
+                <field name="lot"/>
+                <field name="name" string="Product Ref."/>
+                <field name="color"/>
+                <field name="assortment"/>
+                <field name="pairs"/>
+                <field name="purchase_order"/>
+                <field name="shippingmark"/>
+                <field name="assortment_gross_weight"/>
+                <field name="volume"/>
+                <field name="move_id" readonly="1"/>
+                <field name="shoes_campaign" optional="hide"/>
+                <field name="pair_net_weight" optional="hide"/>
+                <field name="pair_gross_weight" optional="hide"/>
+                <field name="assortment_net_weight" optional="hide"/>
+                <field name="high" optional="hide"/>
+                <field name="width" optional="hide"/>
+                <field name="length" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="purchase_container_line_view_form" model="ir.ui.view">
+        <field name="name">purchase.container.line.form</field>
+        <field name="model">purchase.container.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Identification">
+                            <field name="lot"/>
+                            <field name="name" string="Product Ref."/>
+                            <field name="color"/>
+                            <field name="shoes_campaign"/>
+                            <field name="purchase_order"/>
+                            <field name="assortment"/>
+                            <field name="shippingmark"/>
+                        </group>
+                        <group string="Quantities">
+                            <field name="pairs"/>
+                            <field name="move_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Weights">
+                            <field name="pair_net_weight"/>
+                            <field name="pair_gross_weight"/>
+                            <field name="assortment_net_weight"/>
+                            <field name="assortment_gross_weight"/>
+                        </group>
+                        <group string="Dimensions">
+                            <field name="volume"/>
+                            <field name="high"/>
+                            <field name="width"/>
+                            <field name="length"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

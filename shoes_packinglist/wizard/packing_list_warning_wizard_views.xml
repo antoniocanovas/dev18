@@ -1,2 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo/>
+<odoo>
+    <record id="packing_list_warning_wizard_view_form" model="ir.ui.view">
+        <field name="name">packing.list.warning.wizard.form</field>
+        <field name="model">packing.list.warning.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Packing List — Lots Not Found">
+                <sheet>
+                    <group>
+                        <field name="container_id" readonly="1"/>
+                    </group>
+                    <p>
+                        The following packing list lines could not be matched
+                        to any pending stock move for this shipping agent.
+                        You can continue (these lines will be skipped) or cancel
+                        to review the data.
+                    </p>
+                    <field name="warning_line_ids">
+                        <list>
+                            <field name="lot"/>
+                            <field name="name" string="Product Ref."/>
+                            <field name="purchase_order"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button
+                        name="action_continue"
+                        type="object"
+                        string="Continue"
+                        class="btn-primary"
+                    />
+                    <button
+                        name="action_cancel"
+                        type="object"
+                        string="Cancel"
+                        class="btn-secondary"
+                        special="cancel"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
