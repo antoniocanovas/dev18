@@ -68,7 +68,10 @@ class PurchaseContainer(models.Model):
             )
 
         # --- Lot matching ---
-        # Reset previous matching
+        # Lots from purchase_lot_preassignment exist as stock.lot records but are not
+        # yet assigned to incoming move lines before reception. Match each lot to the
+        # stock.move in the pending picking via the lot's product, with a more precise
+        # secondary filter through the sale order when lot.ref is available.
         self.container_line_ids.write({"move_id": False})
 
         unmatched = self.env["purchase.container.line"]
@@ -86,16 +89,25 @@ class PurchaseContainer(models.Model):
             if not lot:
                 unmatched |= line
                 continue
-            move_line = self.env["stock.move.line"].search(
-                [
-                    ("lot_id", "=", lot.id),
-                    ("picking_id", "in", pending_pickings.ids),
-                    ("state", "not in", ["done", "cancel"]),
-                ],
-                limit=1,
-            )
-            if move_line:
-                line.move_id = move_line.move_id
+            # Build base domain: product in pending pickings, not done/cancel
+            base_domain = [
+                ("picking_id", "in", pending_pickings.ids),
+                ("product_id", "=", lot.product_id.id),
+                ("state", "not in", ["done", "cancel"]),
+            ]
+            # Prefer match through the sale order chain (lot.ref = SO name)
+            # purchase_lot_preassignment sets lot.ref = sale order name
+            move = False
+            if lot.ref:
+                move = self.env["stock.move"].search(
+                    base_domain
+                    + [("purchase_line_id.sale_line_id.order_id.name", "=", lot.ref)],
+                    limit=1,
+                )
+            if not move:
+                move = self.env["stock.move"].search(base_domain, limit=1)
+            if move:
+                line.move_id = move
             else:
                 unmatched |= line
 
@@ -140,22 +152,18 @@ class PurchaseContainer(models.Model):
         involved_pickings = processed_lines.mapped("move_id.picking_id")
 
         for picking in involved_pickings:
-            picking_matched_lines = processed_lines.filtered(
+            matched_moves = processed_lines.filtered(
                 lambda l: l.move_id.picking_id == picking
+            ).mapped("move_id")
+            all_moves = picking.move_ids.filtered(
+                lambda m: m.state not in ("done", "cancel")
             )
-            picking_matched_lot_names = set(picking_matched_lines.mapped("lot"))
-            all_mls = picking.move_line_ids.filtered(
-                lambda ml: ml.state not in ("done", "cancel")
-            )
-            matched_mls = all_mls.filtered(
-                lambda ml: ml.lot_id and ml.lot_id.name in picking_matched_lot_names
-            )
-            remaining_mls = all_mls - matched_mls
+            remaining_moves = all_moves - matched_moves
 
-            if not remaining_mls:
+            if not remaining_moves:
                 picking.container_id = self.id
             else:
-                self._split_picking(picking, remaining_mls)
+                self._split_picking(picking, remaining_moves)
                 picking.container_id = self.id
 
         # Update container metrics
@@ -163,10 +171,11 @@ class PurchaseContainer(models.Model):
         self.volume = sum(processed_lines.mapped("volume"))
         self.package_qty = len(processed_lines)
 
-    def _split_picking(self, picking, remaining_mls):
+    def _split_picking(self, picking, remaining_moves):
         """
-        Move remaining_mls to a new backorder picking.
-        Splits stock.move records when only some of their lines go to the backorder.
+        Move remaining_moves to a new backorder picking.
+        Lots are not yet on move lines at packing list import time, so the split
+        operates at the stock.move level (whole moves), not at the move line level.
         """
         backorder_vals = picking.copy_data(
             default={
@@ -177,32 +186,10 @@ class PurchaseContainer(models.Model):
         )[0]
         backorder = self.env["stock.picking"].create(backorder_vals)
 
-        # Group remaining move_lines by their parent move
-        remaining_by_move = {}
-        for ml in remaining_mls:
-            remaining_by_move.setdefault(ml.move_id, self.env["stock.move.line"])
-            remaining_by_move[ml.move_id] |= ml
-
-        for move, rem_lines in remaining_by_move.items():
-            all_move_mls = move.move_line_ids.filtered(
+        for move in remaining_moves:
+            pending_mls = move.move_line_ids.filtered(
                 lambda ml: ml.state not in ("done", "cancel")
             )
-            if len(all_move_mls) == len(rem_lines):
-                # All lines of this move go to backorder — move the move; lines follow
-                move.write({"picking_id": backorder.id})
-            else:
-                # Partial: create new move in backorder for remaining lines
-                remaining_qty = sum(rem_lines.mapped("quantity"))
-                new_move = move.copy(
-                    default={
-                        "picking_id": backorder.id,
-                        "product_uom_qty": remaining_qty,
-                        "move_line_ids": [],
-                    }
-                )
-                rem_lines.write(
-                    {"picking_id": backorder.id, "move_id": new_move.id}
-                )
-                # Reduce original move qty to matched lines only
-                matched_qty = sum((all_move_mls - rem_lines).mapped("quantity"))
-                move.product_uom_qty = matched_qty
+            move.write({"picking_id": backorder.id})
+            if pending_mls:
+                pending_mls.write({"picking_id": backorder.id})
