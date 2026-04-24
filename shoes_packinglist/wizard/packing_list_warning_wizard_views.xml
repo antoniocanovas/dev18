@@ -22,6 +22,15 @@
                             <field name="purchase_order"/>
                         </list>
                     </field>
+                    <separator string="Pending Receipts Without Container"/>
+                    <field name="pending_picking_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="partner_id" string="Shipping Agent"/>
+                            <field name="scheduled_date"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
                 </sheet>
                 <footer>
                     <button

@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class PackingListWarningWizard(models.TransientModel):
@@ -12,6 +12,30 @@ class PackingListWarningWizard(models.TransientModel):
         string="Unmatched Lines",
         readonly=True,
     )
+    pending_picking_ids = fields.Many2many(
+        "stock.picking",
+        compute="_compute_pending_picking_ids",
+        string="Pending Receipts",
+    )
+
+    @api.depends("container_id")
+    def _compute_pending_picking_ids(self):
+        for wizard in self:
+            if not wizard.container_id.shipping_agent_id:
+                wizard.pending_picking_ids = False
+                continue
+            wizard.pending_picking_ids = self.env["stock.picking"].search(
+                [
+                    ("partner_id", "=", wizard.container_id.shipping_agent_id.id),
+                    ("picking_type_id.code", "=", "incoming"),
+                    (
+                        "state",
+                        "in",
+                        ["assigned", "waiting", "confirmed", "partially_available"],
+                    ),
+                    ("container_id", "=", False),
+                ]
+            )
 
     def action_continue(self):
         """Process only lines that have move_id assigned."""
