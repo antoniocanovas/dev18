@@ -34,7 +34,7 @@
                 <button
                     name="action_open_validate_wizard"
                     type="object"
-                    string="Validate"
+                    string="Container reception"
                     class="btn-secondary"
                     invisible="state == 'locked'"
                 />

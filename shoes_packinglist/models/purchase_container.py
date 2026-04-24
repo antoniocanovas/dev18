@@ -177,10 +177,59 @@ class PurchaseContainer(models.Model):
                 self._split_picking(picking, remaining_moves)
                 picking.container_id = self.id
 
+        # Assign lots to move lines so the picking can be validated
+        self._assign_lots_to_moves(processed_lines)
+
         # Update container metrics
         self.weight = sum(processed_lines.mapped("assortment_gross_weight"))
         self.volume = sum(processed_lines.mapped("volume"))
         self.package_qty = len(processed_lines)
+
+    def _assign_lots_to_moves(self, processed_lines):
+        """
+        Pre-assign lots to stock.move.line records so the picking can be validated.
+
+        purchase_lot_preassignment creates stock.lot records but does not put them
+        on move lines before reception. This method creates one move line per
+        packing list line with the matched lot and its quantity (pairs).
+
+        Existing no-lot move lines (created by action_assign) are removed first
+        to avoid duplicates.
+        """
+        # Remove generic no-lot move lines from all matched moves
+        matched_moves = processed_lines.mapped("move_id")
+        for move in matched_moves:
+            move.move_line_ids.filtered(
+                lambda ml: not ml.lot_id and ml.state not in ("done", "cancel")
+            ).unlink()
+
+        # Create one move line per packing list line with the specific lot
+        for line in processed_lines:
+            lot = self.env["stock.lot"].search(
+                [("name", "=", line.lot), ("company_id", "=", self.env.company.id)],
+                limit=1,
+            )
+            if not lot:
+                continue
+            move = line.move_id
+            # Skip if this lot is already on a move line (idempotent re-run)
+            if move.move_line_ids.filtered(
+                lambda ml: ml.lot_id == lot and ml.state not in ("done", "cancel")
+            ):
+                continue
+            qty = line.pairs if line.pairs > 0 else 1.0
+            self.env["stock.move.line"].create(
+                {
+                    "move_id": move.id,
+                    "picking_id": move.picking_id.id,
+                    "product_id": lot.product_id.id,
+                    "lot_id": lot.id,
+                    "quantity": qty,
+                    "product_uom_id": move.product_uom.id,
+                    "location_id": move.location_id.id,
+                    "location_dest_id": move.location_dest_id.id,
+                }
+            )
 
     def _split_picking(self, picking, remaining_moves):
         """
