@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Rename type_id string to "Shipping Mark" in sale order form -->
+    <record id="shoes_shippingmark_sale_order_form" model="ir.ui.view">
+        <field name="name">shoes.shippingmark.sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_order_type.sot_view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="type_id" position="attributes">
+                <attribute name="string">Shipping Mark</attribute>
+            </field>
+        </field>
+    </record>
+
+</odoo>

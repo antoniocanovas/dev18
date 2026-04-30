@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Sustituir fecha única de entrega por rango desde/hasta en presupuesto/pedido/proforma -->
+    <template id="shoes_dealer_report_saleorder_delivery_date"
+              inherit_id="sale.report_saleorder_document"
+              priority="100">
+        <xpath expr="//div[@id='informations']/div[@name='informations_date']" position="after">
+            <div t-if="doc.shoes_delivery_date_from or doc.commitment_date"
+                 class="col" name="informations_delivery_date">
+                <strong>Fecha de entrega</strong>
+                <div t-if="doc.shoes_delivery_date_from and doc.commitment_date">
+                    <span t-field="doc.shoes_delivery_date_from" t-options='{"widget": "date"}'/> &#8594;
+                    <span t-field="doc.commitment_date" t-options='{"widget": "date"}'/>
+                </div>
+                <div t-elif="doc.commitment_date"
+                     t-field="doc.commitment_date"
+                     t-options='{"widget": "date"}'/>
+                <div t-elif="doc.shoes_delivery_date_from"
+                     t-field="doc.shoes_delivery_date_from"
+                     t-options='{"widget": "date"}'/>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Añadir rango de fecha de entrega en el albarán -->
+    <template id="shoes_dealer_report_delivery_delivery_date"
+              inherit_id="stock.report_delivery_document"
+              priority="100">
+        <xpath expr="//div[@id='informations']/div[@name='div_sched_date']" position="after">
+            <div t-if="o.shoes_delivery_date_from or o.date_deadline"
+                 class="col col-3 mw-100 mb-2" name="div_delivery_date">
+                <strong>Fecha de entrega</strong>
+                <div class="m-0">
+                    <t t-if="o.shoes_delivery_date_from and o.date_deadline">
+                        <span t-field="o.shoes_delivery_date_from" t-options='{"widget": "date"}'/> &#8594;
+                        <span t-field="o.date_deadline" t-options='{"widget": "date"}'/>
+                    </t>
+                    <t t-elif="o.date_deadline">
+                        <span t-field="o.date_deadline" t-options='{"widget": "date"}'/>
+                    </t>
+                    <t t-elif="o.shoes_delivery_date_from">
+                        <span t-field="o.shoes_delivery_date_from" t-options='{"widget": "date"}'/>
+                    </t>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
