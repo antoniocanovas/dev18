@@ -235,24 +235,23 @@ class PurchaseContainer(models.Model):
 
     def _update_product_weights_from_packing_list(self, processed_lines):
         """
-        Update weight, net_weight, volume and dimensions on products from packing list data.
+        Update weight, net_weight, volume on product templates and width_length_high
+        on the assortment product.product. Also writes all four fields to the matched
+        stock.lot for each line (no deduplication — each line has its own lot).
 
-        For assortment products: uses assortment_gross_weight, assortment_net_weight, volume.
-        For pair products (linked via product_tmpl_single_id): uses pair_gross_weight,
-        pair_net_weight, and volume / pairs.
-        Deduplicates by product so each product is written once per import.
+        For assortment products: writes assortment_gross_weight, assortment_net_weight,
+        volume to product.template; width_length_high to product.product.
+        For pair products (linked via product_tmpl_single_id): writes pair_gross_weight,
+        pair_net_weight, volume / pairs to product.template only.
+        Deduplicates product writes by product.id so each product is written once.
         """
-        seen_tmpl_ids = set()
+        seen_product_ids = set()
         for line in processed_lines:
             if not line.move_id:
                 continue
             product = line.move_id.product_id
             if not product:
                 continue
-            tmpl = product.product_tmpl_id
-            if tmpl.id in seen_tmpl_ids:
-                continue
-            seen_tmpl_ids.add(tmpl.id)
 
             # Build W×L×H string from dimension fields
             wlh_parts = [line.width, line.length, line.high]
@@ -263,17 +262,41 @@ class PurchaseContainer(models.Model):
             else:
                 width_length_high = False
 
-            # Update assortment product (is_assortment)
+            # Update lot fields (per line, no deduplication)
+            lot = self.env["stock.lot"].search(
+                [("name", "=", line.lot), ("company_id", "=", self.env.company.id)],
+                limit=1,
+            )
+            if lot:
+                lot_vals = {
+                    "weight": line.assortment_gross_weight,
+                    "net_weight": line.assortment_net_weight,
+                    "volume": line.volume,
+                }
+                if width_length_high:
+                    lot_vals["width_length_high"] = width_length_high
+                lot.write(lot_vals)
+
+            # Deduplicate product/template writes by product.id
+            if product.id in seen_product_ids:
+                continue
+            seen_product_ids.add(product.id)
+
+            tmpl = product.product_tmpl_id
+
+            # Update assortment template (weight/net_weight/volume)
             assortment_vals = {
                 "weight": line.assortment_gross_weight,
                 "net_weight": line.assortment_net_weight,
                 "volume": line.volume,
             }
-            if width_length_high:
-                assortment_vals["width_length_high"] = width_length_high
             tmpl.write(assortment_vals)
 
-            # Update pair products linked via product_tmpl_single_id
+            # Update assortment product.product (width_length_high only)
+            if width_length_high:
+                product.write({"width_length_high": width_length_high})
+
+            # Update pair products (template only, no width_length_high)
             pair_tmpl = getattr(product, "product_tmpl_single_id", False)
             if not pair_tmpl:
                 continue
@@ -283,8 +306,6 @@ class PurchaseContainer(models.Model):
                 "net_weight": line.pair_net_weight,
                 "volume": line.volume / pairs,
             }
-            if width_length_high:
-                pair_vals["width_length_high"] = width_length_high
             pair_tmpl.write(pair_vals)
 
     def _split_picking(self, picking, remaining_moves):

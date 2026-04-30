@@ -213,3 +213,88 @@ class TestProcessUpdate(PackingListCommon):
         wizard.action_cancel()
         # Picking should not have container_id set
         self.assertFalse(picking.container_id)
+
+
+class TestProductAndLotUpdate(PackingListCommon):
+    """Tests for _update_product_weights_from_packing_list."""
+
+    def _run_update_with_line(self, width=25.0, length=30.0, high=50.0,
+                               gross=5.0, net=4.5, volume=0.5):
+        """Helper: full update cycle with a single matched line."""
+        picking, _ = self._make_incoming_picking([self.lot1])
+        container = self.env["purchase.container"].create(
+            {"code": "CONT_UPDATE", "shipping_agent_id": self.partner.id}
+        )
+        self.env["purchase.container.line"].create(
+            {
+                "container_id": container.id,
+                "lot": "LOT001",
+                "width": width,
+                "length": length,
+                "high": high,
+                "assortment_gross_weight": gross,
+                "assortment_net_weight": net,
+                "volume": volume,
+            }
+        )
+        container.action_update_from_packing_list()
+        return container
+
+    def test_width_length_high_written_to_product_product(self):
+        self._run_update_with_line()
+        self.assertEqual(self.product.width_length_high, "25×30×50")
+
+    def test_lot_weight_written_from_packing_list(self):
+        self._run_update_with_line(gross=5.0)
+        self.assertAlmostEqual(self.lot1.weight, 5.0)
+
+    def test_lot_net_weight_written_from_packing_list(self):
+        self._run_update_with_line(net=4.5)
+        self.assertAlmostEqual(self.lot1.net_weight, 4.5)
+
+    def test_lot_volume_written_from_packing_list(self):
+        self._run_update_with_line(volume=0.5)
+        self.assertAlmostEqual(self.lot1.volume, 0.5)
+
+    def test_lot_width_length_high_written_from_packing_list(self):
+        self._run_update_with_line(width=25.0, length=30.0, high=50.0)
+        self.assertEqual(self.lot1.width_length_high, "25×30×50")
+
+    def test_lot_fields_not_written_when_no_dimensions(self):
+        self._run_update_with_line(width=0.0, length=0.0, high=0.0)
+        self.assertFalse(self.lot1.width_length_high)
+
+    def test_two_lines_update_two_lots_independently(self):
+        picking, _ = self._make_incoming_picking([self.lot1, self.lot2])
+        container = self.env["purchase.container"].create(
+            {"code": "CONT_TWO", "shipping_agent_id": self.partner.id}
+        )
+        self.env["purchase.container.line"].create(
+            {
+                "container_id": container.id,
+                "lot": "LOT001",
+                "assortment_gross_weight": 5.0,
+                "assortment_net_weight": 4.5,
+                "volume": 0.5,
+                "width": 25.0,
+                "length": 30.0,
+                "high": 50.0,
+            }
+        )
+        self.env["purchase.container.line"].create(
+            {
+                "container_id": container.id,
+                "lot": "LOT002",
+                "assortment_gross_weight": 6.0,
+                "assortment_net_weight": 5.5,
+                "volume": 0.6,
+                "width": 26.0,
+                "length": 31.0,
+                "high": 51.0,
+            }
+        )
+        container.action_update_from_packing_list()
+        self.assertAlmostEqual(self.lot1.weight, 5.0)
+        self.assertAlmostEqual(self.lot2.weight, 6.0)
+        self.assertEqual(self.lot1.width_length_high, "25×30×50")
+        self.assertEqual(self.lot2.width_length_high, "26×31×51")
