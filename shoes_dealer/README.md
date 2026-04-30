@@ -36,6 +36,7 @@ Antes de usar el módulo hay que configurar en **Ajustes → Compañía**:
 | `shoes_pair_tracking` | Trazabilidad de pares |
 | `shoes_pair_uom_id` | Unidad de medida para pares |
 | `shoes_categ_sync` | Sincroniza categoría contable automáticamente |
+| `purchase_all_sale` | **Ver sección "Compra neta" más abajo** |
 
 ## Flujo de trabajo
 
@@ -107,14 +108,45 @@ línea de venta mediante `purchase_line_id`.
 | PO en borrador, qty baja | Actualiza qty en compra, borra lotes sobrantes y regenera |
 | PO en borrador, qty sube | Actualiza qty en compra, crea los lotes adicionales |
 | PO confirmada, qty sube | **Error**: indica añadir nueva línea en el presupuesto |
-| PO confirmada, qty baja | No hace nada (el sobrante queda en stock) |
+| PO confirmada, qty baja | No modifica la compra ni los lotes (el sobrante queda en stock) |
+| Sin PO (qty neta = 0), qty cambia | Sincroniza lotes si corresponde |
 
 Añadir una nueva línea a una venta ya confirmada también genera automáticamente
 la línea de compra correspondiente (si el producto es surtido).
 
 ---
 
-### 5. Recibir la compra
+### 5. Compra neta (`purchase_all_sale`)
+
+El campo `purchase_all_sale` en `res.company` (pestaña **Shoes Dealer**, grupo "Sale and purchases")
+controla cuántas unidades se compran al confirmar una venta:
+
+**`True` (por defecto):** se compra la totalidad de lo vendido, sin considerar el stock disponible.
+
+**`False`:** se calcula la cantidad neta a comprar:
+
+```
+qty_to_buy = qty_vendida − stock_disponible − entradas_libres_pendientes
+```
+
+Donde:
+- **stock disponible**: unidades en ubicaciones internas no reservadas para otros pedidos,
+  más las ya reservadas para el albarán de salida de este pedido. Si el cliente tiene
+  *shipping marks* exclusivos (`shoes_shippingmark`), solo se cuenta el stock compatible.
+  Si el tipo de reserva del albarán es "no reservar", se usa el stock físicamente libre.
+- **entradas libres pendientes**: movimientos de compra pendientes de recibir sin pedido
+  de venta vinculado (`purchase_line_id.sale_line_id = False`).
+
+Reglas especiales:
+- Los **surtidos personalizados** (`product_custom_attribute_value_ids`) siempre compran
+  la cantidad completa, independientemente del campo.
+- Si `qty_to_buy ≤ 0`, no se crea línea de compra ni lotes para esa línea.
+- Los lotes creados por `purchase_lot_preassignment` reflejan la cantidad comprada,
+  no la vendida.
+
+---
+
+### 6. Recibir la compra
 
 Al validar el albarán de recepción, el automatismo de `purchase_lot_preassignment` reserva los lotes
 en el albarán de venta.
@@ -125,7 +157,7 @@ Estos registros permiten consultar el inventario de pares por separado del de su
 
 ---
 
-### 6. Facturar
+### 7. Facturar
 
 Las líneas de factura heredan automáticamente:
 

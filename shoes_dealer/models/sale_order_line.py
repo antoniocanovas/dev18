@@ -12,6 +12,7 @@ class SaleOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
+        orders_to_sync = self.env["sale.order"]
         for line in lines:
             if (
                 line.product_id.is_assortment
@@ -19,61 +20,88 @@ class SaleOrderLine(models.Model):
                 and line.order_id.state in ("sale", "done")
             ):
                 line.order_id.create_purchase_lines_for_custom_products()
+                orders_to_sync |= line.order_id
+        for order in orders_to_sync:
+            order.create_lots_for_sale_order()
         return lines
 
+    def unlink(self):
+        # Collect confirmed orders before the lines disappear
+        orders = self.filtered(
+            lambda l: l.order_id.state in ("sale", "done")
+        ).mapped("order_id")
+        result = super().unlink()
+        for order in orders:
+            order._delete_unused_lots()
+        return result
+
     def write(self, vals):
-        orders_to_regenerate = self.env["sale.order"]
-        orders_to_add_lots = self.env["sale.order"]
+        orders_to_sync = self.env["sale.order"]
 
         if "product_uom_qty" in vals:
             new_qty = vals["product_uom_qty"]
             for line in self:
-                if (
-                    line.purchase_line_id
-                    and line.product_id.is_assortment
-                    and line.state in ("sale", "done")
+                if not (
+                    line.product_id.is_assortment
+                    and line.order_id.state in ("sale", "done")
                     and new_qty != line.product_uom_qty
                 ):
-                    po = line.purchase_line_id.order_id
-                    if po.state in ("purchase", "done"):
-                        if new_qty > line.product_uom_qty:
-                            raise UserError(
-                                _(
-                                    "La compra del producto '%s' ya fue confirmada. "
-                                    "Para incrementar la cantidad, añade una nueva línea en el presupuesto.\n\n"
-                                    "Recuerda que para introducir nuevas líneas del mismo producto si el pedido "
-                                    "está confirmado, el tipo de introducción de líneas ha de ser "
-                                    "\"Product configurator\", probablemente por defecto tienes \"Matrix Grid\" "
-                                    "al principio de la nueva línea; también es buena opción hacer un nuevo pedido.",
-                                    line.product_id.display_name,
-                                )
+                    continue
+                pol = line.purchase_line_id
+                if pol and pol.order_id.state in ("purchase", "done"):
+                    if new_qty > line.product_uom_qty:
+                        raise UserError(
+                            _(
+                                "La compra del producto '%s' ya fue confirmada. "
+                                "Para incrementar la cantidad, añade una nueva línea en el presupuesto.\n\n"
+                                "Recuerda que para introducir nuevas líneas del mismo producto si el pedido "
+                                "está confirmado, el tipo de introducción de líneas ha de ser "
+                                "\"Product configurator\", probablemente por defecto tienes \"Matrix Grid\" "
+                                "al principio de la nueva línea; también es buena opción hacer un nuevo pedido.",
+                                line.product_id.display_name,
                             )
-                        # qty menor con PO confirmada → no hacer nada
+                        )
+                    # PO confirmada + decremento → no tocar lotes
+                    continue
+                if pol and pol.order_id.state != "cancel":
+                    qty_for_po = line.order_id._get_qty_to_purchase(line, qty_sold=new_qty)
+                    if line.product_custom_attribute_value_ids:
+                        pairs_per_unit = line.custom_assortment_pairs
                     else:
-                        # PO en borrador → actualizar cantidad y precio en compra
-                        if line.product_custom_attribute_value_ids:
-                            pairs_per_unit = line.custom_assortment_pairs
-                        else:
-                            pairs_per_unit = line.product_id.pairs_count
-                        line.purchase_line_id.write({
-                            "product_qty": new_qty,
-                            "price_unit": line.product_id.exwork * pairs_per_unit,
-                        })
-                        if new_qty < line.product_uom_qty:
-                            orders_to_regenerate |= line.order_id
-                        else:
-                            orders_to_add_lots |= line.order_id
+                        pairs_per_unit = line.product_id.pairs_count
+                    pol.with_context(from_sale_order_line=True).write({
+                        "product_qty": qty_for_po,
+                        "price_unit": line.product_id.exwork * pairs_per_unit,
+                    })
+                orders_to_sync |= line.order_id
 
-        result = super().write(vals)
+        # skip_lot_creation evita que la acción automática de sale.order dispare
+        # create_lots_for_sale_order() durante el super().write() (doble ejecución
+        # que borraba lotes recién creados y causaba MissingError en stock.lot)
+        result = super(SaleOrderLine, self.with_context(skip_lot_creation=True)).write(vals)
 
-        # Se ejecutan tras el write para que product_uom_qty ya tenga el valor nuevo
-        for order in orders_to_regenerate:
-            order._delete_unused_lots()
-            order.create_lots_for_sale_order()
-        for order in orders_to_add_lots:
+        if "product_uom_qty" in vals:
+            self._sync_delivery_move_qty()
+
+        for order in orders_to_sync:
             order.create_lots_for_sale_order()
 
         return result
+
+    def _sync_delivery_move_qty(self):
+        """Actualiza product_uom_qty en los movimientos de entrega pendientes."""
+        for line in self.filtered(lambda l: l.order_id.state in ("sale", "done")):
+            pending_moves = self.env["stock.move"].search([
+                ("sale_line_id", "=", line.id),
+                ("state", "not in", ["done", "cancel"]),
+                ("picking_type_id.code", "=", "outgoing"),
+            ])
+            if not pending_moves:
+                continue
+            target_qty = max(0.0, line.product_uom_qty - line.qty_delivered)
+            pending_moves.filtered(
+                lambda m: m.product_uom_qty != target_qty
+            ).write({"product_uom_qty": target_qty})
 
     # Comercialmente en cada pedido quieren saber cuántos pares se han vendido:
     @api.depends("product_id", "product_uom_qty", "custom_assortment_pairs")

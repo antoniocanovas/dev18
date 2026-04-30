@@ -185,6 +185,9 @@ class PurchaseContainer(models.Model):
         self.volume = sum(processed_lines.mapped("volume"))
         self.package_qty = len(processed_lines)
 
+        # Update product weight/volume data from packing list
+        self._update_product_weights_from_packing_list(processed_lines)
+
     def _assign_lots_to_moves(self, processed_lines):
         """
         Pre-assign lots to stock.move.line records so the picking can be validated.
@@ -229,6 +232,60 @@ class PurchaseContainer(models.Model):
                     "location_dest_id": move.location_dest_id.id,
                 }
             )
+
+    def _update_product_weights_from_packing_list(self, processed_lines):
+        """
+        Update weight, net_weight, volume and dimensions on products from packing list data.
+
+        For assortment products: uses assortment_gross_weight, assortment_net_weight, volume.
+        For pair products (linked via product_tmpl_single_id): uses pair_gross_weight,
+        pair_net_weight, and volume / pairs.
+        Deduplicates by product so each product is written once per import.
+        """
+        seen_tmpl_ids = set()
+        for line in processed_lines:
+            if not line.move_id:
+                continue
+            product = line.move_id.product_id
+            if not product:
+                continue
+            tmpl = product.product_tmpl_id
+            if tmpl.id in seen_tmpl_ids:
+                continue
+            seen_tmpl_ids.add(tmpl.id)
+
+            # Build W×L×H string from dimension fields
+            wlh_parts = [line.width, line.length, line.high]
+            if any(wlh_parts):
+                width_length_high = "×".join(
+                    str(int(v) if v == int(v) else v) for v in wlh_parts
+                )
+            else:
+                width_length_high = False
+
+            # Update assortment product (is_assortment)
+            assortment_vals = {
+                "weight": line.assortment_gross_weight,
+                "net_weight": line.assortment_net_weight,
+                "volume": line.volume,
+            }
+            if width_length_high:
+                assortment_vals["width_length_high"] = width_length_high
+            tmpl.write(assortment_vals)
+
+            # Update pair products linked via product_tmpl_single_id
+            pair_tmpl = getattr(product, "product_tmpl_single_id", False)
+            if not pair_tmpl:
+                continue
+            pairs = line.pairs or 1.0
+            pair_vals = {
+                "weight": line.pair_gross_weight,
+                "net_weight": line.pair_net_weight,
+                "volume": line.volume / pairs,
+            }
+            if width_length_high:
+                pair_vals["width_length_high"] = width_length_high
+            pair_tmpl.write(pair_vals)
 
     def _split_picking(self, picking, remaining_moves):
         """

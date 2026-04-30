@@ -17,13 +17,6 @@ class StockMoveShoes(models.Model):
         compute='_compute_is_mto',
         store=True,
     )
-    partner_id = fields.Many2one(
-        'res.partner',
-        string='Cliente',
-        related='picking_id.partner_id',
-        store=True,
-        readonly=True,
-    )
     shoes_reserved_qty = fields.Float(
         string='Reservado',
         compute='_compute_shoes_reserved_qty',

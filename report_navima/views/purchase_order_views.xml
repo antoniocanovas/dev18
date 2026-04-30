@@ -19,6 +19,12 @@
                         <span class="o_stat_text">shoes Pair</span>
                     </div>
                 </button>
+                <button type="object"
+                        name="action_download_carton_detail_xlsx"
+                        class="oe_stat_button"
+                        icon="fa-file-excel-o"
+                        invisible="shoes_pair_line_count == 0"
+                        string="Carton Detail"/>
             </xpath>
         </field>
     </record>

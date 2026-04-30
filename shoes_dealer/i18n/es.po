@@ -571,12 +571,12 @@ msgstr "Desc pronto pago"
 #. module: shoes_dealer
 #: model:ir.model.fields,field_description:shoes_dealer.field_res_company__single_purchase
 msgid "Enable pair purchase"
-msgstr "Permitir compra de par"
+msgstr "Comprar pares"
 
 #. module: shoes_dealer
 #: model:ir.model.fields,field_description:shoes_dealer.field_res_company__single_sale
 msgid "Enable pair sales"
-msgstr "Permitir venta de pares"
+msgstr "Vender pares"
 
 #. module: shoes_dealer
 #: model:ir.model.fields,help:shoes_dealer.field_res_users__top_sales
@@ -1138,7 +1138,7 @@ msgstr "Peso estándar par"
 #. module: shoes_dealer
 #: model:ir.model.fields,field_description:shoes_dealer.field_res_company__shoes_pair_weight_std
 msgid "Pair standard price"
-msgstr "Precio standar par"
+msgstr "Precio estándar par"
 
 #. module: shoes_dealer
 #: model:ir.model.fields,field_description:shoes_dealer.field_shoes_pair_weight__pair_weight

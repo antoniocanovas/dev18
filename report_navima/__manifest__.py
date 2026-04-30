@@ -28,6 +28,7 @@
         "sale_product_image",
         "pnt_mass_ir_action_report",
         "shoes_analysis",
+        "shoes_shippingmark",
     ],
     "author": "Punt Sistemes",
     "category": "Project",

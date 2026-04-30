@@ -21,7 +21,7 @@
 
 {
     "name": "Custom Navima",
-    "version": "18.0",
+    "version": "18.0.1.0.0",
     "depends": [
         "product",
         "stock",
@@ -30,8 +30,8 @@
         "shoes_dealer",
         "shoes_campaign",
         "intrastat_duty",
-        "sale_order_type",
         "purchase",
+        "sale_order_type",
     ],
     "author": "Punt Sistemes",
     "category": "Stock",
@@ -45,7 +45,6 @@
         "views/stock_picking_views.xml",
         "views/res_partner_views.xml",
         "views/intrastat_duty_views.xml",
-        "views/purchase_order_views.xml",
         "views/sale_order_views.xml",
         "views/product_template_views.xml",
     ],

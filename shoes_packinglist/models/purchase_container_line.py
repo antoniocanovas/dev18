@@ -25,7 +25,7 @@ class PurchaseContainerLine(models.Model):
         index=True,
     )
     shoes_campaign = fields.Char(string="Campaign")
-    name = fields.Char(string="Product Ref.")
+    name = fields.Char(string="Product")
     color = fields.Char(string="Color")
     pairs = fields.Float(string="Pairs", digits="Product Unit of Measure")
     purchase_order = fields.Char(string="Purchase Order")

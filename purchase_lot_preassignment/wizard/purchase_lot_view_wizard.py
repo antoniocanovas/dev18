@@ -75,17 +75,16 @@ class PurchaseLotViewWizard(models.TransientModel):
         """
         for wizard in self:
             if wizard.purchase_order_id:
-                # Obtener los sale orders relacionados con el purchase order
-                sale_orders = wizard.purchase_order_id._get_sale_orders()
-
-                # Buscar los lotes cuyo 'ref' coincide con los nombres de los sale
-                # orders
-                # E501: Split long line
-                lot_names = sale_orders.mapped("name")
+                po = wizard.purchase_order_id
+                # Lotes de pedidos de venta vinculados al PO
+                sale_orders = po._get_sale_orders()
+                lot_refs = sale_orders.mapped("name")
+                # Lotes creados directamente para este PO (sin SO vinculado)
+                lot_refs.append(po.name)
                 lots = self.env["stock.lot"].search(
                     [
-                        ("ref", "in", lot_names),
-                        ("company_id", "=", wizard.purchase_order_id.company_id.id),
+                        ("ref", "in", lot_refs),
+                        ("company_id", "=", po.company_id.id),
                     ]
                 )
                 wizard.available_lot_ids = lots

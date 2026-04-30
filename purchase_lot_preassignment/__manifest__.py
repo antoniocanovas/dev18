@@ -32,6 +32,7 @@
         "report/purchase_lot_label_zpl.xml",
         "wizard/purchase_lot_view_wizard_views.xml",
         "wizard/sale_lot_view_wizard_views.xml",
+        "views/res_company_views.xml",
         "views/purchase_order_views.xml",
         "views/sale_order_views.xml",
         "views/stock_picking_views.xml",

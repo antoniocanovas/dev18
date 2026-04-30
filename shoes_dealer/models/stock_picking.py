@@ -7,6 +7,11 @@ from odoo.exceptions import UserError, ValidationError
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    shoes_delivery_date_from = fields.Datetime(
+        string="Delivery from",
+        copy=True,
+    )
+
     # Comercialmente en cada Albaran quieren saber cuántos pares se han vendido:
     def _get_shoes_pair_count(self):
         for record in self:

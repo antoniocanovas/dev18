@@ -32,7 +32,12 @@
             </field>
             <field name="date_order" position="after">
                 <field name="date_cancellation_limit" readonly="state not in ['draft','sent']"/>
-                <field name="commitment_date" readonly="state not in ['draft','sent']"/>
+                <field name="commitment_date" invisible="1" readonly="state not in ['draft','sent']"/>
+                <field name="shoes_delivery_date_from"
+                       string="Delivery date"
+                       widget="daterange"
+                       options="{'end_date_field': 'commitment_date'}"
+                       readonly="state not in ['draft','sent']"/>
             </field>
             <field name="note" position="before">
                 <field name="pairs_count"/>

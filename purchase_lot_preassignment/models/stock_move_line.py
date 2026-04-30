@@ -80,18 +80,21 @@ class StockMoveLine(models.Model):
                         # --- Lógica de Trazabilidad ---
                         # Caso 1: Trazabilidad por Número de Serie
                         if product.tracking == "serial":
-                            # Para series, solo reservamos si no hay ya una reserva
-                            # para este lote/serie.
-                            # Esto evita duplicados en caso de que la acción
-                            # se ejecute varias veces.
-                            already_reserved = self.env["stock.move.line"].search_count(
-                                [
-                                    ("move_id", "=", target_move.id),
-                                    ("lot_id", "=", lot.id),
-                                ]
+                            reserved_qty = sum(
+                                target_move.move_line_ids.mapped("quantity")
                             )
-                            if not already_reserved:
-                                qty_to_reserve = 1
+                            # Solo reservar si la entrega aún no está completa
+                            if reserved_qty < target_move.product_uom_qty:
+                                already_reserved = self.env[
+                                    "stock.move.line"
+                                ].search_count(
+                                    [
+                                        ("move_id", "=", target_move.id),
+                                        ("lot_id", "=", lot.id),
+                                    ]
+                                )
+                                if not already_reserved:
+                                    qty_to_reserve = 1
                         # Caso 2: Trazabilidad por Lote
                         elif product.tracking == "lot":
                             qty_received_in_lot = record.quantity
