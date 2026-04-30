@@ -1,7 +1,7 @@
 from odoo import fields, models
 
 
-class ProductTemplate(models.Model):
-    _inherit = "product.template"
+class ProductProduct(models.Model):
+    _inherit = "product.product"
 
     width_length_high = fields.Char(string="W×L×H (cm)")
