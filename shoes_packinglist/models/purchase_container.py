@@ -1,5 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 
 class PurchaseContainer(models.Model):
@@ -83,9 +84,17 @@ class PurchaseContainer(models.Model):
         # yet assigned to incoming move lines before reception. Match each lot to the
         # stock.move in the pending picking via the lot's product, with a more precise
         # secondary filter through the sale order when lot.ref is available.
+        #
+        # After a picking split, multiple moves exist for the same product. We use two
+        # strategies to pick the correct one:
+        #   1. If a move line already has this lot pre-assigned, use that move directly.
+        #   2. Among candidates, choose the first with remaining capacity (fewer
+        #      lot-assigned move lines than product_qty), also counting claims made
+        #      earlier in this same matching loop to handle multi-line containers.
         self.container_line_ids.write({"move_id": False})
 
         unmatched = self.env["purchase.container.line"]
+        session_lot_counts = {}  # move.id → lots claimed in this matching loop
         for line in self.container_line_ids:
             if not line.lot:
                 unmatched |= line
@@ -100,25 +109,63 @@ class PurchaseContainer(models.Model):
             if not lot:
                 unmatched |= line
                 continue
-            # Build base domain: product in pending pickings, not done/cancel
-            base_domain = [
-                ("picking_id", "in", pending_pickings.ids),
-                ("product_id", "=", lot.product_id.id),
-                ("state", "not in", ["done", "cancel"]),
-            ]
-            # Prefer match through the sale order chain (lot.ref = SO name)
-            # purchase_lot_preassignment sets lot.ref = sale order name
+
+            # Priority 1: move that already has this lot on a pre-assigned move line
             move = False
-            if lot.ref:
-                move = self.env["stock.move"].search(
-                    base_domain
-                    + [("purchase_line_id.sale_line_id.order_id.name", "=", lot.ref)],
-                    limit=1,
-                )
-            if not move:
-                move = self.env["stock.move"].search(base_domain, limit=1)
+            existing_ml = self.env["stock.move.line"].search(
+                [
+                    ("lot_id", "=", lot.id),
+                    ("picking_id", "in", pending_pickings.ids),
+                    ("state", "not in", ["done", "cancel"]),
+                ],
+                limit=1,
+            )
+            if existing_ml:
+                move = existing_ml.move_id
+            else:
+                # Build base domain: product in pending pickings, not done/cancel
+                base_domain = [
+                    ("picking_id", "in", pending_pickings.ids),
+                    ("product_id", "=", lot.product_id.id),
+                    ("state", "not in", ["done", "cancel"]),
+                ]
+                # Prefer match through the sale order chain (lot.ref = SO name)
+                candidates = self.env["stock.move"]
+                if lot.ref:
+                    candidates = self.env["stock.move"].search(
+                        base_domain
+                        + [
+                            (
+                                "purchase_line_id.sale_line_id.order_id.name",
+                                "=",
+                                lot.ref,
+                            )
+                        ]
+                    )
+                if not candidates:
+                    candidates = self.env["stock.move"].search(base_domain)
+
+                # Pick the first candidate that still has capacity for another lot
+                rounding = lot.product_id.uom_id.rounding
+                for candidate in candidates:
+                    existing_lot_lines = len(
+                        candidate.move_line_ids.filtered(
+                            lambda ml: ml.lot_id
+                            and ml.state not in ("done", "cancel")
+                        )
+                    )
+                    session_claims = session_lot_counts.get(candidate.id, 0)
+                    if float_compare(
+                        float(existing_lot_lines + session_claims),
+                        candidate.product_qty,
+                        precision_rounding=rounding,
+                    ) < 0:
+                        move = candidate
+                        break
+
             if move:
                 line.move_id = move
+                session_lot_counts[move.id] = session_lot_counts.get(move.id, 0) + 1
             else:
                 unmatched |= line
 
@@ -163,13 +210,39 @@ class PurchaseContainer(models.Model):
         involved_pickings = processed_lines.mapped("move_id.picking_id")
 
         for picking in involved_pickings:
-            matched_moves = processed_lines.filtered(
+            picking_lines = processed_lines.filtered(
                 lambda l: l.move_id.picking_id == picking
-            ).mapped("move_id")
+            )
+            matched_moves = picking_lines.mapped("move_id")
             all_moves = picking.move_ids.filtered(
                 lambda m: m.state not in ("done", "cancel")
             )
             remaining_moves = all_moves - matched_moves
+
+            # Split partially-covered moves: when fewer container lines than move qty
+            for move in matched_moves:
+                lines_for_move = picking_lines.filtered(lambda l: l.move_id == move)
+                container_qty = float(len(lines_for_move))
+                rounding = move.product_id.uom_id.rounding
+                if float_compare(container_qty, move.product_qty, precision_rounding=rounding) < 0:
+                    backorder_qty = move.product_qty - container_qty
+                    new_move_vals_list = move._split(backorder_qty)
+                    if new_move_vals_list:
+                        new_move = self.env["stock.move"].create(new_move_vals_list)
+                        remaining_moves |= new_move
+                        # Redistribute pre-assigned lot move lines: lots not in this
+                        # container belong to the backorder move
+                        container_lot_names = set(lines_for_move.mapped("lot"))
+                        backorder_mls = move.move_line_ids.filtered(
+                            lambda ml: ml.lot_id
+                            and ml.lot_id.name not in container_lot_names
+                            and ml.state not in ("done", "cancel")
+                        )
+                        if backorder_mls:
+                            backorder_mls.write({
+                                "move_id": new_move.id,
+                                "picking_id": new_move.picking_id.id,
+                            })
 
             if not remaining_moves:
                 picking.container_id = self.id
@@ -330,3 +403,5 @@ class PurchaseContainer(models.Model):
             move.write({"picking_id": backorder.id})
             if pending_mls:
                 pending_mls.write({"picking_id": backorder.id})
+
+        backorder.with_context(do_not_check_immediately_transfer=True).action_confirm()

@@ -6,7 +6,7 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@name='volume']" position="after">
+            <xpath expr="//group[@name='weight']/div[field[@name='volume']]" position="after">
                 <label for="width_length_high"/>
                 <div class="o_row">
                     <field name="width_length_high"/>

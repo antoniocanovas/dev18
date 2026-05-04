@@ -61,8 +61,20 @@ Al validar una línea de recepción de compra (`stock.move.line` en estado `done
 
 ### Botón "Ver lotes" en ventas y albaranes
 
-Desde el pedido de venta y desde el albarán se puede acceder a un wizard que muestra todos los lotes asociados
-al pedido, buscando por `lot.ref = nombre del pedido de venta`.
+Desde el pedido de venta y desde el albarán se puede acceder a un wizard que muestra los lotes asociados.
+
+**En pedidos de venta:** busca lotes por `lot.ref = nombre del pedido de venta`.
+
+**En albaranes de recepción:** la lógica depende del estado de procesamiento del packing list:
+
+- **Post-procesamiento** (el albarán ya tiene move lines con lotes asignados por `shoes_packinglist`):
+  muestra únicamente los lotes en `picking.move_line_ids.lot_id`. Cada albarán muestra solo sus
+  propios lotes, lo que es correcto tras dividir el albarán original entre varios contenedores.
+
+- **Pre-procesamiento** (sin move lines con lotes todavía): muestra todos los lotes del PO
+  vinculado, excluyendo los que ya están asignados en move lines de otros albaranes del mismo PO.
+
+**En albaranes de entrega:** busca lotes por `lot.ref = nombre del pedido de venta` del albarán.
 
 ### Botón "Etiquetas" en compras
 

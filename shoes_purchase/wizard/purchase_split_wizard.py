@@ -1,4 +1,4 @@
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
@@ -13,38 +13,6 @@ class PurchaseSplitWizard(models.TransientModel):
         readonly=True,
     )
 
-    # --- Filtros opcionales ---
-    filter_campaign_id = fields.Many2one(
-        "project.project",
-        string="Temporada",
-    )
-    filter_partner_id = fields.Many2one(
-        "res.partner",
-        string="Cliente (SO)",
-    )
-    filter_product_id = fields.Many2one(
-        "product.product",
-        string="Artículo",
-    )
-    filter_product_tmpl_id = fields.Many2one(
-        "product.template",
-        string="Plantilla de producto",
-    )
-    filter_shippingmark_id = fields.Many2one(
-        "sale.order.type",
-        string="Shipping Mark",
-    )
-
-    # --- Líneas disponibles según filtros (dominio para line_ids) ---
-    # Sin tabla de relación: campo computed no-store no necesita tabla DB
-    available_line_ids = fields.Many2many(
-        "purchase.order.line",
-        string="Líneas disponibles",
-        compute="_compute_available_line_ids",
-        store=False,
-    )
-
-    # --- Líneas a conservar en el PO original ---
     line_ids = fields.Many2many(
         "purchase.order.line",
         "purchase_split_wizard_keep_rel",
@@ -52,45 +20,6 @@ class PurchaseSplitWizard(models.TransientModel):
         "line_id",
         string="Líneas a conservar en el pedido original",
     )
-
-    @api.depends(
-        "purchase_order_id",
-        "filter_campaign_id",
-        "filter_partner_id",
-        "filter_product_id",
-        "filter_product_tmpl_id",
-        "filter_shippingmark_id",
-    )
-    def _compute_available_line_ids(self):
-        for wiz in self:
-            if not wiz.purchase_order_id:
-                wiz.available_line_ids = False
-                continue
-            domain = [("order_id", "=", wiz.purchase_order_id.id)]
-            if wiz.filter_campaign_id:
-                # shoes_campaign_id no es stored en POL, se filtra por el PO padre
-                domain.append(("order_id.shoes_campaign_id", "=", wiz.filter_campaign_id.id))
-            if wiz.filter_partner_id:
-                # sale_order_id es related stored (sale_line_id.order_id) desde sale_purchase
-                domain.append(("sale_order_id.partner_id", "=", wiz.filter_partner_id.id))
-            if wiz.filter_product_id:
-                domain.append(("product_id", "=", wiz.filter_product_id.id))
-            if wiz.filter_product_tmpl_id:
-                # product_tmpl_id no es stored en POL, se filtra vía product_id
-                domain.append(("product_id.product_tmpl_id", "=", wiz.filter_product_tmpl_id.id))
-            if wiz.filter_shippingmark_id:
-                domain.append(("pnt_sale_type_id", "=", wiz.filter_shippingmark_id.id))
-            wiz.available_line_ids = self.env["purchase.order.line"].search(domain)
-
-    @api.onchange(
-        "filter_campaign_id",
-        "filter_partner_id",
-        "filter_product_id",
-        "filter_product_tmpl_id",
-        "filter_shippingmark_id",
-    )
-    def _onchange_filters(self):
-        self.line_ids = False
 
     def action_split(self):
         self.ensure_one()

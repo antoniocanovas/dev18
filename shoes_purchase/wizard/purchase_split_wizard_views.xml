@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- List view for purchase.order.line used in the split wizard add-line dialog.
+         priority=10 so it takes precedence over the base purchase view (priority=16).
+         The OCA menu action is unaffected because it specifies view_id explicitly. -->
+    <record id="purchase_order_line_list_split" model="ir.ui.view">
+        <field name="name">purchase.order.line.list.split</field>
+        <field name="model">purchase.order.line</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <list string="Líneas de pedido">
+                <field name="product_id" string="Artículo"/>
+                <field name="sale_order_id" string="Pedido de venta"/>
+                <field name="pnt_sale_type_id" string="Shipping Mark"/>
+                <field name="product_qty" string="Cantidad"/>
+                <field name="price_unit" string="Precio unit."/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Extend the base purchase search view to add group-by and search options.
+         Being an extension (mode=extension, the default), these changes apply to:
+           - the base view itself  → used by the "Add a line" dialog (priority=16)
+           - the OCA primary variant → built on top of the extended base arch -->
+    <record id="purchase_order_line_search_split" model="ir.ui.view">
+        <field name="name">purchase.order.line.search.split</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_search"/>
+        <field name="arch" type="xml">
+            <!-- Add search fields after the existing partner_id field -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sale_order_id" string="Pedido de venta"/>
+                <field name="pnt_sale_type_id" string="Shipping Mark"/>
+            </xpath>
+            <!-- Add group-by options inside the existing Group By section -->
+            <xpath expr="//group" position="inside">
+                <separator/>
+                <filter string="Pedido de venta" name="groupby_sale_order"
+                        context="{'group_by': 'sale_order_id'}"/>
+                <filter string="Shipping Mark" name="groupby_shippingmark"
+                        context="{'group_by': 'pnt_sale_type_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="purchase_split_wizard_form" model="ir.ui.view">
         <field name="name">purchase.split.wizard.form</field>
         <field name="model">purchase.split.wizard</field>
@@ -8,23 +51,11 @@
                 <sheet>
                     <group>
                         <field name="purchase_order_id" readonly="1"/>
-                        <field name="available_line_ids" invisible="1"/>
-                    </group>
-                    <group string="Filtros">
-                        <group>
-                            <field name="filter_campaign_id"/>
-                            <field name="filter_product_id"/>
-                            <field name="filter_product_tmpl_id"/>
-                        </group>
-                        <group>
-                            <field name="filter_partner_id"/>
-                            <field name="filter_shippingmark_id"/>
-                        </group>
                     </group>
                     <separator string="Líneas a conservar en el pedido original"/>
                     <field name="line_ids"
                            nolabel="1"
-                           domain="[('id', 'in', available_line_ids)]">
+                           domain="[('order_id', '=', purchase_order_id)]">
                         <list string="Líneas a conservar">
                             <field name="product_id"/>
                             <field name="sale_order_id" string="Pedido de venta" optional="show"/>

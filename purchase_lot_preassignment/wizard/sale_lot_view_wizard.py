@@ -72,16 +72,36 @@ class SaleLotViewWizard(models.TransientModel):
             elif wizard.picking_id:
                 # Para pickings, buscar según el tipo
                 if wizard.picking_id.picking_type_id.code == "incoming":
-                    # Para recepciones, buscar por sale orders relacionados
-                    if wizard.picking_id.purchase_id:
+                    # Si ya hay move lines con lote asignadas (post-packing list), usarlas
+                    lot_from_lines = wizard.picking_id.move_line_ids.filtered(
+                        lambda ml: ml.lot_id and ml.state not in ("done", "cancel")
+                    ).mapped("lot_id")
+                    if lot_from_lines:
+                        lots = lot_from_lines
+                    elif wizard.picking_id.purchase_id:
+                        # Fallback antes del procesamiento del packing list:
+                        # mostrar lotes del PO excluyendo los ya asignados a otros albaranes
                         sale_orders = wizard.picking_id.purchase_id._get_sale_orders()
                         lot_names = sale_orders.mapped("name")
-                        lots = self.env["stock.lot"].search(
+                        all_po_lots = self.env["stock.lot"].search(
                             [
                                 ("ref", "in", lot_names),
                                 ("company_id", "=", wizard.picking_id.company_id.id),
                             ]
                         )
+                        already_claimed = self.env["stock.move.line"].search(
+                            [
+                                ("picking_id", "!=", wizard.picking_id.id),
+                                (
+                                    "picking_id.purchase_id",
+                                    "=",
+                                    wizard.picking_id.purchase_id.id,
+                                ),
+                                ("lot_id", "in", all_po_lots.ids),
+                                ("state", "not in", ["done", "cancel"]),
+                            ]
+                        ).mapped("lot_id")
+                        lots = all_po_lots - already_claimed
                 elif wizard.picking_id.picking_type_id.code == "outgoing":
                     # Para entregas de venta, buscar por sale order
                     if wizard.picking_id.sale_id:

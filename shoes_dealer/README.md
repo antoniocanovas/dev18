@@ -215,6 +215,13 @@ depends = [
 ]
 ```
 
+**Módulos opcionales que amplían funcionalidad:**
+
+| Módulo | Funcionalidad añadida |
+|--------|-----------------------|
+| `shoes_shippingmark` | Exclusividad de stock por Shipping Mark en el cálculo de compra neta |
+| `shoes_intrastat_duty` | Precio recomendado calculado sobre coste de aterrizaje (exwork + arancel) |
+
 ---
 
 ## Instalación
