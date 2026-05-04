@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_merge_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.merge.wizard.form</field>
+        <field name="model">purchase.merge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fusionar pedidos de compra">
+                <sheet>
+                    <field name="can_merge" invisible="1"/>
+                    <field name="survivor_id" invisible="1"/>
+                    <div class="alert alert-danger" role="alert" invisible="can_merge">
+                        <field name="validation_error" readonly="1" nolabel="1"/>
+                    </div>
+                    <group invisible="not can_merge">
+                        <group string="Pedido superviviente">
+                            <field name="survivor_id" readonly="1"/>
+                        </group>
+                        <group string="Notas fusionadas">
+                            <field name="merged_notes" readonly="1" nolabel="1"/>
+                        </group>
+                    </group>
+                    <separator string="Pedidos que se fusionarán" invisible="not can_merge"/>
+                    <field name="purchase_order_ids"
+                           readonly="1"
+                           nolabel="1"
+                           invisible="not can_merge">
+                        <list string="Pedidos a fusionar">
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="shoes_campaign_id"/>
+                            <field name="date_planned" string="Fecha entrega"/>
+                            <field name="amount_total" string="Total"/>
+                        </list>
+                    </field>
+                    <div class="alert alert-warning mt-2" role="alert" invisible="not can_merge">
+                        Los pedidos <strong>no supervivientes</strong> serán
+                        <strong>eliminados</strong> tras la fusión. Esta operación
+                        no se puede deshacer.
+                    </div>
+                </sheet>
+                <footer>
+                    <button string="Fusionar"
+                            name="action_merge"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not can_merge"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
