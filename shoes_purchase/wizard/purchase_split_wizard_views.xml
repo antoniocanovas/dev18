@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_split_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.split.wizard.form</field>
+        <field name="model">purchase.split.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Dividir pedido de compra">
+                <sheet>
+                    <group>
+                        <field name="purchase_order_id" readonly="1"/>
+                        <field name="available_line_ids" invisible="1"/>
+                    </group>
+                    <group string="Filtros">
+                        <group>
+                            <field name="filter_campaign_id"/>
+                            <field name="filter_product_id"/>
+                            <field name="filter_product_tmpl_id"/>
+                        </group>
+                        <group>
+                            <field name="filter_partner_id"/>
+                            <field name="filter_shippingmark_id"/>
+                        </group>
+                    </group>
+                    <separator string="Líneas a conservar en el pedido original"/>
+                    <field name="line_ids"
+                           nolabel="1"
+                           domain="[('id', 'in', available_line_ids)]">
+                        <list string="Líneas a conservar">
+                            <field name="product_id"/>
+                            <field name="sale_order_id" string="Pedido de venta" optional="show"/>
+                            <field name="pnt_sale_type_id" string="Shipping Mark" optional="show"/>
+                            <field name="product_qty" string="Cantidad"/>
+                            <field name="price_unit" string="Precio unit."/>
+                            <field name="pairs_count" string="Pares" optional="show"/>
+                        </list>
+                    </field>
+                    <div class="alert alert-info mt-2" role="alert">
+                        Las líneas <strong>no seleccionadas</strong> del pedido original
+                        pasarán al nuevo pedido de compra.
+                    </div>
+                </sheet>
+                <footer>
+                    <button string="Dividir pedido"
+                            name="action_split"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
