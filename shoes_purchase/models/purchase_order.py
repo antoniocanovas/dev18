@@ -14,3 +14,13 @@ class PurchaseOrder(models.Model):
             "target": "new",
             "context": {"default_purchase_order_id": self.id},
         }
+
+    def action_open_merge_wizard(self):
+        return {
+            "name": "Fusionar pedidos de compra",
+            "type": "ir.actions.act_window",
+            "res_model": "purchase.merge.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_purchase_order_ids": self.ids},
+        }
