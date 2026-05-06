@@ -17,6 +17,16 @@ class SaleOrder(models.Model):
         return qty_sold
 
     def action_cancel(self):
+        # Eliminar líneas de compra en borrador vinculadas a líneas de este pedido
+        draft_pols = self.env["purchase.order.line"]
+        for order in self:
+            for line in order.order_line:
+                pol = line.purchase_line_id
+                if pol and pol.order_id.state == "draft":
+                    draft_pols |= pol
+        if draft_pols:
+            draft_pols.unlink()
+
         # Limpiar antes: evita que lotes creados durante el cancel queden huérfanos
         for order in self:
             order._delete_unused_lots()

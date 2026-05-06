@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_product_pricelist_inh_form" model="ir.ui.view">
+        <field name="name">shoes.product.pricelist.inh.form</field>
+        <field name="model">product.pricelist</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <field name="company_id" position="after">
+                <field name="pnt_campaign_filter_ids" widget="many2many_tags"/>
+            </field>
+            
+            <!-- Reemplazar completamente el campo item_ids -->
+            <xpath expr="//page[@name='pricelist_rules']" position="replace">
+                <page name="pricelist_rules" string="Price Rules">
+                    <!-- Campo original: editable, visible solo cuando NO hay filtro -->
+                    <field name="item_ids" 
+                           nolabel="1" 
+                           context="{'default_base':'list_price'}"
+                           invisible="pnt_campaign_filter_ids">
+                        <list string="Pricelist Rules">
+                            <field name="product_tmpl_id" column_invisible="True"/>
+                            <field name="name" string="Apply on"/>
+                            <field name="price" string="Price"/>
+                            <field name="min_quantity"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="base" column_invisible="True"/>
+                            <field name="price_discount" column_invisible="True"/>
+                            <field name="applied_on" column_invisible="True"/>
+                            <field name="compute_price" column_invisible="True"/>
+                        </list>
+                    </field>
+                    
+                    <!-- Campo filtrado: read-only, visible solo cuando HAY filtro -->
+                    <field name="pnt_item_ids" 
+                           nolabel="1"
+                           invisible="not pnt_campaign_filter_ids">
+                        <list string="Filtered Pricelist Rules" create="false" delete="false">
+                            <field name="product_tmpl_id" column_invisible="True"/>
+                            <field name="name" string="Apply on"/>
+                            <field name="price" string="Price"/>
+                            <field name="min_quantity"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="base" column_invisible="True"/>
+                            <field name="price_discount" column_invisible="True"/>
+                            <field name="applied_on" column_invisible="True"/>
+                            <field name="compute_price" column_invisible="True"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            
+            <xpath expr="//notebook" position="inside">
+                <page string="Recalculation" >
+                    <group name="pricelist_recalculation" string="Product prices recalculation">
+                        <field name="shoes_campaign_id" widget="selection"/>
+                        <field name="recalculation_type"/>
+                        <field name="marketing_discount"/>
+                        <field name="margin" />
+                        <field name="dollar_exchange" />
+                    </group>
+                    <group invisible="not shoes_campaign_id or not recalculation_type">
+                        <button class="oe_highlight"
+                                type="object"
+                                name="campaign_pricelist_recalculation"
+                                string="Recalculate"/>
+                    </group>
+                    <group name="product_template_in_pricelist">
+                        <field name="product_tmpl_ids" groups="base.group_no_one"/>
+                    </group>
+                </page>
+                <page string="Pairs" name="pairs_pricelist">
+                    <field name="product_tmpl_item_ids">
+                        <list>
+                            <field name="product_tmpl_id"/>
+                            <field name="price"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -41,7 +41,16 @@ Añade el campo `width_length_high` (Char) para almacenar las dimensiones de la 
 
 ### `stock.lot`
 
-Añade los campos `weight`, `net_weight`, `volume` y `width_length_high` para registrar los datos físicos del lote tal como aparecen en el packing list.
+Añade los siguientes campos:
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `weight` | Float | Peso bruto del surtido (kg) |
+| `net_weight` | Float | Peso neto del surtido (kg) |
+| `volume` | Float | Volumen (m³) |
+| `width_length_high` | Char | Dimensiones en formato `W×L×H (cm)` |
+| `container_line_id` | Many2one → `purchase.container.line` | Línea del packing list de la que procede el lote. Con `ondelete="set null"`: si se borra la línea el enlace desaparece automáticamente. |
+| `container_id` | Many2one → `purchase.container` | Campo calculado (`related="container_line_id.container_id"`, `store=True`). Solo lectura; refleja el contenedor de la línea enlazada. |
 
 ---
 
@@ -93,12 +102,14 @@ Tras el emparejamiento, para cada albarán implicado:
 
 | Destino | Campos actualizados |
 |---------|-------------------|
-| `stock.lot` | `weight`, `net_weight`, `volume`, `width_length_high` |
+| `stock.lot` | `weight`, `net_weight`, `volume`, `width_length_high`, `container_line_id` |
 | `product.template` (surtido) | `weight`, `net_weight`, `volume` |
 | `product.product` (surtido) | `width_length_high` |
 | `product.template` (par, via `product_tmpl_single_id`) | `weight` (pair_gross), `net_weight` (pair_net), `volume / pairs` |
 
 La actualización de producto está deduplicada por `product.id` para evitar escrituras repetidas del mismo producto en el mismo contenedor.
+
+Al inicio de `_process_packing_list_update` se limpian los `container_line_id` de todos los lotes que tenían enlace a este contenedor, antes de volver a asignarlos. Esto garantiza que una re-ejecución parte siempre de un estado limpio. Adicionalmente, el `ondelete="set null"` en `container_line_id` hace que, si una línea del packing list es eliminada directamente, el lote pierda el enlace sin necesidad de ninguna lógica adicional.
 
 ---
 

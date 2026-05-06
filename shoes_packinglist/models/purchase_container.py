@@ -203,6 +203,12 @@ class PurchaseContainer(models.Model):
     def _process_packing_list_update(self):
         """Split pickings and update container metrics. Called after lot matching."""
         self.ensure_one()
+
+        # Clear container reference from any lot previously linked to this container
+        self.env["stock.lot"].search([("container_id", "=", self.id)]).write(
+            {"container_line_id": False}
+        )
+
         processed_lines = self.container_line_ids.filtered("move_id")
         if not processed_lines:
             return
@@ -345,6 +351,7 @@ class PurchaseContainer(models.Model):
                     "weight": line.assortment_gross_weight,
                     "net_weight": line.assortment_net_weight,
                     "volume": line.volume,
+                    "container_line_id": line.id,
                 }
                 if width_length_high:
                     lot_vals["width_length_high"] = width_length_high

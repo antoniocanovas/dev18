@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- ACCIONES DE VENTANA: -->
+    <record id="shoes_pricelist_act_window" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">action</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="filter" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="limit">80</field>
+        <field name="name">Shoes Pricelist</field>
+        <field name="res_model">shoes.pricelist</field>
+        <field name="search_view_id" eval="False"/>
+        <field name="target">current</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- SHOES PRICELIST MENU: -->
+    <record id="shoes_pricelist_menu" model="ir.ui.menu">
+        <field name="action" ref="shoes_pricelist_act_window"/>
+        <field name="active" eval="True"/>
+        <field name="name">Pricelist</field>
+        <field name="parent_id" ref="shoes_dealer.shoes_dealer_main_menu"/>
+        <field name="sequence">50</field>
+        <field name="web_icon" eval="False"/>
+    </record>
+
+    <!-- FORM VIEW: -->
+    <record id="shoes_pricelist_default_form" model="ir.ui.view">
+        <field name="name">shoes.pricelist.default.form</field>
+        <field name="model">shoes.pricelist</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                    <button name="update_shoes_pricelist" string="Update" type="object"
+                            icon="fa-tasks" class="oe_stat_button"
+                            invisible="not shoes_campaign_id or not pricelist_id"
+                            groups="sales_team.group_sale_salesman_all_leads">
+                    </button>
+                </header>
+                <sheet>
+                    <h1>
+                        <field name="name" placeholder="Pricelist name ..."/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="shoes_campaign_id"/>
+                            <field name="pricelist_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="product_tmpl_single_id"/>
+                            <field name="image" widget="image" options="{'size':[0,90]}" readonly="1" optional="show"/>
+                            <field name="pricelist_price"/>
+                            <field name="product_standard_price" options="{'currency_field': 'currency_id'}"/>
+                            <field name="product_single_price"/>
+                            <field name="shoes_campaign_id" column_invisible="1"/>
+                            <field name="pricelist_id" column_invisible="1"/>
+                            <field name="shoes_pricelist_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                    <group name="description" string="Description"></group>
+                    <field name="notes" placeholder="Notes"/>
+                </sheet>
+                <!-- Chatter -->
+                <chatter reload_on_attachment="True"/>
+            </form>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">form</field>
+    </record>
+
+    <!-- TREE VIEW: -->
+    <record id="shoes_pricelist_default_tree" model="ir.ui.view">
+        <field name="name">shoes.pricelist.default.tree</field>
+        <field name="model">shoes.pricelist</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" column_invisible="1"/>
+                <field name="shoes_campaign_id"/>
+                <field name="pricelist_id"/>
+                <field name="state"/>
+            </list>
+        </field>
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+        <field name="inherit_id" eval="False"/>
+        <field name="key" eval="False"/>
+        <field name="mode">primary</field>
+        <field name="priority">16</field>
+        <field name="type">list</field>
+    </record>
+
+</odoo>

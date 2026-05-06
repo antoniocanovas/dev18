@@ -8,6 +8,8 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
                 <group string="Packing List Data">
+                    <field name="container_line_id" colspan="2" readonly="1"/>
+                    <field name="container_id" colspan="2" readonly="1"/>
                     <group>
                         <field name="weight"/>
                         <field name="net_weight"/>
