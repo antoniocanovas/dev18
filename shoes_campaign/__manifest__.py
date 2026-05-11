@@ -1,8 +1,8 @@
 ##############################################################################
 #
 #    Punt Sistemes SL
-#    Copyright (C) 2024 - Punt Sistemes (http://www.puntsistemes.es). All Rights
-#    Reserved
+#    Copyright (C) 2024 - Punt Sistemes (http://www.puntsistemes.es).
+#    All Rights Reserved
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,37 +20,30 @@
 ##############################################################################
 
 {
-    "name": "reports navima",
+    "name": "Shoes Dealer Campaign",
     "version": "18.0",
     "depends": [
-        "purchase",
-        "sale_product_matrix",
-        "sale_product_image",
-        "pnt_mass_ir_action_report",
-        "shoes_analysis",
+        "product",
+        "project",
+        "product_brand",
+        "stock_delivery",
         "shoes_dealer",
-        "shoes_shippingmark",
+        "intrastat_duty",
     ],
     "author": "Punt Sistemes",
     "category": "Project",
     "website": "https://www.puntsistemes.es",
     "description": """
-        añade tabla de datos en la vista presupuesto,compras y ventas
+        Project attributes to shoes dealer campaign and product creation from tasks. 
     """,
     "data": [
+        "views/project_project_views.xml",
+        "views/product_template_views.xml",
+        "views/project_task_views.xml",
+        "views/shoes_type_views.xml",
+        "views/res_company_views.xml",
+        "views/shoes_closure_views.xml",
         "security/ir.model.access.csv",
-        "views/purchase_line_shoes_pair_line_views.xml",
-        "views/purchase_order_line_views.xml",
-        "views/purchase_order_views.xml",
-        "reports/sale_order.xml",
-        "reports/account_invoice_report_templates.xml",
-        "reports/purchase_order.xml",
-        "reports/report_delivery.xml",
-        "reports/lot_label_reports.xml",
-        "reports/lot_label_templates.xml",
-        "reports/location_barcode_templates.xml",
-        "reports/purchase_shoes_size_matrix_report.xml",
-        "reports/packing_list_report.xml",
     ],
     "demo": [],
     "installable": True,

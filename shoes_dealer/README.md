@@ -1,4 +1,4 @@
-# Shoes Dealer v18.0.1.0.0
+# Shoes Dealer v18.0.2.0.0
 
 ## Descripción
 
@@ -22,21 +22,44 @@ las compras al fabricante.
 
 ## Configuración inicial (res.company)
 
-Antes de usar el módulo hay que configurar en **Ajustes → Compañía**:
+Antes de usar el módulo hay que configurar en **Ajustes → Compañía**, pestaña **Shoes Dealer**:
 
-| Campo | Descripción |
-|-------|-------------|
-| `assortment_attribute_id` | Atributo de producto que identifica el surtido |
-| `size_attribute_id` | Atributo de talla |
-| `color_attribute_id` | Atributo de color |
-| `assortment_prefix` | Prefijo de referencia para surtidos (ej: `S.`) |
-| `single_prefix` | Prefijo para pares (ej: `P.`) |
-| `exwork_currency_id` | Moneda por defecto de los precios exwork |
-| `shoes_assortment_tracking` | Trazabilidad de surtidos (`lot`, `serial`, ninguno) |
-| `shoes_pair_tracking` | Trazabilidad de pares |
-| `shoes_pair_uom_id` | Unidad de medida para pares |
-| `shoes_categ_sync` | Sincroniza categoría contable automáticamente |
-| `purchase_all_sale` | **Ver sección "Compra neta" más abajo** |
+| Campo | Grupo | Descripción |
+|-------|-------|-------------|
+| `assortment_attribute_id` | Attributes | Atributo de producto que identifica el surtido |
+| `size_attribute_id` | Attributes | Atributo de talla |
+| `color_attribute_id` | Attributes | Atributo de color |
+| `assortment_prefix` | Attributes | Prefijo de referencia para surtidos (ej: `S.`) |
+| `single_prefix` | Attributes | Prefijo para pares (ej: `P.`) |
+| `exwork_currency_id` | Sale and purchases | Moneda por defecto de los precios exwork |
+| `shoes_pair_uom_id` | Attributes | Unidad de medida para pares |
+| `shoes_assortment_tracking` | Tracking | Trazabilidad de surtidos (`lot`, `serial`, ninguno) |
+| `shoes_pair_tracking` | Tracking | Trazabilidad de pares |
+| `shoes_categ_sync` | Sync options | Sincroniza categoría contable automáticamente |
+| `purchase_all_sale` | Sale and purchases | Ver sección "Compra neta" más abajo |
+| `lot_name_campaign` | LOT NAME | Prefija el nombre del lote con la campaña del pedido |
+| `lot_name_manufacturer` | LOT NAME | Prefija el nombre del lote con el campo `ref` del fabricante |
+| `lot_name_brand` | LOT NAME | Prefija el nombre del lote con el `code` de la marca |
+
+## Nomenclatura de lotes
+
+El nombre de cada lote se construye como:
+
+```
+[campaña][ref fabricante][code marca]{nombre base}
+```
+
+Donde `{nombre base}` es `{SO}-001`, `{SO}-002`... para trazabilidad serial, o `{SO}` para lote.
+
+Los tres prefijos son opcionales e independientes; se concatenan directamente sin separador.
+Si alguno está habilitado pero el dato correspondiente está vacío (campaña no asignada, fabricante sin `ref`, marca sin `code`), el sistema lanza un error explicativo antes de crear ningún lote.
+
+Ejemplos con `lot_name_campaign=True`, `lot_name_manufacturer=True`, `lot_name_brand=True`:
+
+| Campaña | Ref fabricante | Code marca | Nombre base | Resultado |
+|---------|---------------|------------|-------------|-----------|
+| FW26 | VK | BB | S0001-001 | `FW26VKBBS0001-001` |
+| FW26 | VK | — (desactivado) | S0001-001 | `FW26VKS0001-001` |
 
 ## Flujo de trabajo
 
@@ -52,6 +75,9 @@ Catálogo de hormas con material de suela, plantilla, plataforma, tipo de punta 
 **Materiales** (`Zapatos → Materiales`):
 Catálogo de materiales con imagen y código.
 
+**Marcas** (`product.brand`):
+Añade el campo `code` para identificar la marca con un código corto utilizable en la nomenclatura de lotes.
+
 ---
 
 ### 2. Crear un producto surtido
@@ -65,8 +91,8 @@ Catálogo de materiales con imagen y código.
 
 El precio recomendado se calcula como `exwork + exwork × margen / 100`. Si el módulo
 `shoes_intrastat_duty` está instalado, la base del cálculo pasa a ser el coste de
-aterrizaje estimado (exwork + arancel aduanero) en lugar del exwork directo. Ver README
-de ese módulo para más detalle.
+aterrizaje estimado (exwork + arancel aduanero) en lugar del exwork directo.
+
 3. Ejecutar la acción **"Create shoe pairs"**. El sistema:
    - Crea el `product.template` del par con atributos de color y talla
    - Crea variantes del surtido (una por color × surtido)
@@ -109,19 +135,14 @@ línea de venta mediante `purchase_line_id`.
 | PO en borrador, qty sube | Actualiza qty en compra, crea los lotes adicionales |
 | PO confirmada, qty sube | **Error**: indica añadir nueva línea en el presupuesto |
 | PO confirmada, qty baja | No modifica la compra ni los lotes (el sobrante queda en stock) |
-| Sin PO (qty neta = 0), qty cambia | Sincroniza lotes si corresponde |
-
-Añadir una nueva línea a una venta ya confirmada también genera automáticamente
-la línea de compra correspondiente (si el producto es surtido).
 
 ---
 
 ### 5. Compra neta (`purchase_all_sale`)
 
-El campo `purchase_all_sale` en `res.company` (pestaña **Shoes Dealer**, grupo "Sale and purchases")
-controla cuántas unidades se compran al confirmar una venta:
+El campo `purchase_all_sale` en `res.company` controla cuántas unidades se compran al confirmar una venta:
 
-**`True` (por defecto):** se compra la totalidad de lo vendido, sin considerar el stock disponible.
+**`True` (por defecto):** se compra la totalidad de lo vendido.
 
 **`False`:** se calcula la cantidad neta a comprar:
 
@@ -133,31 +154,40 @@ Donde:
 - **stock disponible**: unidades en ubicaciones internas no reservadas para otros pedidos,
   más las ya reservadas para el albarán de salida de este pedido. Si el cliente tiene
   *shipping marks* exclusivos (`shoes_shippingmark`), solo se cuenta el stock compatible.
-  Si el tipo de reserva del albarán es "no reservar", se usa el stock físicamente libre.
-- **entradas libres pendientes**: movimientos de compra pendientes de recibir sin pedido
-  de venta vinculado (`purchase_line_id.sale_line_id = False`).
+- **entradas libres pendientes**: movimientos de compra pendientes sin pedido de venta vinculado.
 
 Reglas especiales:
-- Los **surtidos personalizados** (`product_custom_attribute_value_ids`) siempre compran
-  la cantidad completa, independientemente del campo.
+- Los **surtidos personalizados** siempre compran la cantidad completa.
 - Si `qty_to_buy ≤ 0`, no se crea línea de compra ni lotes para esa línea.
-- Los lotes creados por `purchase_lot_preassignment` reflejan la cantidad comprada,
-  no la vendida.
 
 ---
 
-### 6. Recibir la compra
+### 6. Generación de lotes
+
+Los lotes se crean automáticamente al confirmar un pedido de venta (`create_lots_for_sale_order`) y al crear o modificar líneas en pedidos de compra directa (`create_lots_for_purchase_order`).
+
+En ambos casos, el nombre del lote se construye con los prefijos configurados en `res.company` (campaña, fabricante, marca). La búsqueda de lotes existentes usa el nombre completo con prefijo, garantizando idempotencia sin conflictos de nombre.
+
+Los lotes de venta reciben `sale_id` apuntando al pedido de venta, lo que permite:
+- Localizar todos los lotes de un pedido sin depender del campo `ref`.
+- Propagar automáticamente el campo `client_order_ref` del pedido de venta al lote (campo related con `store=True`).
+- Limpiar lotes por `sale_id` en `_delete_unused_lots`, más fiable que la búsqueda por nombre de pedido.
+
+Los disparadores de sincronización de lotes en `purchase.order.line` (create/write/unlink) filtran por `is_assortment`, ya que la lógica de pre-asignación de lotes aplica únicamente a productos surtido.
+
+---
+
+### 7. Recibir la compra
 
 Al validar el albarán de recepción, el automatismo de `purchase_lot_preassignment` reserva los lotes
 en el albarán de venta.
 
 Cuando una `stock.move.line` llega a estado `done`, si el producto es un surtido, el sistema crea
 registros `assortment.pair` para cada par contenido (parseando las tallas y cantidades del BOM).
-Estos registros permiten consultar el inventario de pares por separado del de surtidos.
 
 ---
 
-### 7. Facturar
+### 8. Facturar
 
 Las líneas de factura heredan automáticamente:
 
@@ -179,7 +209,8 @@ Las líneas de factura heredan automáticamente:
 | Unlink en `product.template.attribute.value` (color/talla de surtido) | Limpia colores/tallas no usados del par |
 | Write en `stock.move.line` → `state = done` (surtido) | Crea registros `assortment.pair` |
 | Cron diario | Elimina `assortment.pair` con cantidad 0 |
-| Write en `sale.order` → `state = sale` | Crea lotes (via `purchase_lot_preassignment`) |
+| Write en `sale.order` → `state = sale` | Crea lotes vía `create_lots_for_sale_order` |
+| Create/write/unlink en `purchase.order.line` (is_assortment) | Sincroniza lotes vía `create_lots_for_purchase_order` |
 
 ---
 
@@ -194,6 +225,14 @@ Las líneas de factura heredan automáticamente:
 | `shoes.pair.weight` | Pesos estándar por par (bruto y neto) |
 | `product.material` | Catálogo de materiales |
 | `assortment.pair` | Registro de trazabilidad de pares en movimientos |
+
+## Campos añadidos a modelos estándar
+
+| Modelo | Campo | Descripción |
+|--------|-------|-------------|
+| `product.brand` | `code` | Código corto de marca, usado como prefijo en nomenclatura de lotes |
+| `stock.lot` | `sale_id` | Many2one al pedido de venta origen del lote |
+| `stock.lot` | `client_order_ref` | Related a `sale_id.client_order_ref`, store=True |
 
 ---
 

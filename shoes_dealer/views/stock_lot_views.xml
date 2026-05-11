@@ -11,6 +11,8 @@
                 <field name="assortment_pair" readonly="1" invisible="not is_assortment"/>
                 <field name="pairs_count" invisible="not is_assortment"/>
                 <field name="is_assortment" invisible="1"/>
+                <field name="sale_id" readonly="1"/>
+                <field name="client_order_ref" readonly="1"/>
             </xpath>
         </field>
     </record>

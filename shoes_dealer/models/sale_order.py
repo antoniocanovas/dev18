@@ -62,6 +62,133 @@ class SaleOrder(models.Model):
         res["shoes_delivery_date_from"] = self.shoes_delivery_date_from
         return res
 
+    def _delete_unused_lots(self):
+        lots = self.env["stock.lot"].search([("sale_id", "=", self.id)])
+        safe_to_delete = lots.filtered(
+            lambda l: not self.env["stock.move.line"].search_count(
+                [("lot_id", "=", l.id), ("state", "not in", ["cancel"])]
+            )
+        )
+        safe_to_delete.unlink()
+
+    def _check_lot_name_prefix_data(self, product):
+        company = self.company_id
+        errors = []
+        if company.lot_name_campaign and not self.shoes_campaign_id:
+            errors.append(_("Campaign: el pedido no tiene campaña asignada."))
+        if company.lot_name_manufacturer:
+            if not product.manufacturer_id:
+                errors.append(_(
+                    "Manufacturer ref: el producto '%s' no tiene fabricante asignado.",
+                    product.display_name,
+                ))
+            elif not product.manufacturer_id.ref:
+                errors.append(_(
+                    "Manufacturer ref: el fabricante '%s' no tiene referencia (Ref) definida.",
+                    product.manufacturer_id.name,
+                ))
+        if company.lot_name_brand:
+            if not product.product_brand_id:
+                errors.append(_(
+                    "Brand code: el producto '%s' no tiene marca asignada.",
+                    product.display_name,
+                ))
+            elif not product.product_brand_id.code:
+                errors.append(_(
+                    "Brand code: la marca '%s' no tiene código (Code) definido.",
+                    product.product_brand_id.name,
+                ))
+        if errors:
+            raise UserError(
+                _("La configuración de nombre de lote requiere los siguientes datos:\n\n%s")
+                % "\n".join("• %s" % e for e in errors)
+            )
+
+    def _build_lot_name_prefix(self, product):
+        company = self.company_id
+        parts = []
+        if company.lot_name_campaign and self.shoes_campaign_id:
+            parts.append(self.shoes_campaign_id.name or "")
+        if company.lot_name_manufacturer and product.manufacturer_id:
+            parts.append(product.manufacturer_id.ref or "")
+        if company.lot_name_brand and product.product_brand_id:
+            parts.append(product.product_brand_id.code or "")
+        return "".join(parts)
+
+    def create_lots_for_sale_order(self):
+        self.ensure_one()
+        if self.env.context.get("skip_lot_creation"):
+            return
+        if not (self.id and self.order_line and self.state == "sale"):
+            return
+
+        self._delete_unused_lots()
+
+        base_name = self.name
+
+        purchase_all = self.company_id.purchase_all_sale
+        serial_counter = 1
+        for li in self.order_line:
+            product = li.product_id
+            if product.tracking not in ("lot", "serial"):
+                continue
+            if purchase_all or li.product_custom_attribute_value_ids:
+                quantity = int(li.product_uom_qty)
+            elif li.purchase_line_id:
+                quantity = int(li.purchase_line_id.product_qty)
+            else:
+                continue
+            if li.purchase_line_id:
+                quantity = min(quantity, int(li.purchase_line_id.product_qty))
+            if quantity < 1:
+                continue
+
+            self._check_lot_name_prefix_data(product)
+            prefix = self._build_lot_name_prefix(product)
+
+            if product.tracking == "serial":
+                for _ in range(quantity):
+                    final_name = prefix + "%s-%03d" % (base_name, serial_counter)
+                    existing = self.env["stock.lot"].search(
+                        [
+                            ("product_id", "=", product.id),
+                            ("name", "=", final_name),
+                            ("company_id", "=", self.company_id.id),
+                        ],
+                        limit=1,
+                    )
+                    if not existing:
+                        self.env["stock.lot"].create(
+                            {
+                                "name": final_name,
+                                "product_id": product.id,
+                                "ref": self.name,
+                                "company_id": self.company_id.id,
+                                "sale_id": self.id,
+                            }
+                        )
+                    serial_counter += 1
+            else:
+                final_name = prefix + base_name
+                existing = self.env["stock.lot"].search(
+                    [
+                        ("product_id", "=", product.id),
+                        ("name", "=", final_name),
+                        ("company_id", "=", self.company_id.id),
+                    ],
+                    limit=1,
+                )
+                if not existing:
+                    self.env["stock.lot"].create(
+                        {
+                            "name": final_name,
+                            "product_id": product.id,
+                            "ref": self.name,
+                            "company_id": self.company_id.id,
+                            "sale_id": self.id,
+                        }
+                    )
+
     def _action_confirm(self):
         # skip_lot_creation: la automación dispara durante el super() cuando state='sale',
         # pero en ese momento purchase_line_id aún no existe (se crea a continuación).

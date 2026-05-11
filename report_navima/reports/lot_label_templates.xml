@@ -306,9 +306,9 @@
                         <div class="bom-components-section"
                              style="height: 100%; border: none; padding: 0; margin: 0;">
                             <t t-call="report_navima.bom_components_table"
-                               t-if="not purchase_line.assortment_pair_id"/>
+                               t-if="not (purchase_line and purchase_line.assortment_pair_id)"/>
                             <t t-call="report_navima.bom_components_table_especial"
-                               t-if="purchase_line.assortment_pair_id"/>
+                               t-if="purchase_line and purchase_line.assortment_pair_id"/>
                         </div>
 
                     </div>

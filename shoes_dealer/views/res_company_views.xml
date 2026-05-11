@@ -35,13 +35,18 @@
                             <field name="single_purchase"/>
                             <field name="exwork_currency_id"/>
                         </group>
-                    </group>
-                    <group name="shoes_tracking" string="Tracking" invisible="not is_shoes_company">
-                        <field name="shoes_assortment_tracking" required="is_shoes_company"/>
-                        <field name="shoes_pair_tracking" required="is_shoes_company"/>
-                    </group>
-                    <group name="shoes_sync_options" string="Sync options" invisible="not is_shoes_company">
-                        <field name="shoes_categ_sync"/>
+                        <group name="lot_name" string="LOT NAME">
+                            <field name="lot_name_campaign"/>
+                            <field name="lot_name_manufacturer"/>
+                            <field name="lot_name_brand"/>
+                        </group>
+                        <group name="shoes_tracking" string="Tracking" invisible="not is_shoes_company">
+                            <field name="shoes_assortment_tracking" required="is_shoes_company"/>
+                            <field name="shoes_pair_tracking" required="is_shoes_company"/>
+                        </group>
+                        <group name="shoes_sync_options" string="Sync options" invisible="not is_shoes_company">
+                            <field name="shoes_categ_sync"/>
+                        </group>
                     </group>
                 </page>
             </xpath>

@@ -71,11 +71,7 @@ class SaleOrder(models.Model):
 
         self._delete_unused_lots()
 
-        name_parts = []
-        if self.client_order_ref:
-            name_parts.append(self.client_order_ref)
-        name_parts.append(self.name)
-        base_name = "-".join(name_parts)
+        base_name = self.name
 
         purchase_all = self.company_id.purchase_all_sale
         serial_counter = 1

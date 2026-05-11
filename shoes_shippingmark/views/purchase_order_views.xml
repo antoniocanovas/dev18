@@ -13,8 +13,7 @@
             <xpath expr="//page[@name='products']/field[@name='order_line']/list[1]/field[@name='product_id']" position="after">
                 <field name="pnt_sale_type_id" string="Shipping Mark" optional="show"
                        help="Shipping mark inherited from the sale order, or manually assigned. Only editable for new lines not linked to a sale order."
-                       readonly="sale_line_id"
-                       required="not sale_line_id"/>
+                       readonly="sale_line_id"/>
             </xpath>
         </field>
     </record>

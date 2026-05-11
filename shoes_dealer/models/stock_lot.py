@@ -10,6 +10,13 @@ class StockLot(models.Model):
     is_assortment = fields.Boolean(related='product_id.is_assortment')
     is_pair = fields.Boolean(related='product_id.is_pair')
 
+    sale_id = fields.Many2one("sale.order", string="Sale Order", index=True, copy=False)
+    client_order_ref = fields.Char(
+        string="Client Order Ref",
+        related="sale_id.client_order_ref",
+        store=True,
+    )
+
     def get_assortment_pair(self):
         for lot in self:
             total = 0

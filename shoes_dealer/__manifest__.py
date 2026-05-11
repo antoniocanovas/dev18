@@ -35,6 +35,7 @@
     ],
     "data": [
         "views/menu_views.xml",
+        "views/product_brand_views.xml",
         "data/shoes_data.xml",
         "data/server_actions.xml",
         "data/automatic_actions.xml",

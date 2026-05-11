@@ -10,6 +10,17 @@ Hereda del módulo `purchase_container` y añade toda la lógica de emparejamien
 
 ## Modelos
 
+### `purchase.container` (extensión)
+
+Campos añadidos sobre el modelo base de `purchase_container`:
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `container_line_ids` | One2many | Líneas del packing list del contenedor |
+| `container_line_count` | Integer (computed) | Número de líneas del packing list |
+| `shipping_agent_id` | Many2one | Solo lectura si existen líneas de packing list |
+| `currency_id` | Many2one → `res.currency` | Moneda de compra, calculada desde `shipping_agent_id.property_purchase_currency_id`. Editable posteriormente. |
+
 ### `purchase.container.line`
 
 Línea del packing list de un contenedor. Cada línea representa una caja (surtido) con su lote asignado.
@@ -22,6 +33,9 @@ Línea del packing list de un contenedor. Cada línea representa una caja (surti
 | `color` | Color |
 | `pairs` | Número de pares en la caja |
 | `purchase_order` | Referencia del pedido de compra |
+| `client_order_ref` | Referencia del pedido de compra del cliente final |
+| `tariff_heading` | Partida arancelaria (char, puede diferir de la de la ficha del producto) |
+| `price` | Precio (float, widget monetario con moneda del contenedor) |
 | `assortment` | Código de surtido |
 | `lot` | Número de serie / lote |
 | `volume` | Volumen (m³) |
@@ -32,6 +46,7 @@ Línea del packing list de un contenedor. Cada línea representa una caja (surti
 | `shippingmark` | Shipping mark |
 | `width` / `length` / `high` | Dimensiones de la caja (cm) |
 | `move_id` | `stock.move` emparejado (asignado al procesar) |
+| `currency_id` | Related a `container_id.currency_id` (para el widget monetario de `price`) |
 
 Los campos de texto se limpian automáticamente de espacios y tabulaciones al crear o escribir.
 
@@ -49,8 +64,8 @@ Añade los siguientes campos:
 | `net_weight` | Float | Peso neto del surtido (kg) |
 | `volume` | Float | Volumen (m³) |
 | `width_length_high` | Char | Dimensiones en formato `W×L×H (cm)` |
-| `container_line_id` | Many2one → `purchase.container.line` | Línea del packing list de la que procede el lote. Con `ondelete="set null"`: si se borra la línea el enlace desaparece automáticamente. |
-| `container_id` | Many2one → `purchase.container` | Campo calculado (`related="container_line_id.container_id"`, `store=True`). Solo lectura; refleja el contenedor de la línea enlazada. |
+| `container_line_id` | Many2one → `purchase.container.line` | Línea del packing list de la que procede el lote. Con `ondelete="set null"`. |
+| `container_id` | Many2one → `purchase.container` | Related a `container_line_id.container_id`, store=True. |
 
 ---
 
@@ -83,9 +98,9 @@ Si alguna línea no puede emparejarse, se abre el **wizard de aviso** que lista 
 
 Tras el emparejamiento, para cada albarán implicado:
 
-1. Se calculan los moves **emparejados** (tienen líneas de contenedor apuntando a ellos) y los **no emparejados** (el resto del albarán).
-2. **Moves parcialmente cubiertos** (el contenedor solo cubre parte de la qty del move): se llama a `move._split(backorder_qty)` para reducir el move original a la qty del contenedor y crear un nuevo move con el resto. Si hay `stock.move.line` pre-asignadas con lotes no incluidos en el contenedor, se redistribuyen al nuevo move.
-3. Los moves no emparejados (y los nuevos moves del split) se mueven a un albarán backorder via `_split_picking`. El backorder se confirma automáticamente para que quede disponible en futuras actualizaciones.
+1. Se calculan los moves **emparejados** y los **no emparejados**.
+2. **Moves parcialmente cubiertos**: se llama a `move._split(backorder_qty)` para reducir el move original a la qty del contenedor y crear un nuevo move con el resto. Las move lines pre-asignadas con lotes no incluidos en el contenedor se redistribuyen al nuevo move.
+3. Los moves no emparejados se mueven a un albarán backorder via `_split_picking`. El backorder se confirma automáticamente.
 4. El albarán original queda con solo los moves del contenedor y se le asigna `container_id`.
 
 ### Asignación de lotes a move lines
@@ -109,8 +124,6 @@ Tras el emparejamiento, para cada albarán implicado:
 
 La actualización de producto está deduplicada por `product.id` para evitar escrituras repetidas del mismo producto en el mismo contenedor.
 
-Al inicio de `_process_packing_list_update` se limpian los `container_line_id` de todos los lotes que tenían enlace a este contenedor, antes de volver a asignarlos. Esto garantiza que una re-ejecución parte siempre de un estado limpio. Adicionalmente, el `ondelete="set null"` en `container_line_id` hace que, si una línea del packing list es eliminada directamente, el lote pierda el enlace sin necesidad de ninguna lógica adicional.
-
 ---
 
 ## Wizards
@@ -126,7 +139,7 @@ Se abre automáticamente si alguna línea del packing list no pudo emparejarse c
 
 Permite validar todos los albaranes pendientes del contenedor en un único paso:
 
-1. Solicita la **ubicación de destino** (ubicación interna o de tránsito).
+1. Solicita la **ubicación de destino**.
 2. Actualiza `location_dest_id` en el albarán, los moves y las move lines.
 3. Valida todos los albaranes con `skip_backorder=True`.
 

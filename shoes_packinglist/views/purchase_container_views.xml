@@ -6,6 +6,20 @@
         <field name="inherit_id" ref="purchase_container.purchase_container_view_form"/>
         <field name="arch" type="xml">
 
+            <!-- shipping_agent_id: readonly when container lines exist -->
+            <xpath expr="//field[@name='shipping_agent_id']" position="attributes">
+                <attribute name="readonly">container_line_count > 0</attribute>
+            </xpath>
+
+            <!-- Purchase currency below cost -->
+            <xpath expr="//div[@name='container_cost']" position="after">
+                <field
+                    name="currency_id"
+                    string="Purchase Currency"
+                    options="{'no_open': True, 'no_create': True}"
+                />
+            </xpath>
+
             <!-- Packing List stat button in button_box -->
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button

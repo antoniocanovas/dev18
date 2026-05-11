@@ -16,11 +16,24 @@ class PurchaseContainer(models.Model):
         compute="_compute_container_line_count",
         string="Packing List Lines",
     )
+    currency_id = fields.Many2one(
+        "res.currency",
+        string="Purchase Currency",
+        compute="_compute_currency_id",
+        store=True,
+        readonly=False,
+        copy=False,
+    )
 
     @api.depends("container_line_ids")
     def _compute_container_line_count(self):
         for rec in self:
             rec.container_line_count = len(rec.container_line_ids)
+
+    @api.depends("shipping_agent_id")
+    def _compute_currency_id(self):
+        for rec in self:
+            rec.currency_id = rec.shipping_agent_id.property_purchase_currency_id or False
 
     def action_open_validate_wizard(self):
         self.ensure_one()

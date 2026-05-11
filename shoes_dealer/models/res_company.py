@@ -48,3 +48,20 @@ class ResCompany(models.Model):
         help="Pair and assortment sync accounting category when enabled.",
         default=True,
     )
+
+    # Lot name composition:
+    lot_name_campaign = fields.Boolean(
+        "Campaign",
+        default=False,
+        help="Prefija el nombre del lote con el nombre de la campaña del pedido.",
+    )
+    lot_name_manufacturer = fields.Boolean(
+        "Manufacturer",
+        default=False,
+        help="Prefija el nombre del lote con el campo ref del fabricante del producto.",
+    )
+    lot_name_brand = fields.Boolean(
+        "Brand",
+        default=False,
+        help="Prefija el nombre del lote con el código de la marca del producto.",
+    )

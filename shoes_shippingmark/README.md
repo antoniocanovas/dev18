@@ -27,8 +27,8 @@ El modelo subyacente es `sale.order.type` (módulo OCA `sale_order_type`), reuti
 
 `purchase.order.line` añade `pnt_sale_type_id` (Shipping Mark). Se asigna automáticamente al crear la línea:
 
-- Si la línea proviene de una venta: se copia el `type_id` del pedido de venta.
-- Si es una compra directa sin SO: se asigna el `default_shippingmark_id` de la compañía.
+- Si la línea proviene de una venta: se copia el `type_id` del pedido de venta (campo readonly).
+- Si es una compra directa sin SO: se asigna el `default_shippingmark_id` de la compañía (campo opcional y editable).
 
 Las líneas de compra vinculadas a una venta no pueden modificar su cantidad directamente; el cambio debe realizarse desde la línea de venta.
 
@@ -57,7 +57,7 @@ Esto garantiza que un cliente con exclusividad nunca reciba stock etiquetado par
 | `sale.order` | `type_id` (renombrado) | Mostrado como "Shipping Mark" en la interfaz |
 | `sale.order.type` | — | Restricción UNIQUE en nombre |
 | `stock.lot` | `shippingmark_id` | Shipping Mark del lote (propagada desde la venta) |
-| `purchase.order.line` | `pnt_sale_type_id` | Shipping Mark de la línea de compra |
+| `purchase.order.line` | `pnt_sale_type_id` | Shipping Mark de la línea de compra (readonly si viene de venta, opcional en compra directa) |
 | `stock.move` | `_action_assign` | Filtrado de reservas por exclusividad |
 | `stock.quant` | `_gather` | Filtrado de quants por `shippingmark_id` del lote |
 
@@ -74,7 +74,7 @@ Esto garantiza que un cliente con exclusividad nunca reciba stock etiquetado par
           ↓
 4. Se crean lotes con shippingmark_id = type_id del pedido (vía purchase_lot_preassignment)
           ↓
-5. Se crea línea de compra con pnt_sale_type_id = type_id
+5. Se crea línea de compra con pnt_sale_type_id = type_id (readonly)
           ↓
 6. Al reservar el albarán de salida:
    - Sin exclusividad → cualquier quant disponible

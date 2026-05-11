@@ -51,6 +51,15 @@ class PurchaseContainerLine(models.Model):
         index=True,
         copy=False,
     )
+    tariff_heading = fields.Char(string="Tariff Heading")
+    currency_id = fields.Many2one(
+        "res.currency",
+        related="container_id.currency_id",
+        string="Currency",
+        store=False,
+    )
+    price = fields.Float(string="Price", digits="Product Price")
+    client_order_ref = fields.Char(string="Client Order Ref")
 
     @api.model_create_multi
     def create(self, vals_list):

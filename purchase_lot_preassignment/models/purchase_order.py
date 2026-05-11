@@ -22,7 +22,7 @@ class PurchaseOrder(models.Model):
 
     def create_lots_for_purchase_order(self):
         """
-        Crea los lotes para las líneas de compra de productos is_assortment
+        Crea los lotes para las líneas de compra con tracking lot/serial
         que NO provienen de un pedido de venta (sin sale_line_id).
         Usa el nombre del PO como base con un contador global de tres dígitos.
         Limpia los lotes sin movimientos activos antes de recrearlos.
@@ -36,7 +36,7 @@ class PurchaseOrder(models.Model):
         serial_counter = 1
         for line in self.order_line:
             product = line.product_id
-            if not product.is_assortment or line.sale_line_id:
+            if line.sale_line_id:
                 continue
             if product.tracking not in ("lot", "serial"):
                 continue

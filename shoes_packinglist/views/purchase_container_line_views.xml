@@ -5,12 +5,16 @@
         <field name="model">purchase.container.line</field>
         <field name="arch" type="xml">
             <list editable="bottom" import="1">
+                <field name="currency_id" column_invisible="1"/>
                 <field name="lot"/>
                 <field name="name" string="Product Ref."/>
                 <field name="color"/>
                 <field name="assortment"/>
                 <field name="pairs"/>
+                <field name="tariff_heading"/>
+                <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="purchase_order"/>
+                <field name="client_order_ref"/>
                 <field name="shippingmark"/>
                 <field name="assortment_gross_weight"/>
                 <field name="volume"/>
@@ -39,11 +43,15 @@
                             <field name="color"/>
                             <field name="shoes_campaign"/>
                             <field name="purchase_order"/>
+                            <field name="client_order_ref"/>
                             <field name="assortment"/>
+                            <field name="tariff_heading"/>
                             <field name="shippingmark"/>
                         </group>
                         <group string="Quantities">
                             <field name="pairs"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="move_id" readonly="1"/>
                         </group>
                     </group>
