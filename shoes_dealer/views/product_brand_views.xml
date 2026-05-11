@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_brand_form_shoes_dealer" model="ir.ui.view">
+        <field name="name">product.brand.form.shoes.dealer</field>
+        <field name="model">product.brand</field>
+        <field name="inherit_id" ref="product_brand.view_product_brand_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='partner']" position="before">
+                <group name="code">
+                    <field name="code"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_brand_list_shoes_dealer" model="ir.ui.view">
+        <field name="name">product.brand.list.shoes.dealer</field>
+        <field name="model">product.brand</field>
+        <field name="inherit_id" ref="product_brand.view_product_brand_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="code"/>
+            </field>
+        </field>
+    </record>
+</odoo>
