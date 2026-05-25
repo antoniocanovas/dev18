@@ -36,6 +36,7 @@
     "data": [
         "views/menu_views.xml",
         "views/product_brand_views.xml",
+        "views/product_category_views.xml",
         "data/shoes_data.xml",
         "data/server_actions.xml",
         "data/automatic_actions.xml",
@@ -64,5 +65,11 @@
         "views/shoes_heel_views.xml",
         "views/report_templates.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "shoes_dealer/static/src/js/product_matrix_dialog_patch.js",
+            "shoes_dealer/static/src/xml/product_matrix_dialog_patch.xml",
+        ],
+    },
     "installable": True,
 }

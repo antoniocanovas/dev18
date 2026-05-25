@@ -12,154 +12,18 @@ class PurchaseOrderLine(models.Model):
         string="Shoes Pair Lines",
     )
 
-    @api.onchange("product_id", "product_qty", "assortment_pair_id")
+    @api.onchange("product_id", "product_qty")
     def _onchange_generate_shoes_pair_lines(self) -> None:
         """
-        Generate shoes pair lines from assortment_pair or assortment_pair_id.
+        Generate shoes pair lines from assortment_pair.
 
-        This method is triggered when product_id, product_qty or assortment_pair_id
-        change.
+        This method is triggered when product_id or product_qty change.
         """
         for line in self:
-            # Caso especial: si hay assortment_pair_id con custom_value
-            if line.assortment_pair_id and line.assortment_pair_id.custom_value:
-                line._generate_shoes_pair_lines_from_custom_assortment()
-            # Caso normal: usar assortment_pair del producto
-            elif not line.assortment_pair_id and line.product_id:
+            if line.product_id:
                 assortment_pair = line.product_id.assortment_pair
                 if assortment_pair:
                     line._generate_shoes_pair_lines_from_assortment(assortment_pair)
-
-    def _generate_shoes_pair_lines_from_custom_assortment(self) -> None:  # noqa: C901
-        """
-        Generate shoes pair lines from assortment_pair_id.custom_value.
-
-        Format: "38x2,39x3,40x1" where:
-        - 38 = size (talla)
-        - 2 = quantity (cantidad)
-
-        This method searches for product variants with:
-        - Same product_tmpl_single_id
-        - Same color_value_id
-        - size_value_id.name matching the sizes in custom_value
-        """
-        if not self.assortment_pair_id or not self.assortment_pair_id.custom_value:
-            if self.shoes_pair_line_ids:
-                self.shoes_pair_line_ids.unlink()
-            return
-
-        custom_value = self.assortment_pair_id.custom_value
-        if not self.product_id or not self.product_id.product_tmpl_single_id:
-            if self.shoes_pair_line_ids:
-                self.shoes_pair_line_ids.unlink()
-            return
-
-        # Parse custom_value: "38x2,39x3,40x1"
-        try:
-            custom_pairs = custom_value.split(",")
-            tallas_cantidades_dict = {}
-
-            for pair in custom_pairs:
-                parts = pair.strip().split("x")
-                if len(parts) != 2:
-                    continue
-                talla = parts[0].strip()
-                cantidad = int(parts[1].strip())
-                tallas_cantidades_dict[talla] = cantidad
-
-            if not tallas_cantidades_dict:
-                if self.shoes_pair_line_ids:
-                    self.shoes_pair_line_ids.unlink()
-                return
-
-        except (ValueError, AttributeError):
-            if self.shoes_pair_line_ids:
-                self.shoes_pair_line_ids.unlink()
-            return
-
-        # Get list of sizes
-        tallas_lista = list(tallas_cantidades_dict.keys())
-
-        # Search for product variants with:
-        # - Same product_tmpl_single_id
-        # - Same color_value_id
-        # - size_value_id.name in tallas_lista
-        product_variants = self.env["product.product"].search(
-            [
-                ("product_tmpl_id", "=", self.product_id.product_tmpl_single_id.id),
-                ("color_value_id", "=", self.product_id.color_value_id.id),
-                ("size_value_id.name", "in", tallas_lista),
-            ]
-        )
-
-        if not product_variants:
-            if self.shoes_pair_line_ids:
-                self.shoes_pair_line_ids.unlink()
-            return
-
-        # Get line quantity multiplier
-        line_qty = self.product_qty or 1.0
-
-        # Build list of line values
-        new_lines_vals = []
-        for variant in product_variants:
-            if not variant.size_value_id:
-                continue
-
-            talla_variant = variant.size_value_id.name
-            cantidad_base = tallas_cantidades_dict.get(talla_variant, 0)
-
-            if cantidad_base <= 0:
-                continue
-
-            # Calculate final quantity: line quantity * base quantity from custom_value
-            calculated_quantity = line_qty * cantidad_base
-
-            # Build line values
-            line_vals = self._build_pair_line_vals(variant, calculated_quantity)
-
-            # Ensure product_id is present
-            if not line_vals.get("product_id"):
-                continue
-
-            # Caso especial: siempre asignar assortment_id 55
-            line_vals["product_assortment_id"] = 55
-
-            new_lines_vals.append(line_vals)
-
-        # Get existing lines
-        existing_lines = self.shoes_pair_line_ids
-
-        # Create mapping of existing lines by product_id for quick lookup
-        existing_by_product = {line.product_id.id: line for line in existing_lines}
-
-        commands = []
-        updated_product_ids = set()
-
-        # Update existing lines or mark for creation
-        for line_vals in new_lines_vals:
-            product_id = line_vals["product_id"]
-
-            if product_id in existing_by_product:
-                # Update existing line
-                existing_line = existing_by_product[product_id]
-                commands.append((1, existing_line.id, line_vals))
-                updated_product_ids.add(product_id)
-            else:
-                # Create new line
-                commands.append((0, 0, line_vals))
-
-        # Delete lines that are no longer needed
-        for existing_line in existing_lines:
-            if existing_line.product_id.id not in updated_product_ids:
-                commands.append((2, existing_line.id))
-
-        # Apply all commands at once
-        if commands:
-            self.shoes_pair_line_ids = commands
-        elif existing_lines:
-            # No new lines but there are existing ones - delete all
-            self.shoes_pair_line_ids.unlink()
 
     def _parse_assortment_pair_string(
         self, assortment_pair: str | None
@@ -359,45 +223,22 @@ class PurchaseOrderLine(models.Model):
             self.shoes_pair_line_ids.unlink()
 
     def _should_regenerate_pair_lines(self) -> bool:
-        """
-        Check if pair lines should be regenerated for this line.
-
-        Returns:
-            bool: True if pair lines should be regenerated
-        """
-        # Caso especial: assortment_pair_id con custom_value
-        if self.assortment_pair_id and self.assortment_pair_id.custom_value:
-            return True
-
-        # Caso normal: assortment_pair del producto
-        return (
-            not self.assortment_pair_id
-            and self.product_id
-            and self.product_id.assortment_pair
-        )
+        return bool(self.product_id and self.product_id.assortment_pair)
 
     def _regenerate_pair_lines_if_needed(self) -> None:
         """Regenerate pair lines if conditions are met."""
         for line in self:
             if line._should_regenerate_pair_lines():
-                # Caso especial: assortment_pair_id con custom_value
-                if line.assortment_pair_id and line.assortment_pair_id.custom_value:
-                    line._generate_shoes_pair_lines_from_custom_assortment()
-                # Caso normal: assortment_pair del producto
-                elif line.product_id and line.product_id.assortment_pair:
-                    line._generate_shoes_pair_lines_from_assortment(
-                        line.product_id.assortment_pair
-                    )
+                line._generate_shoes_pair_lines_from_assortment(
+                    line.product_id.assortment_pair
+                )
 
     def write(self, vals: dict[str, Any]) -> bool:
         """Regenerate shoes pair lines when relevant fields change."""
         res = super().write(vals)
 
         # Only regenerate if relevant fields changed
-        if any(
-            field in vals
-            for field in ["product_id", "product_qty", "assortment_pair_id"]
-        ):
+        if any(field in vals for field in ["product_id", "product_qty"]):
             self._regenerate_pair_lines_if_needed()
 
         return res

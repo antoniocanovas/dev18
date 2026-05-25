@@ -77,6 +77,7 @@ class ProductTemplate(models.Model):
                     [
                         ('gender', 'in', [record.gender, False]),
                         ('attribute_id', '=', assortment_attribute.id),
+                        ('assortment_id.custom', '!=', True),
                     ]
                 ).ids
 

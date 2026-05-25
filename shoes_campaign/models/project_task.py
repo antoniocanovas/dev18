@@ -128,6 +128,10 @@ class ProjectTask(models.Model):
        "product.material", string="Material", ondelete="restrict"
     )
     shoes_last_id = fields.Many2one("shoes.last", string="Last", ondelete="restrict")
+    trade_name = fields.Char(
+        "Trade Name",
+        help="Nombre comercial utilizado para exportación de datos",
+    )
     shoes_product_tmpl_id = fields.Many2one("product.template", string="Product")
     # Para añadir QR en tarifas:
     shoes_url = fields.Char("URL")

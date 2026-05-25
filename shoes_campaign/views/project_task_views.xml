@@ -25,6 +25,7 @@
                     <page name="shoes_dealer_campaign" invisible="not is_shoes_campaign" string="Shoe model">
                         <group name="shoes_dealer_campaign" invisible="not is_shoes_campaign">
                             <group>
+                                <field name="trade_name"/>
                                 <field name="shoes_product_tmpl_id" readonly="1"/>
                                 <field name="product_brand_id"/>
                                 <field name="code" readonly="code"/>

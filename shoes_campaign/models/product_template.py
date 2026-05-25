@@ -11,6 +11,10 @@ class ProductTemplate(models.Model):
     shoes_task_id = fields.Many2one(
         "project.task", string="Shoes model", ondelete="restrict"
     )
+    trade_name = fields.Char(
+        related="shoes_task_id.trade_name",
+        store=True,
+    )
     shoes_url = fields.Char(string="URL", related="shoes_task_id.shoes_url")
     shoes_last_id = fields.Many2one("shoes.last", string="Last", ondelete="restrict")
     shoes_model_material = fields.Char(

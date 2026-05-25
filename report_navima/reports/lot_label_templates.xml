@@ -222,7 +222,7 @@
                                             <div class="color-info col-6">
                                                 <span>Pack</span>
                                                 <br/>
-                                                <strong t-out="purchase_line.product_id.product_assortment_id.name if purchase_line and purchase_line.product_id.product_assortment_id else 'ESPECIAL'"
+                                                <strong t-out="purchase_line.product_id.product_assortment_id.name if (purchase_line and purchase_line.product_id.product_assortment_id and not purchase_line.product_id.product_assortment_id.custom) else (env.company.shoes_assortment_custom_label or 'ESPECIAL')"
                                                         style="font-size: 30px;"/>
                                             </div>
                                         </t>
@@ -290,9 +290,6 @@
                             <t t-if="purchase_line and purchase_line.product_id.product_assortment_id">
                                 <t t-call="report_navima.assortment_values_table"/>
                             </t>
-                            <t t-if="purchase_line and not purchase_line.product_id.product_assortment_id">
-                                <t t-call="report_navima.assortment_values_table_custom"/>
-                            </t>
 
                         </div>
 
@@ -305,10 +302,7 @@
                         <!-- SECCIÓN 5: Tabla de Componentes BOM -->
                         <div class="bom-components-section"
                              style="height: 100%; border: none; padding: 0; margin: 0;">
-                            <t t-call="report_navima.bom_components_table"
-                               t-if="not (purchase_line and purchase_line.assortment_pair_id)"/>
-                            <t t-call="report_navima.bom_components_table_especial"
-                               t-if="purchase_line and purchase_line.assortment_pair_id"/>
+                            <t t-call="report_navima.bom_components_table"/>
                         </div>
 
                     </div>
@@ -436,43 +430,6 @@
             </div>
         </template>
 
-        <template id="assortment_values_table_custom">
-            <div class="row">
-                <t t-if="purchase_line.assortment_pair_id">
-                    <table class="table table-bordered table-sm mt-2 text-center assortment-table">
-                        <thead class="table-light">
-                            <tr>
-                                <!-- Cabecera con las tallas -->
-                                <t t-set="pares"
-                                   t-value="purchase_line.assortment_pair_id.custom_value.split(',')"/>
-                                <t t-set="tallas" t-value="[]"/>
-                                <t t-foreach="pares" t-as="par">
-                                    <t t-set="talla" t-value="par.split('x')[0]"/>
-                                    <t t-set="tallas" t-value="tallas + [talla]"/>
-                                    <th t-esc="talla" class="border text-center"/>
-                                </t>
-                                <th class="border text-center font-weight-bold">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <!-- Fila con las cantidades -->
-                                <t t-set="cantidades" t-value="[]"/>
-                                <t t-set="total_cantidad" t-value="0"/>
-                                <t t-foreach="pares" t-as="par">
-                                    <t t-set="cantidad" t-value="int(par.split('x')[1])"/>
-                                    <t t-set="cantidades" t-value="cantidades + [cantidad]"/>
-                                    <t t-set="total_cantidad" t-value="total_cantidad + cantidad"/>
-                                    <td t-esc="cantidad" class="border text-center"/>
-                                </t>
-                                <td t-esc="total_cantidad" class="border text-center font-weight-bold bg-light"/>
-                            </tr>
-                        </tbody>
-                    </table>
-                </t>
-            </div>
-        </template>
-
         <!-- Template auxiliar: Tabla de componentes BOM -->
         <template id="bom_components_table">
             <t t-set="bom_components" t-value="[]"/>
@@ -579,128 +536,6 @@
                                                                     <img t-att-src="'/web/image/product.product/%s/image_512' % component.id"
                                                                          style="width: 20mm; height: 20mm; object-fit: contain;"/>
 
-                                                                </t>
-                                                                <t t-else="">
-                                                                    <div class="no-image-placeholder"
-                                                                         style="color: #888; font-style: italic; padding: 10px; font-size: 10px;">
-                                                                        No image available
-                                                                    </div>
-                                                                </t>
-                                                            </div>
-                                                        </div>
-                                                        <strong t-out="component.size_value_id.name"
-                                                                style="font-size: 14px; font-weight: bold; display: block; margin-top: 2mm;position: relative;"/>
-
-
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </t>
-                                        <t t-else="">
-                                            <!-- Celda vacía -->
-                                            <div style="height: 100%;"></div>
-                                        </t>
-                                    </td>
-                                </t>
-                            </tr>
-                        </t>
-                    </table>
-                </div>
-            </div>
-        </template>
-
-        <template id="bom_components_table_especial">
-            <t t-set="bom_components" t-value="[]"/>
-            <t t-if="o.product_id and purchase_line and purchase_line.assortment_pair_id">
-                <!-- Extraer las tallas y cantidades del custom_value -->
-                <t t-set="custom_pairs" t-value="purchase_line.assortment_pair_id.custom_value.split(',')"/>
-                <t t-set="tallas_cantidades_dict" t-value="{}"/>
-
-                <!-- Crear un diccionario de talla -> cantidad -->
-                <t t-foreach="custom_pairs" t-as="pair">
-                    <t t-set="talla" t-value="pair.split('x')[0].strip()"/>
-                    <t t-set="cantidad" t-value="int(pair.split('x')[1].strip())"/>
-                    <t t-set="tallas_cantidades_dict"
-                       t-value="dict(list(tallas_cantidades_dict.items()) + [(talla, cantidad)])"/>
-                </t>
-
-                <!-- Obtener lista de tallas -->
-                <t t-set="tallas_lista" t-value="list(tallas_cantidades_dict.keys())"/>
-
-                <!-- Buscar variantes del producto template con mismo color y tallas en la lista -->
-                <t t-set="product_variants" t-value="env['product.product'].search([
-                    ('product_tmpl_id', '=', o.product_id.product_tmpl_single_id.id),
-                    ('color_value_id', '=', o.product_id.color_value_id.id),
-                    ('size_value_id.name', 'in', tallas_lista)
-                ])"/>
-
-                <!-- Para cada variante, repetirla según la cantidad de su talla -->
-                <t t-foreach="product_variants" t-as="variant">
-                    <!-- Solo procesar si no hemos llegado al límite -->
-                    <t t-if="len(bom_components) &lt; 12">
-                        <t t-set="talla_variant" t-value="variant.size_value_id.name"/>
-                        <t t-set="cantidad_variant" t-value="tallas_cantidades_dict.get(talla_variant, 1)"/>
-
-                        <!-- Repetir el producto según la cantidad, pero sin exceder 12 -->
-                        <t t-foreach="range(cantidad_variant)" t-as="repeticion">
-                            <t t-if="len(bom_components) &lt; 12">
-                                <t t-set="bom_components" t-value="bom_components + [variant]"/>
-                            </t>
-                        </t>
-                    </t>
-                </t>
-            </t>
-
-            <!-- Limitar a máximo 12 componentes -->
-            <t t-set="bom_components" t-value="bom_components[:12]"/>
-
-            <div class="row" style="border: none; margin: 0; height: 100%;">
-                <div class="col-12" style="border: none; padding: 0; margin: 0; height: 100%;">
-                    <table style="width: 100%; height: 100%; border-collapse: collapse; border: none;"
-                           class="borderless">
-                        <!-- Generar 4 filas -->
-                        <t t-foreach="range(4)" t-as="row_index">
-                            <tr style="height: 25%; border: none;">
-                                <!-- Generar 3 columnas -->
-                                <t t-foreach="range(3)" t-as="col_index">
-                                    <t t-set="component_index" t-value="row_index * 3 + col_index"/>
-                                    <td style="width: 33.33%; text-align: center; vertical-align: middle; padding: 3mm; border: 1px dashed #666;">
-                                        <t t-if="component_index &lt; len(bom_components)">
-                                            <t t-set="component" t-value="bom_components[component_index]"/>
-                                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border: none;">
-                                                <div class="row" style="border: none; margin: 0;">
-                                                    <div class="col-6" style="border: none; padding: 1mm;">
-                                                        <div class="row" style="border: none; margin: 0;">
-                                                            <strong t-out="component.shoes_model_material"
-                                                                    style="font-size: 10px;"/>
-                                                        </div>
-                                                        <div class="row" style="border: none; margin: 0;">
-                                                            <span t-out="component.name"
-                                                                  style="font-size: 10px;"/>
-                                                        </div>
-                                                        <div class="row" style="border: none; margin: 0;">
-                                                            <strong t-out="component.color_value_id.name"
-                                                                    style="font-size: 10px;"/>
-                                                        </div>
-                                                        <div class="row"
-                                                             style="display:block; border: none; margin: 0; line-height: 0.8;">
-                                                            <span t-field="component.barcode"
-                                                                  t-options="{'widget': 'barcode', 'img_style': barcode_horizontal_size_mini}"/>
-                                                            <span t-out="component.barcode"
-                                                                  style="font-size: 8px; display: block; margin-top: 1mm;"/>
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="col-6"
-                                                         style="border: none; padding: 1mm; position: relative;">
-                                                        <div style="background-color: #f0f0f0; padding: 1mm 3mm 1mm 3mm; border-radius: 3px; height: 25mm; display: flex; flex-direction: column; position: relative;">
-                                                            <strong t-out="component.shoes_campaign_id.name"
-                                                                    style="font-size: 12px; font-weight: bold; background-color: transparent; padding: 0; text-align: center; margin-bottom: 1.5mm;"/>
-                                                            <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                                                                <t t-if="component.image_512">
-                                                                    <img t-att-src="'/web/image/product.product/%s/image_512' % component.id"
-                                                                         style="width: 20mm; height: 20mm; object-fit: contain;"/>
                                                                 </t>
                                                                 <t t-else="">
                                                                     <div class="no-image-placeholder"

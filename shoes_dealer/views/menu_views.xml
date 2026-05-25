@@ -63,32 +63,44 @@
             sequence="55"
             web_icon="shoes_dealer,static/description/icon.png"
     >
-        <!-- Campaigns: ahora sí existe action_open_shoes_dealer_campaigns -->
+        <!-- Marketing -->
         <menuitem
-                name="Campaigns"
-                id="shoes_dealer_campaigns"
+                name="Marketing"
+                id="shoes_dealer_marketing_menu"
                 sequence="10"
-                action="shoes_dealer.shoes_dealer_open_shoes_dealer_campaigns"
                 groups="project.group_project_user"
-        />
+        >
+            <menuitem
+                    name="Campaigns"
+                    id="shoes_dealer_campaigns"
+                    sequence="10"
+                    action="shoes_dealer.shoes_dealer_open_shoes_dealer_campaigns"
+                    groups="project.group_project_user"
+            />
+        </menuitem>
 
         <!-- Products -->
         <menuitem
                 name="Products"
-                id="shoes_dealer_products"
+                id="shoes_dealer_products_menu"
                 sequence="20"
-                action="shoes_dealer.shoes_dealer_product_template_action_product"
                 groups="stock.group_stock_user,stock.group_stock_manager"
-        />
-
-        <!-- Variants -->
-        <menuitem
-                name="Variants"
-                id="shoes_dealer_variants"
-                sequence="30"
-                action="shoes_dealer.shoes_dealer_stock_product_normal_action"
-                groups="stock.group_stock_user,stock.group_stock_manager"
-        />
+        >
+            <menuitem
+                    name="Products"
+                    id="shoes_dealer_products"
+                    sequence="10"
+                    action="shoes_dealer.shoes_dealer_product_template_action_product"
+                    groups="stock.group_stock_user,stock.group_stock_manager"
+            />
+            <menuitem
+                    name="Variants"
+                    id="shoes_dealer_variants"
+                    sequence="20"
+                    action="shoes_dealer.shoes_dealer_stock_product_normal_action"
+                    groups="stock.group_stock_user,stock.group_stock_manager"
+            />
+        </menuitem>
         <!-- Configuration (padre) -->
         <menuitem
                 name="Configuration"

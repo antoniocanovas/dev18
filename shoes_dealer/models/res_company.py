@@ -21,6 +21,21 @@ class ResCompany(models.Model):
     single_prefix = fields.Char("Single prefix", store=True)
     single_sale = fields.Boolean("Enable pair sales", store=True, default=False)
     single_purchase = fields.Boolean("Enable pair purchase", store=True, default=False)
+    shoes_assortment_custom_label = fields.Char(
+        "Custom assortment label",
+        store=True,
+        help=(
+            "Etiqueta que aparece en la sección 'Pack' de la etiqueta de lote cuando el surtido "
+            "es de tipo personalizado (custom=True), es decir, creado automáticamente desde el "
+            "wizard de cuadrícula de líneas de venta.\n\n"
+            "Si está vacío se muestra 'ESPECIAL'.\n\n"
+            "AVISO: este valor solo afecta a la impresión. Los registros shoes.assortment siguen "
+            "usando el código de composición como nombre (ej: '35x2+36x4+37x2'), lo que garantiza "
+            "su unicidad. Sin embargo, el valor de atributo de producto vinculado a cada surtido "
+            "custom también se nombra con ese código, por lo que en los desplegables del producto "
+            "seguirán apareciendo los códigos técnicos, no esta etiqueta."
+        ),
+    )
     exwork_currency_id = fields.Many2one(
         "res.currency",
         store=True,
@@ -64,4 +79,13 @@ class ResCompany(models.Model):
         "Brand",
         default=False,
         help="Prefija el nombre del lote con el código de la marca del producto.",
+    )
+    lot_name_sequence = fields.Many2one(
+        "ir.sequence",
+        string="Lot sequence",
+        default=lambda self: self.env.ref(
+            "stock.sequence_production_lots", raise_if_not_found=False
+        ),
+        help="Secuencia utilizada para generar el nombre del lote (sufijo tras el prefijo). "
+             "Por defecto usa la secuencia estándar de Odoo para lotes/series.",
     )

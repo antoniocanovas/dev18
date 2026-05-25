@@ -63,6 +63,7 @@
                             </list>
                         </field>
                         <field name="pairs_count"/>
+                        <field name="custom"/>
                         <field name="value_ids" widget="many2many_tags"/>
                     </group>
                 </sheet>
@@ -87,6 +88,7 @@
                 <field name="gender"/>
                 <field name="line_ids" widget="many2many_tags"/>
                 <field name="pairs_count"/>
+                <field name="custom" optional="hide"/>
                 <field name="attribute_id" invisible="1"/>
             </list>
         </field>

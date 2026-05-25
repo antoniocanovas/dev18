@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template
+        id="report_invoice_document_grouped_by_picking_delivery_address"
+        inherit_id="account_invoice_report_grouped_by_picking.report_invoice_document"
+    >
+        <xpath
+            expr="//tr[td/strong/span[@t-field='picking.name']]"
+            position="inside"
+        >
+            <br />
+            <span
+                t-field="picking.partner_id"
+                t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'
+            />
+        </xpath>
+    </template>
+</odoo>

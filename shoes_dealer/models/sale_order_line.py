@@ -32,7 +32,7 @@ class SaleOrderLine(models.Model):
         ).mapped("order_id")
         result = super().unlink()
         for order in orders:
-            order._delete_unused_lots()
+            order.create_lots_for_sale_order()
         return result
 
     def write(self, vals):
@@ -65,10 +65,7 @@ class SaleOrderLine(models.Model):
                     continue
                 if pol and pol.order_id.state != "cancel":
                     qty_for_po = line.order_id._get_qty_to_purchase(line, qty_sold=new_qty)
-                    if line.product_custom_attribute_value_ids:
-                        pairs_per_unit = line.custom_assortment_pairs
-                    else:
-                        pairs_per_unit = line.product_id.pairs_count
+                    pairs_per_unit = line.product_id.pairs_count
                     pol.with_context(from_sale_order_line=True).write({
                         "product_qty": qty_for_po,
                         "price_unit": line.product_id.exwork * pairs_per_unit,
@@ -104,17 +101,10 @@ class SaleOrderLine(models.Model):
             ).write({"product_uom_qty": target_qty})
 
     # Comercialmente en cada pedido quieren saber cuántos pares se han vendido:
-    @api.depends("product_id", "product_uom_qty", "custom_assortment_pairs")
+    @api.depends("product_id", "product_uom_qty")
     def _get_shoes_sale_line_pair_count(self):
         for record in self:
-            if record.product_custom_attribute_value_ids:
-                record.pairs_count = (
-                    record.custom_assortment_pairs * record.product_uom_qty
-                )
-            else:
-                record.pairs_count = (
-                    record.product_id.pairs_count * record.product_uom_qty
-                )
+            record.pairs_count = record.product_id.pairs_count * record.product_uom_qty
 
     pairs_count = fields.Integer(
         "Pairs", store=True, compute="_get_shoes_sale_line_pair_count"
@@ -125,214 +115,14 @@ class SaleOrderLine(models.Model):
         self.product_id.ensure_one()
 
         price = super()._get_pricelist_price()
-        if (
-            self.product_custom_attribute_value_ids
-            and self.product_id.product_tmpl_single_id
-        ):
-            customvalue = self.product_custom_attribute_value_ids[0].custom_value
-            # Quitar espacios del campo custom del surtido:
-            customvalue = customvalue.replace(" ", "").lower()
-
-            # Detectar si se está usando punto y coma en lugar de coma
-            if ";" in customvalue and "," not in customvalue:
-                raise UserError(
-                    f"Error en surtido personalizado: se detectó punto y coma (;)"
-                    f" como separador.\n"
-                    f"Valor actual: '{customvalue}'\n\n"
-                    f"Por favor, use coma (,) para separar los pares.\n"
-                    f"Formato correcto: 36x2,37x5,38x3"
-                )
-
-            customvalues = customvalue.split(",")
-
-            # Validar formato y calcular pairs_count con manejo de errores
-            pairs_count = 0
-            for element in customvalues:
-                if not element.strip():  # Ignorar elementos vacíos
-                    continue
-
-                if "x" not in element:
-                    raise UserError(
-                        f"Formato incorrecto en surtido personalizado: '{element}'. "
-                        f"El formato esperado es 'tallaxcantidad'"
-                        f" (ejemplo: 36x2, 38x1). "
-                        f"Por favor, revisa el campo de surtido personalizado."
-                    )
-                parts = element.split("x")
-                if len(parts) != 2:
-                    # Verificar si hay punto y coma dentro del elemento
-                    if ";" in element:
-                        raise UserError(
-                            f"Formato incorrecto en surtido personalizado: '{element}'"
-                            f".\n"
-                            f"Se detectó punto y coma (;) dentro de un elemento. "
-                            f"Use coma (,) para separar diferentes pares.\n"
-                            f"Formato correcto: 36x2,37x5,38x3"
-                        )
-                    raise UserError(
-                        f"Formato incorrecto en surtido personalizado: '{element}'. "
-                        f"Debe contener exactamente una 'x' "
-                        f"separando talla y cantidad.\n"
-                        f"Formato correcto: tallaxcantidad,tallaxcantidad"
-                        f" (ejemplo: 36x2,37x5)"
-                    )
-                try:
-                    quantity = int(parts[1])
-                    pairs_count += quantity
-                except ValueError:
-                    raise UserError(
-                        f"Cantidad inválida en surtido personalizado: '{parts[1]}'. "
-                        f"La cantidad debe ser un número entero. "
-                        f"Formato correcto: tallaxcantidad (ejemplo: 36x2)"
-                    ) from None
-
-            order = self.order_id
-            product = self.env["product.product"].search(
-                [("product_tmpl_id", "=", self.product_id.product_tmpl_single_id.id)],
-                limit=1,
-            )
-            price = order.pricelist_id._get_product_price(product, 1.0)
-            return price * pairs_count
-        else:
-            return price
-
-    # Añadido product_id para actualización dinámica
-    @api.depends("write_date", "product_id")
-    def _get_custom_assortment_pairs(self):
-        for record in self:
-            pairs_count = 0
-            # eliminado el .ids de prodcut_custom_attribute_value_ids para que entre
-            # antes de escribir
-            if (
-                record.product_id.is_assortment
-                and record.name
-                and record.product_custom_attribute_value_ids
-            ):  # noqa: E501
-                customvalue = record.product_custom_attribute_value_ids[0].custom_value
-                # Quitar espacios del campo custom del surtido:
-                customvalue = customvalue.replace(" ", "").lower()
-
-                # Detectar si se está usando punto y coma en lugar de coma
-                if ";" in customvalue and "," not in customvalue:
-                    raise UserError(
-                        f"Error en surtido personalizado: se detectó punto y coma (;)"
-                        f" como separador.\n"
-                        f"Valor actual: '{customvalue}'\n\n"
-                        f"Por favor, use coma (,) para separar los pares.\n"
-                        f"Formato correcto: 36x2,37x5,38x3"
-                    )
-
-                customvalues = customvalue.split(",")
-
-                # Validar formato y calcular pairs_count con manejo de errores
-                for element in customvalues:
-                    if not element.strip():  # Ignorar elementos vacíos
-                        continue
-
-                    if "x" not in element:
-                        raise UserError(
-                            f"Formato incorrecto en surtido personalizado: '{element}'."
-                            f" "
-                            f"El formato esperado es 'tallaxcantidad' (ejemplo: 36x2,"
-                            f" 38x1). "
-                            f"Por favor, revisa el campo de surtido personalizado."
-                        )
-                    parts = element.split("x")
-                    if len(parts) != 2:
-                        # Verificar si hay punto y coma dentro del elemento
-                        if ";" in element:
-                            raise UserError(
-                                f"Formato incorrecto en surtido personalizado:"
-                                f" '{element}'"
-                                f".\n"
-                                f"Se detectó punto y coma (;) dentro de un elemento. "
-                                f"Use coma (,) para separar diferentes pares.\n"
-                                f"Formato correcto: 36x2,37x5,38x3"
-                            )
-                        raise UserError(
-                            f"Formato incorrecto en surtido personalizado:"
-                            f" '{element}'. "
-                            f"Debe contener exactamente una 'x' separando talla"
-                            f" y cantidad.\n"
-                            f"Formato correcto: tallaxcantidad,tallaxcantidad"
-                            f" (ejemplo: 36x2,37x5)"
-                        )
-                    try:
-                        quantity = int(parts[1])
-                        pairs_count += quantity
-                    except ValueError:
-                        raise UserError(
-                            f"Cantidad inválida en surtido personalizado:"
-                            f" '{parts[1]}'. "
-                            f"La cantidad debe ser un número entero. "
-                            f"Formato correcto: tallaxcantidad (ejemplo: 36x2)"
-                        ) from None
-            record.custom_assortment_pairs = pairs_count
-
-    custom_assortment_pairs = fields.Integer(
-        "Custom assortment pairs", store=True, compute="_get_custom_assortment_pairs"
-    )
+        return price
 
     @api.depends("write_date")
     def _get_assortment_pair(self):
         for record in self:
-            customvalue, cleanvalues, sizes, pairs, pair_products, pairs_count = (  # noqa: F841
-                "",
-                "",
-                "",
-                "",
-                "",
-                0,
-            )  # noqa: F841, E501
+            cleanvalues = ""
             if record.product_id.is_assortment and record.name:
-                if record.product_custom_attribute_value_ids.ids:
-                    customvalue = record.product_custom_attribute_value_ids[
-                        0
-                    ].custom_value
-                    if customvalue:
-                        # Quitar espacios del campo custom del surtido:
-                        customvalue = customvalue.replace(" ", "").lower()
-                        customvalues = customvalue.split(",")
-                        for li in customvalues:
-                            element = li.split("x")
-                            # Para tallas (encontrar si existe la talla y color en el
-                            # par):
-                            color_value_id = record.product_id.color_value_id
-                            size_attribute = self.env.company.size_attribute_id
-                            size_value_id = self.env["product.attribute.value"].search(
-                                [
-                                    ("attribute_id", "=", size_attribute.id),
-                                    ("name", "=", element[0]),
-                                ]
-                            )
-
-                            pppair = self.env["product.product"].search(
-                                [
-                                    ("color_value_id", "=", color_value_id.id),
-                                    ("size_value_id", "=", size_value_id.id),
-                                    (
-                                        "product_tmpl_id",
-                                        "=",
-                                        record.product_id.product_tmpl_single_id.id,
-                                    ),
-                                ]
-                            )
-                            sizes += element[0] + ","
-                            pairs += element[1] + ","
-                            pair_products += str(pppair.id) + ","
-
-                        # OK, guardamos valores, tras quitar la última coma:
-                        if len(sizes) > 0:
-                            sizes = sizes[:-1]
-                        if len(pairs) > 0:
-                            pairs = pairs[:-1]
-                        if len(pair_products) > 0:
-                            pair_products = pair_products[:-1]
-
-                        cleanvalues = sizes + ";" + pairs + ";" + pair_products
-
-                # Caso de un surtido normal (no custom) con ldm:
-                elif not customvalue and record.product_id.bom_ids.ids:
+                if record.product_id.bom_ids.ids:
                     bom = record.product_id.bom_ids[0]
                     cleanvalues = bom.assortment_pair
             record["assortment_pair"] = cleanvalues
@@ -441,72 +231,3 @@ class SaleOrderLine(models.Model):
     def change_saleproductok_2_saleproductko(self):
         self.product_id = self.product_saleko_id.id
 
-    @api.onchange("name")
-    def _check_valid_shoes_assortment_custom_attributes(self):
-        for record in self:
-            #            cleanvalues, sizes, pairs, pair_products,
-            #            pairs_count = "", "", "", "", 0
-            size_attribute = self.env.company.size_attribute_id
-            sale_line_product = record.product_id
-            sale_line_product_color = sale_line_product.color_value_id
-            shoes_pair_model = sale_line_product.product_tmpl_single_id
-
-            # Si pongo en el if record.product_custom_attribute_value_ids,
-            # no pasa (uso name) !!
-            if sale_line_product.is_assortment and record.name:
-                try:
-                    customvalue = record.product_custom_attribute_value_ids[
-                        0
-                    ].custom_value
-                except:  # noqa: E722
-                    continue
-
-                if customvalue:
-                    # Quitar espacios del campo custom del surtido:
-                    customvalue = customvalue.replace(" ", "").lower()
-                    customvalues = customvalue.split(",")
-
-                    # Chequear que las tallas o cantidades introducidas son válidas
-                    # y el par está creado:
-                    for li in customvalues:
-                        element = li.split("x")
-                        # Para tallas (encontrar si existe la talla y color en el par):
-                        color_value_id = sale_line_product_color
-                        size_value_id = self.env["product.attribute.value"].search(
-                            [
-                                ("attribute_id", "=", size_attribute.id),
-                                ("name", "=", element[0]),
-                            ]
-                        )
-                        if not size_value_id.id:
-                            raise UserError(
-                                "La talla "
-                                + str(element[0])
-                                + " no existe en el sistema."
-                            )
-
-                        pppair = self.env["product.product"].search(
-                            [
-                                ("color_value_id", "=", color_value_id.id),
-                                ("size_value_id", "=", size_value_id.id),
-                                ("product_tmpl_id", "=", shoes_pair_model.id),
-                            ]
-                        )
-                        if not pppair.id:
-                            raise UserError(
-                                "No encuentro el par suelto de talla "
-                                + str(element[0])
-                                + " y color "
-                                + color_value_id.name
-                                + " en este modelo."
-                            )
-
-                        # Para cantidades (ok):
-                        try:
-                            qty = int(element[1])  # noqa: F841
-                        except:  # noqa: E722
-                            raise UserError(  # noqa: B904
-                                element[1]
-                                + ", no parece una cantidad válida. Indica un número "
-                                "entero válido."
-                            )

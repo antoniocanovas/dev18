@@ -64,9 +64,11 @@ class PurchaseOrder(models.Model):
         if not self.id or not self.order_line:
             return
 
-        self._delete_unused_po_lots()
+        sequence = self.company_id.lot_name_sequence
 
-        serial_counter = 1
+        # Calcular lotes necesarios por producto
+        needed = {}
+        prefix_map = {}
         for line in self.order_line:
             product = line.product_id
             if not product.is_assortment or line.sale_line_id:
@@ -76,47 +78,48 @@ class PurchaseOrder(models.Model):
             quantity = int(line.product_qty)
             if quantity < 1:
                 continue
-
             self._check_lot_name_prefix_data(product)
-            prefix = self._build_lot_name_prefix(product)
+            lot_count = quantity if product.tracking == "serial" else 1
+            needed[product.id] = needed.get(product.id, 0) + lot_count
+            prefix_map.setdefault(product.id, self._build_lot_name_prefix(product))
 
-            if product.tracking == "serial":
-                for _ in range(quantity):
-                    final_name = prefix + "%s-%03d" % (self.name, serial_counter)
-                    existing = self.env["stock.lot"].search(
-                        [
-                            ("product_id", "=", product.id),
-                            ("name", "=", final_name),
-                            ("company_id", "=", self.company_id.id),
-                        ],
-                        limit=1,
-                    )
-                    if not existing:
-                        self.env["stock.lot"].create(
-                            {
-                                "name": final_name,
-                                "product_id": product.id,
-                                "ref": self.name,
-                                "company_id": self.company_id.id,
-                            }
-                        )
-                    serial_counter += 1
+        # Clasificar lotes existentes: committed (con movimientos) o free
+        all_lots = self.env["stock.lot"].search([("ref", "=", self.name)])
+        if all_lots:
+            active_lot_ids = set(
+                self.env["stock.move.line"].search([
+                    ("lot_id", "in", all_lots.ids),
+                    ("state", "not in", ["cancel"]),
+                ]).mapped("lot_id").ids
+            )
+        else:
+            active_lot_ids = set()
+
+        committed = {}
+        free = {}
+        for lot in all_lots:
+            pid = lot.product_id.id
+            if lot.id in active_lot_ids:
+                committed[pid] = committed.get(pid, 0) + 1
             else:
-                final_name = prefix + self.name
-                existing = self.env["stock.lot"].search(
-                    [
-                        ("product_id", "=", product.id),
-                        ("name", "=", final_name),
-                        ("company_id", "=", self.company_id.id),
-                    ],
-                    limit=1,
-                )
-                if not existing:
-                    self.env["stock.lot"].create(
-                        {
-                            "name": final_name,
-                            "product_id": product.id,
-                            "ref": self.name,
-                            "company_id": self.company_id.id,
-                        }
-                    )
+                free.setdefault(pid, self.env["stock.lot"])
+                free[pid] |= lot
+
+        # Aplicar delta por producto
+        for pid in set(needed) | set(free):
+            need = needed.get(pid, 0)
+            comm = committed.get(pid, 0)
+            free_lots = free.get(pid, self.env["stock.lot"])
+            delta = need - comm - len(free_lots)
+
+            if delta > 0:
+                prefix = prefix_map.get(pid, "")
+                for _ in range(delta):
+                    self.env["stock.lot"].create({
+                        "name": prefix + sequence.next_by_id(),
+                        "product_id": pid,
+                        "ref": self.name,
+                        "company_id": self.company_id.id,
+                    })
+            elif delta < 0:
+                free_lots[max(0, need - comm):].unlink()

@@ -52,39 +52,6 @@
         </xpath>
 
 
-        <xpath expr="//td[@id='product']" position="inside">
-            <t t-if="line.assortment_pair_id">
-                <table class="table table-bordered table-sm mt-2 text-center">
-                    <thead class="table-light">
-                        <tr>
-                            <!-- Cabecera con las tallas -->
-                            <t t-set="pares" t-value="line.assortment_pair_id.custom_value.split(',')"/>
-                            <t t-set="tallas" t-value="[]"/>
-                            <t t-foreach="pares" t-as="par">
-                                <t t-set="talla" t-value="par.split('x')[0]"/>
-                                <t t-set="tallas" t-value="tallas + [talla]"/>
-                                <th t-esc="talla" class="border text-center"/>
-                            </t>
-                            <th class="border text-center font-weight-bold">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <!-- Fila con las cantidades -->
-                            <t t-set="cantidades" t-value="[]"/>
-                            <t t-set="total_cantidad" t-value="0"/>
-                            <t t-foreach="pares" t-as="par">
-                                <t t-set="cantidad" t-value="int(par.split('x')[1])"/>
-                                <t t-set="cantidades" t-value="cantidades + [cantidad]"/>
-                                <t t-set="total_cantidad" t-value="total_cantidad + cantidad"/>
-                                <td t-esc="cantidad" class="border text-center"/>
-                            </t>
-                            <td t-esc="total_cantidad" class="border text-center font-weight-bold bg-light"/>
-                        </tr>
-                    </tbody>
-                </table>
-            </t>
-        </xpath>
 
     </template>
 </odoo>

@@ -36,7 +36,7 @@
                 </button>
             </xpath>
 
-            <!-- Update + Validate buttons before the Lock button -->
+            <!-- Update + Validate + Print buttons before the Lock button -->
             <xpath expr="//header/button[@name='button_lock']" position="before">
                 <button
                     name="action_update_from_packing_list"
@@ -51,6 +51,13 @@
                     string="Container reception"
                     class="btn-secondary"
                     invisible="state == 'locked'"
+                />
+                <button
+                    name="action_print_packing_list"
+                    type="object"
+                    string="Packing List"
+                    class="btn-secondary"
+                    invisible="not container_line_count"
                 />
             </xpath>
 

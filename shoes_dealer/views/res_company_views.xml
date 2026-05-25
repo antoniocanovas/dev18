@@ -33,12 +33,14 @@
                             <field name="shoes_pair_weight_std"/>
                             <field name="shoes_hs_code_std"/>
                             <field name="single_purchase"/>
+                            <field name="shoes_assortment_custom_label"/>
                             <field name="exwork_currency_id"/>
                         </group>
                         <group name="lot_name" string="LOT NAME">
                             <field name="lot_name_campaign"/>
                             <field name="lot_name_manufacturer"/>
                             <field name="lot_name_brand"/>
+                            <field name="lot_name_sequence"/>
                         </group>
                         <group name="shoes_tracking" string="Tracking" invisible="not is_shoes_company">
                             <field name="shoes_assortment_tracking" required="is_shoes_company"/>

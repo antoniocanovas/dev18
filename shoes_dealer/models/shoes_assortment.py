@@ -53,3 +53,5 @@ class ShoesAssortment(models.Model):
     pairs_count = fields.Integer(
         "Pairs", store=True, compute="_get_shoes_set_pair_count"
     )
+
+    custom = fields.Boolean("Custom", default=False)

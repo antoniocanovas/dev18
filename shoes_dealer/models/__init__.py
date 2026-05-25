@@ -1,4 +1,5 @@
 from . import product_brand
+from . import product_category
 from . import shoes_assortment
 from . import shoes_assortment_line
 from . import product_template

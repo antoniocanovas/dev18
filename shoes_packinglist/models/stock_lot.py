@@ -7,7 +7,10 @@ class StockLot(models.Model):
     weight = fields.Float(string="Gross Weight", digits="Stock Weight")
     net_weight = fields.Float(string="Net Weight", digits="Stock Weight")
     volume = fields.Float(string="Volume", digits="Volume")
-    width_length_high = fields.Char(string="W×L×H (cm)")
+    product_length = fields.Float(string="Length")
+    product_height = fields.Float(string="Height")
+    product_width = fields.Float(string="Width")
+    dimensional_uom_id = fields.Many2one("uom.uom", string="Dimensional UoM")
     container_line_id = fields.Many2one(
         "purchase.container.line",
         string="Container Line",

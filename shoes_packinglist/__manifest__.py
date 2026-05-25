@@ -9,6 +9,7 @@
         "stock",
         "account",
         "product_net_weight",
+        "product_dimension",
     ],
     "data": [
         "security/ir.model.access.csv",
@@ -18,5 +19,6 @@
         "views/stock_lot_views.xml",
         "views/purchase_container_line_views.xml",
         "views/purchase_container_views.xml",
+        "reports/packing_list_report.xml",
     ],
 }

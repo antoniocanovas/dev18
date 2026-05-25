@@ -121,6 +121,10 @@ class ProductTemplate(models.Model):
         related="product_tmpl_single_id.shipping_price",
         readonly=False,
     )
+    trade_name = fields.Char(
+        "Trade Name",
+        help="Nombre comercial utilizado para exportación de datos",
+    )
     campaign_code = fields.Char("Campaign Code", store=True, copy=False)
     sale_margin = fields.Float(
         string="Sale Margin",

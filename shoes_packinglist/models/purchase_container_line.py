@@ -27,7 +27,8 @@ class PurchaseContainerLine(models.Model):
     shoes_campaign = fields.Char(string="Campaign")
     name = fields.Char(string="Product")
     color = fields.Char(string="Color")
-    pairs = fields.Float(string="Pairs", digits="Product Unit of Measure")
+    pair_qty = fields.Float(string="Pairs", digits="Product Unit of Measure")
+    quantity = fields.Float(string="Quantity", digits="Product Unit of Measure", default=1)
     purchase_order = fields.Char(string="Purchase Order")
     assortment = fields.Char(string="Assortment")
     lot = fields.Char(string="Lot")
@@ -75,6 +76,38 @@ class PurchaseContainerLine(models.Model):
     def _compute_display_name(self):
         for record in self:
             record.display_name = record.lot or _("Container Line #%d") % record.id
+
+    def _get_sizes_text(self):
+        """Returns size/quantity breakdown from the assortment linked to the product."""
+        self.ensure_one()
+        if "shoes.assortment" not in self.env:
+            return ""
+        product = self.move_id.product_id
+        if not product:
+            return ""
+        assortment_attr = getattr(product, "assortment_attribute_id", False)
+        if not assortment_attr:
+            return ""
+        assortment = assortment_attr.assortment_id
+        if not assortment or not assortment.line_ids:
+            return ""
+        return " / ".join(
+            "%s x%s" % (sl.value_id.name, sl.quantity)
+            for sl in assortment.line_ids
+        )
+
+    def _get_report_extra(self):
+        """Returns brand, color and campaign display values for the packing list report."""
+        self.ensure_one()
+        product = self.move_id.product_id
+        brand = getattr(product, "product_brand_id", False)
+        campaign = getattr(product, "shoes_campaign_id", False)
+        return {
+            "brand": brand.name if brand else "",
+            "color": getattr(product, "shoes_model_material", "") or "",
+            "campaign": campaign.display_name if campaign else "",
+            "sizes": self._get_sizes_text(),
+        }
 
 
 def _clean_char_fields(vals):

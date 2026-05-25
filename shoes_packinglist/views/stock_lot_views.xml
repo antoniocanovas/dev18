@@ -6,19 +6,26 @@
         <field name="model">stock.lot</field>
         <field name="inherit_id" ref="stock.view_production_lot_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <group string="Packing List Data">
-                    <field name="container_line_id" colspan="2" readonly="1"/>
-                    <field name="container_id" colspan="2" readonly="1"/>
+            <xpath expr="//page[@name='description']" position="after">
+                <page string="Packing List" name="packing_list">
                     <group>
-                        <field name="weight"/>
-                        <field name="net_weight"/>
+                        <group string="Pesos y volumen">
+                            <field name="weight"/>
+                            <field name="net_weight"/>
+                            <field name="volume"/>
+                        </group>
+                        <group string="Dimensiones">
+                            <field name="product_length"/>
+                            <field name="product_height"/>
+                            <field name="product_width"/>
+                            <field name="dimensional_uom_id"/>
+                        </group>
                     </group>
                     <group>
-                        <field name="volume"/>
-                        <field name="width_length_high"/>
+                        <field name="container_line_id" readonly="1"/>
+                        <field name="container_id" readonly="1"/>
                     </group>
-                </group>
+                </page>
             </xpath>
         </field>
     </record>

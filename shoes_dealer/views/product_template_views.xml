@@ -23,6 +23,7 @@
                                    invisible="not is_pair"
                             />
                             <field name="gender" readonly="is_pair or product_tmpl_set_id"/>
+                            <field name="trade_name"/>
                             <field name="campaign_code" readonly="1"/>
                             <field name="default_code" string="Reference" invisible="product_variant_count &gt; 1"/>
                         </group>

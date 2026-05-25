@@ -114,9 +114,11 @@
         </xpath>
 
         <!-- Sustituir cantidad por entero si la cantidad no es float -->
-        <xpath expr="//span[@t-field='line.quantity']" position="replace">
-            <span t-out="int(line.quantity) if line.quantity == int(line.quantity) else line.quantity"
-                  class="text-nowrap"/>
+        <xpath expr="//span[@t-field='line.quantity']" position="inside">
+            <t t-if="not line.product_id.product_tmpl_id.is_assortment">
+                <span t-out="int(line.quantity) if line.quantity == int(line.quantity) else line.quantity"
+                      class="text-nowrap"/>
+            </t>
         </xpath>
 
         <!-- Añadir columna "Tallas" después de Quantity en el tbody -->

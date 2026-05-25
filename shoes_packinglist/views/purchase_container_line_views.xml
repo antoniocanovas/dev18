@@ -10,7 +10,8 @@
                 <field name="name" string="Product Ref."/>
                 <field name="color"/>
                 <field name="assortment"/>
-                <field name="pairs"/>
+                <field name="pair_qty"/>
+                <field name="quantity" optional="hide"/>
                 <field name="tariff_heading"/>
                 <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="purchase_order"/>
@@ -49,7 +50,8 @@
                             <field name="shippingmark"/>
                         </group>
                         <group string="Quantities">
-                            <field name="pairs"/>
+                            <field name="pair_qty"/>
+                            <field name="quantity"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="move_id" readonly="1"/>

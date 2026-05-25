@@ -29,7 +29,6 @@
             <xpath expr="//page/field[@name='order_line']/list/field[@name='price_unit']" position="after">
                 <field name="pairs_count" optional="hide"/>
                 <field name="pair_price" optional="show"/>
-                <field name="assortment_pair_id" optional="hide"/>
             </xpath>
             <field name="notes" position="before">
                 <field name="pairs_count"/>

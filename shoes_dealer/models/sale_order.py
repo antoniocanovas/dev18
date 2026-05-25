@@ -1,6 +1,4 @@
 # Copyright 2023 Serincloud SL - Ingenieriacloud.com
-from typing import Any
-
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -122,17 +120,19 @@ class SaleOrder(models.Model):
         if not (self.id and self.order_line and self.state == "sale"):
             return
 
-        self._delete_unused_lots()
-
-        base_name = self.name
-
+        sequence = self.company_id.lot_name_sequence
         purchase_all = self.company_id.purchase_all_sale
-        serial_counter = 1
+
+        # Calcular lotes necesarios por producto (ignorar líneas con PO confirmada)
+        needed = {}
+        prefix_map = {}
         for li in self.order_line:
             product = li.product_id
             if product.tracking not in ("lot", "serial"):
                 continue
-            if purchase_all or li.product_custom_attribute_value_ids:
+            if li.purchase_line_id and li.purchase_line_id.order_id.state in ("purchase", "done"):
+                continue
+            if purchase_all:
                 quantity = int(li.product_uom_qty)
             elif li.purchase_line_id:
                 quantity = int(li.purchase_line_id.product_qty)
@@ -142,52 +142,52 @@ class SaleOrder(models.Model):
                 quantity = min(quantity, int(li.purchase_line_id.product_qty))
             if quantity < 1:
                 continue
-
             self._check_lot_name_prefix_data(product)
-            prefix = self._build_lot_name_prefix(product)
+            lot_count = quantity if product.tracking == "serial" else 1
+            needed[product.id] = needed.get(product.id, 0) + lot_count
+            prefix_map.setdefault(product.id, self._build_lot_name_prefix(product))
 
-            if product.tracking == "serial":
-                for _ in range(quantity):
-                    final_name = prefix + "%s-%03d" % (base_name, serial_counter)
-                    existing = self.env["stock.lot"].search(
-                        [
-                            ("product_id", "=", product.id),
-                            ("name", "=", final_name),
-                            ("company_id", "=", self.company_id.id),
-                        ],
-                        limit=1,
-                    )
-                    if not existing:
-                        self.env["stock.lot"].create(
-                            {
-                                "name": final_name,
-                                "product_id": product.id,
-                                "ref": self.name,
-                                "company_id": self.company_id.id,
-                                "sale_id": self.id,
-                            }
-                        )
-                    serial_counter += 1
+        # Clasificar lotes existentes: committed (con movimientos) o free
+        all_lots = self.env["stock.lot"].search([("sale_id", "=", self.id)])
+        if all_lots:
+            active_lot_ids = set(
+                self.env["stock.move.line"].search([
+                    ("lot_id", "in", all_lots.ids),
+                    ("state", "not in", ["cancel"]),
+                ]).mapped("lot_id").ids
+            )
+        else:
+            active_lot_ids = set()
+
+        committed = {}
+        free = {}
+        for lot in all_lots:
+            pid = lot.product_id.id
+            if lot.id in active_lot_ids:
+                committed[pid] = committed.get(pid, 0) + 1
             else:
-                final_name = prefix + base_name
-                existing = self.env["stock.lot"].search(
-                    [
-                        ("product_id", "=", product.id),
-                        ("name", "=", final_name),
-                        ("company_id", "=", self.company_id.id),
-                    ],
-                    limit=1,
-                )
-                if not existing:
-                    self.env["stock.lot"].create(
-                        {
-                            "name": final_name,
-                            "product_id": product.id,
-                            "ref": self.name,
-                            "company_id": self.company_id.id,
-                            "sale_id": self.id,
-                        }
-                    )
+                free.setdefault(pid, self.env["stock.lot"])
+                free[pid] |= lot
+
+        # Aplicar delta por producto
+        for pid in set(needed) | set(free):
+            need = needed.get(pid, 0)
+            comm = committed.get(pid, 0)
+            free_lots = free.get(pid, self.env["stock.lot"])
+            delta = need - comm - len(free_lots)
+
+            if delta > 0:
+                prefix = prefix_map.get(pid, "")
+                for _ in range(delta):
+                    self.env["stock.lot"].create({
+                        "name": prefix + sequence.next_by_id(),
+                        "product_id": pid,
+                        "ref": self.name,
+                        "company_id": self.company_id.id,
+                        "sale_id": self.id,
+                    })
+            elif delta < 0:
+                free_lots[max(0, need - comm):].unlink()
 
     def _action_confirm(self):
         # skip_lot_creation: la automación dispara durante el super() cuando state='sale',
@@ -199,6 +199,252 @@ class SaleOrder(models.Model):
         for order in self.filtered(lambda o: o.state == "sale"):
             order.create_lots_for_sale_order()
         return result
+
+    def _get_matrix(self, product_template):
+        matrix = super()._get_matrix(product_template)
+        assortment_attr = self.env.company.assortment_attribute_id
+        if not assortment_attr:
+            return matrix
+        custom_ptav_ids = set(self.env["product.template.attribute.value"].search([
+            ("product_tmpl_id", "=", product_template.id),
+            ("attribute_id", "=", assortment_attr.id),
+            ("product_attribute_value_id.assortment_id.custom", "=", True),
+        ]).ids)
+        if not custom_ptav_ids:
+            return matrix
+
+        def _is_custom(cell):
+            return bool(cell.get("ptav_ids") and custom_ptav_ids.intersection(cell["ptav_ids"]))
+
+        orig_header = matrix["header"]
+        orig_rows = matrix["matrix"]
+
+        # Column indices that have at least one non-custom cell
+        valid_cols = {
+            col_idx
+            for row in orig_rows
+            for col_idx, cell in enumerate(row[1:], 1)
+            if not _is_custom(cell) and cell.get("ptav_ids")
+        }
+
+        matrix["header"] = [orig_header[0]] + [
+            orig_header[i] for i in sorted(valid_cols) if i < len(orig_header)
+        ]
+        matrix["matrix"] = [
+            new_row
+            for row in orig_rows
+            for new_row in [[row[0]] + [row[i] for i in sorted(valid_cols) if i < len(row)]]
+            if any(not _is_custom(cell) for cell in new_row[1:])
+        ]
+        return matrix
+
+    # -------------------------------------------------------------------------
+    # Assortment matrix helpers
+    # -------------------------------------------------------------------------
+
+    def _find_or_create_shoes_assortment(self, size_qtys):
+        ShoesAssortment = self.env["shoes.assortment"]
+        for assortment in ShoesAssortment.search([("custom", "=", True)]):
+            lines = {line.value_id.id: int(line.quantity) for line in assortment.line_ids}
+            if lines == {sid: int(qty) for sid, qty in size_qtys.items()}:
+                return assortment
+        SizeValue = self.env["product.attribute.value"]
+        parts = sorted(
+            "%sx%d" % (SizeValue.browse(sid).name, int(qty))
+            for sid, qty in size_qtys.items()
+        )
+        name_code = "+".join(parts)
+        return ShoesAssortment.create({
+            "name": name_code,
+            "code": name_code[:20],
+            "custom": True,
+            "gender": False,
+            "attribute_id": self.env.company.size_attribute_id.id,
+            "line_ids": [
+                (0, 0, {"value_id": sid, "quantity": int(qty)})
+                for sid, qty in size_qtys.items()
+            ],
+        })
+
+    def _get_or_create_assortment_attribute_value(self, assortment):
+        assortment_attribute = self.env.company.assortment_attribute_id
+        existing = self.env["product.attribute.value"].search([
+            ("assortment_id", "=", assortment.id),
+            ("attribute_id", "=", assortment_attribute.id),
+        ], limit=1)
+        if existing:
+            return existing
+        return self.env["product.attribute.value"].create({
+            "name": assortment.name,
+            "attribute_id": assortment_attribute.id,
+            "assortment_id": assortment.id,
+        })
+
+    def _ensure_assortment_value_on_product(self, assortment_tmpl, assortment_value):
+        assortment_attribute = self.env.company.assortment_attribute_id
+        ptal = self.env["product.template.attribute.line"].search([
+            ("product_tmpl_id", "=", assortment_tmpl.id),
+            ("attribute_id", "=", assortment_attribute.id),
+        ], limit=1)
+        if not ptal:
+            self.env["product.template.attribute.line"].create({
+                "product_tmpl_id": assortment_tmpl.id,
+                "attribute_id": assortment_attribute.id,
+                "value_ids": [(4, assortment_value.id)],
+            })
+        elif assortment_value.id not in ptal.value_ids.ids:
+            ptal.write({"value_ids": [(4, assortment_value.id)]})
+
+    def _find_assortment_variant(self, assortment_tmpl, color_value, assortment_value):
+        return self.env["product.product"].search([
+            ("product_tmpl_id", "=", assortment_tmpl.id),
+            ("color_value_id", "=", color_value.id),
+            ("assortment_attribute_id", "=", assortment_value.id),
+        ], limit=1)
+
+    def _create_assortment_sol(self, order, assortment_variant, qty):
+        self.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": assortment_variant.id,
+            "product_uom_qty": qty,
+            "price_unit": assortment_variant.lst_price,
+        })
+
+    def _apply_specific_mode(self, order, assortment_tmpl, color_value,
+                             size_qtys, assortment_qty_boxes):
+        assortment = self._find_or_create_shoes_assortment(size_qtys)
+        av = self._get_or_create_assortment_attribute_value(assortment)
+        self._ensure_assortment_value_on_product(assortment_tmpl, av)
+        variant = self._find_assortment_variant(assortment_tmpl, color_value, av)
+        if not variant:
+            raise UserError(
+                _("No se pudo crear la variante del surtido para color %s.")
+                % color_value.name
+            )
+        self._create_assortment_sol(order, variant, assortment_qty_boxes)
+
+    def _apply_auto_mode(self, order, assortment_tmpl, color_value,
+                         size_qtys, pairs_qty):
+        assortments_to_apply = []
+        remainders = {}
+        for size_id, total_qty in size_qtys.items():
+            pure_count = int(total_qty // pairs_qty)
+            remainder = total_qty % pairs_qty
+            if pure_count > 0:
+                assortments_to_apply.append(({size_id: pairs_qty}, pure_count))
+            if remainder > 0:
+                remainders[size_id] = remainder
+        for box_qtys in self._pack_remainders(remainders, pairs_qty):
+            assortments_to_apply.append((box_qtys, 1))
+        for box_size_qtys, box_count in assortments_to_apply:
+            assortment = self._find_or_create_shoes_assortment(box_size_qtys)
+            av = self._get_or_create_assortment_attribute_value(assortment)
+            self._ensure_assortment_value_on_product(assortment_tmpl, av)
+            variant = self._find_assortment_variant(assortment_tmpl, color_value, av)
+            if variant:
+                self._create_assortment_sol(order, variant, box_count)
+
+    def _pack_remainders(self, remainders, max_pairs):
+        if not remainders:
+            return []
+        boxes = []
+        current_box = {}
+        current_total = 0
+        for size_id, qty in sorted(remainders.items(), key=lambda x: x[1], reverse=True):
+            remaining = qty
+            while remaining > 0:
+                space = max_pairs - current_total
+                take = min(remaining, space)
+                current_box[size_id] = current_box.get(size_id, 0) + take
+                current_total += take
+                remaining -= take
+                if current_total >= max_pairs:
+                    boxes.append(dict(current_box))
+                    current_box = {}
+                    current_total = 0
+        if current_box:
+            boxes.append(current_box)
+        return boxes
+
+    @api.model
+    def process_pair_assortment_matrix(self, order_id, product_template_id,
+                                        compute_mode, pairs_qty, color_data):
+        """
+        Called from the ProductMatrixDialog JS when compute_mode is 'specific' or 'auto'.
+        color_data: list of {
+            'assortment_qty': int,          # only used in 'specific' mode
+            'cells': [{'ptav_ids': [int, ...], 'qty': float}, ...]
+        }
+        Each cell's ptav_ids includes all PTAVs for that variant (color + size).
+        Python identifies color vs size via company attribute config.
+        """
+        order = self.env["sale.order"].browse(order_id)
+        color_attribute = self.env.company.color_attribute_id
+        size_attribute = self.env.company.size_attribute_id
+
+        pair_tmpl = self.env["product.template"].browse(product_template_id)
+        assortment_tmpl = pair_tmpl.product_tmpl_set_id
+        if not assortment_tmpl:
+            raise UserError(_("El producto no tiene producto surtido (set) asociado."))
+
+        processed_rows = []
+        for row in color_data:
+            color_value = None
+            size_qtys = {}
+
+            for cell in row.get("cells", []):
+                qty = cell.get("qty", 0)
+                if not qty:
+                    continue
+                ptavs = self.env["product.template.attribute.value"].browse(
+                    cell.get("ptav_ids", [])
+                )
+                for ptav in ptavs:
+                    if ptav.attribute_id == color_attribute:
+                        if not color_value:
+                            color_value = ptav.product_attribute_value_id
+                    elif ptav.attribute_id == size_attribute:
+                        sid = ptav.product_attribute_value_id.id
+                        size_qtys[sid] = size_qtys.get(sid, 0) + qty
+
+            if not color_value or not size_qtys:
+                continue
+
+            processed_rows.append({
+                "color_value": color_value,
+                "size_qtys": size_qtys,
+                "assortment_qty": row.get("assortment_qty", 1),
+            })
+
+        if compute_mode == "specific":
+            errors = []
+            for row in processed_rows:
+                total = sum(row["size_qtys"].values())
+                boxes = row["assortment_qty"]
+                if boxes < 1:
+                    errors.append(
+                        _("Color %s: el número de surtidos debe ser al menos 1.")
+                        % row["color_value"].name
+                    )
+                elif total > pairs_qty * boxes:
+                    errors.append(
+                        _("Color %s: %d pares no caben en %d surtido(s) de %d pares.")
+                        % (row["color_value"].name, total, boxes, pairs_qty)
+                    )
+            if errors:
+                raise UserError("\n".join(errors))
+
+        for row in processed_rows:
+            if compute_mode == "specific":
+                self._apply_specific_mode(
+                    order, assortment_tmpl, row["color_value"],
+                    row["size_qtys"], row["assortment_qty"],
+                )
+            else:
+                self._apply_auto_mode(
+                    order, assortment_tmpl, row["color_value"],
+                    row["size_qtys"], pairs_qty,
+                )
 
     def _get_qty_to_purchase(self, sol, qty_sold=None):
         """
@@ -213,7 +459,7 @@ class SaleOrder(models.Model):
         """
         if qty_sold is None:
             qty_sold = sol.product_uom_qty
-        if self.company_id.purchase_all_sale or sol.product_custom_attribute_value_ids:
+        if self.company_id.purchase_all_sale:
             return qty_sold
 
         # --- Stock available from inventory ---
@@ -290,11 +536,7 @@ class SaleOrder(models.Model):
                     if qty_to_buy <= 0:
                         continue
 
-                    # Precio por surtido: exwork × pares por unidad de surtido
-                    if li.product_custom_attribute_value_ids:
-                        pairs_per_unit = li.custom_assortment_pairs
-                    else:
-                        pairs_per_unit = li.product_id.pairs_count
+                    pairs_per_unit = li.product_id.pairs_count
                     price_unit = li.product_id.exwork * pairs_per_unit
 
                     draft_purchases = self.env["purchase.order"].search(
@@ -312,11 +554,6 @@ class SaleOrder(models.Model):
                         "price_unit": price_unit,
                         "product_qty": qty_to_buy,
                     }
-                    if li.product_custom_attribute_value_ids:
-                        pol_vals["assortment_pair_id"] = (
-                            li.product_custom_attribute_value_ids[0].id
-                        )
-
                     purchase_line = self.env["purchase.order.line"].create(pol_vals)
                     # Indicar en SOL para que no vuelva a crear el pedido:
                     li["purchase_line_id"] = purchase_line.id

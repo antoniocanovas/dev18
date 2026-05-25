@@ -20,19 +20,7 @@ class StockMoveLine(models.Model):
                 or (record.state not in ["done"])
             ):
                 continue
-            # Si el valor del surtido es personalizado, crear assortment.pair desde
-            # valor custom:
-            if record.product_id.assortment_attribute_id.is_custom:
-                # Diferencia entre compra y venta:
-                origin = False
-                if record.move_id.sale_line_id.id:
-                    origin = record.move_id.sale_line_id
-                if record.move_id.purchase_line_id.id:
-                    origin = record.move_id.purchase_line_id.sale_line_id
-                if (origin) and (origin.product_custom_attribute_value_ids.ids):
-                    customvalue = origin.assortment_pair
-
-            # Surtido estándar (no custom):
+            # Surtido estándar:
             if (record.product_id.assortment_attribute_id.is_custom) and (
                 record.product_id.bom_ids.ids
             ):
