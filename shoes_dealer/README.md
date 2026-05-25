@@ -128,7 +128,6 @@ Campos calculados en la línea:
 | `pairs_count` | Total de pares (surtido × cantidad de cajas) |
 | `pair_price` | Precio por par (`precio_total ÷ pairs_count`) |
 | `special_pair_price` | Precio especial por par (recalcula el precio unitario) |
-| `custom_assortment_pairs` | Pares totales del surtido personalizado |
 
 **Al confirmar el pedido**, se crea automáticamente una línea en un pedido de compra al fabricante
 (buscando primero un PO en borrador del mismo proveedor). La línea de compra queda vinculada a la

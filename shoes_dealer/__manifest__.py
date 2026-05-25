@@ -69,6 +69,7 @@
         "web.assets_backend": [
             "shoes_dealer/static/src/js/product_matrix_dialog_patch.js",
             "shoes_dealer/static/src/xml/product_matrix_dialog_patch.xml",
+            "shoes_dealer/static/src/css/product_matrix_zero.css",
         ],
     },
     "installable": True,

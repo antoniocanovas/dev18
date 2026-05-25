@@ -35,15 +35,17 @@ class ProjectTask(models.Model):
     def shoes_create_product(self):
         for record in self:
             super(ProjectTask, record).shoes_create_product()
-            existing = self.env['shoes.sku'].search([
-                ('shoes_task_id', '=', record.id),
-                ('color_value_id', '=', False),
-            ], limit=1)
-            if not existing:
-                seq = self.env.company.shoes_sku_sequence_id
-                name = seq.next_by_id() if seq else self.env['ir.sequence'].next_by_code('shoes.sku') or '/'
-                self.env['shoes.sku'].create({
-                    'name': name,
-                    'shoes_task_id': record.id,
-                    'image': record.displayed_image_id.datas,
-                })
+            seq = self.env.company.shoes_sku_sequence_id
+            for item in record.shoes_color_chart_item_ids:
+                existing = self.env['shoes.sku'].search([
+                    ('shoes_task_id', '=', record.id),
+                    ('color_value_id', '=', item.color_value_id.id),
+                ], limit=1)
+                if not existing:
+                    name = seq.next_by_id() if seq else self.env['ir.sequence'].next_by_code('shoes.sku') or '/'
+                    self.env['shoes.sku'].create({
+                        'name': name,
+                        'shoes_task_id': record.id,
+                        'color_value_id': item.color_value_id.id,
+                        'image': record.displayed_image_id.datas,
+                    })
