@@ -13,6 +13,14 @@ class ShoesAccesory(models.Model):
     name = fields.Char("Name", translate=True, compute="_compute_name")
     product_id = fields.Many2one("product.product", string="Product", required=True)
     qty = fields.Integer("Qty", default=2)
+    uom_po_id = fields.Many2one(
+        "uom.uom", string="Purchase UoM",
+        related="product_id.uom_po_id", readonly=True,
+    )
+    cost_price = fields.Float("Cost price", digits="Product Price")
+    subtotal = fields.Float(
+        "Subtotal", compute="_compute_subtotal", store=True, digits="Product Price"
+    )
     task_id = fields.Many2one("project.task", string="Model")
 
     # Related:
@@ -53,6 +61,16 @@ class ShoesAccesory(models.Model):
     accesory_manufacturer_status = fields.Float(
         "Manufacturer Status", compute="_compute_accesory_manufacturer_status"
     )
+
+    @api.depends("qty", "cost_price")
+    def _compute_subtotal(self):
+        for record in self:
+            record.subtotal = record.qty * record.cost_price
+
+    @api.onchange("product_id")
+    def _onchange_product_id_cost(self):
+        if self.product_id:
+            self.cost_price = self.product_id.standard_price
 
     @api.depends("product_id", "qty")
     def _compute_name(self):

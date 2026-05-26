@@ -8,6 +8,16 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <!-- ref en la misma línea que el selector individual/empresa -->
+            <xpath expr="//div[hasclass('oe_title')]/field[@name='company_type']" position="replace">
+                <div class="d-flex align-items-center gap-3">
+                    <field name="company_type" widget="radio" options="{'horizontal': true}"/>
+                    <span class="fs-4 fw-bold" style="color: #8b0000;" invisible="not ref">
+                        <field name="ref" readonly="1" nolabel="1"/>
+                    </span>
+                </div>
+            </xpath>
+
             <!-- Añadir campo de etiquetas imprimibles justo debajo del VAT -->
             <xpath expr="//sheet/group/group" position="inside">
                 <field name="printed_label_ids"

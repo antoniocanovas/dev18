@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="shoes_stock_referrer_list_view" model="ir.ui.view">
+        <field name="name">shoes.stock.referrer.list</field>
+        <field name="model">shoes.stock.referrer</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="image" widget="image" string=" " options="{'size': [40, 40]}" readonly="1"/>
+                <field name="name" readonly="1"/>
+                <field name="partner_id"/>
+                <field name="shoes_campaign_id"/>
+                <field name="shoes_sku_id"
+                       domain="[('shoes_campaign_id', '=', shoes_campaign_id)]"/>
+                <field name="shoes_task_id" optional="show"/>
+                <field name="type"/>
+                <field name="date"/>
+                <field name="state" widget="selection"/>
+                <button name="action_open_form" type="object"
+                        icon="fa-external-link" title="Open"
+                        class="btn-sm btn-secondary" string=""/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="shoes_stock_referrer_form_view" model="ir.ui.view">
+        <field name="name">shoes.stock.referrer.form</field>
+        <field name="model">shoes.stock.referrer</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,stock,sent,return"
+                           options="{'clickable': 1}"/>
+                </header>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Referrer">
+                            <field name="partner_id"/>
+                            <field name="shoes_campaign_id"/>
+                            <field name="shoes_sku_id"
+                                   domain="[('shoes_campaign_id', '=', shoes_campaign_id)]"/>
+                            <field name="type"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Product">
+                            <field name="shoes_task_id" readonly="1"/>
+                            <field name="product_tmpl_set_id" readonly="1"/>
+                            <field name="product_tmpl_single_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Images" name="images">
+                            <field name="product_image_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="image_1920" widget="image"
+                                           options="{'size': [90, 90]}"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="shoes_stock_referrer_search_view" model="ir.ui.view">
+        <field name="name">shoes.stock.referrer.search</field>
+        <field name="model">shoes.stock.referrer</field>
+        <field name="arch" type="xml">
+            <search string="Referrers Stock">
+                <field name="partner_id"/>
+                <field name="shoes_sku_id"/>
+                <field name="shoes_campaign_id"/>
+                <field name="product_brand_id"/>
+                <field name="shoes_task_id"/>
+                <field name="state"/>
+                <separator/>
+                <filter string="Draft" name="filter_draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Stock" name="filter_stock"
+                        domain="[('state', '=', 'stock')]"/>
+                <filter string="Sent" name="filter_sent"
+                        domain="[('state', '=', 'sent')]"/>
+                <filter string="Return" name="filter_return"
+                        domain="[('state', '=', 'return')]"/>
+                <separator/>
+                <filter string="Izquierdo" name="filter_left"
+                        domain="[('type', '=', 'I')]"/>
+                <filter string="Derecho" name="filter_right"
+                        domain="[('type', '=', 'D')]"/>
+                <filter string="Par completo" name="filter_pair"
+                        domain="[('type', '=', 'P')]"/>
+                <separator/>
+                <filter string="Campaign" name="group_campaign"
+                        context="{'group_by': 'shoes_campaign_id'}"/>
+                <filter string="Brand" name="group_brand"
+                        context="{'group_by': 'product_brand_id'}"/>
+                <filter string="Referrer" name="group_partner"
+                        context="{'group_by': 'partner_id'}"/>
+                <filter string="Model" name="group_task"
+                        context="{'group_by': 'shoes_task_id'}"/>
+                <filter string="Date" name="group_date"
+                        context="{'group_by': 'date'}"/>
+                <filter string="State" name="group_state"
+                        context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="shoes_stock_referrer_action" model="ir.actions.act_window">
+        <field name="name">Referrers Stock</field>
+        <field name="res_model">shoes.stock.referrer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="shoes_stock_referrer_search_view"/>
+        <field name="context">{'search_default_group_campaign': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No referrer stock found. Create one!
+            </p>
+        </field>
+    </record>
+
+    <!-- MENU in Marketing -->
+    <menuitem
+        name="Referrers Stock"
+        id="shoes_stock_referrer_menu"
+        parent="shoes_dealer.shoes_dealer_design_menu"
+        sequence="30"
+        action="shoes_stock_referrer_action"
+        groups="project.group_project_user"
+    />
+
+</odoo>

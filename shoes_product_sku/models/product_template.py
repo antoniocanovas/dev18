@@ -7,6 +7,9 @@ from odoo.exceptions import UserError
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    #Para borrar después de actualización:
+    width_length_high = fields.Char('Para borrar')
+
     shoes_sku_count = fields.Integer('SKU', compute='_compute_shoes_sku_count')
     # Computed for display on product.template form (first variant's SKU, usually unique per template+color)
     shoes_sku_id = fields.Many2one(

@@ -294,6 +294,24 @@ class ProductProduct(models.Model):
         "Pairs", store=False, compute="_get_shoes_product_product_pair_count"
     )
 
+    def _get_assortment_pair_label(self):
+        for record in self:
+            label = ""
+            bom = self.env["mrp.bom"].search([("product_id", "=", record.id)], limit=1)
+            if bom and bom.assortment_pair:
+                parts = bom.assortment_pair.split(";")
+                if len(parts) >= 2:
+                    sizes = parts[0].split(",")
+                    pairs = parts[1].split(",")
+                    label = ",".join(
+                        f"{s}×{p}" for s, p in zip(sizes, pairs) if s and p
+                    )
+            record["assortment_pair_label"] = label
+
+    assortment_pair_label = fields.Char(
+        "Assortment pair label", store=False, compute="_get_assortment_pair_label"
+    )
+
     # Recalcula pesos de surtidos en función de  el número de pares
     @api.constrains("pairs_count")
     def get_weight_by_pairs(self) -> None:

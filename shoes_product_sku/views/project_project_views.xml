@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_sku_project_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sku.project.inh.form</field>
+        <field name="model">project.project</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_project_inh_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Import button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_import_sku_images" type="object"
+                        string="Import SKU Images / Videos"
+                        invisible="not is_shoes_campaign"
+                        class="btn-secondary"/>
+            </xpath>
+
+            <!-- SKU smart button on project form -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_shoes_sku"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-barcode"
+                        invisible="not is_shoes_campaign">
+                    <field name="shoes_sku_count" widget="statinfo" string="SKU"/>
+                </button>
+                <button name="action_view_referrers"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-users"
+                        invisible="not is_shoes_campaign">
+                    <field name="shoes_referrer_count" widget="statinfo" string="Shoes demo"/>
+                </button>
+            </xpath>
+
+        </field>
+        <field name="priority">101</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Salesman (own documents only): read records where partner is their customer -->
+    <record id="shoes_stock_referrer_own_rule" model="ir.rule">
+        <field name="name">Shoes Stock Referrer: Own Partners</field>
+        <field name="model_id" ref="model_shoes_stock_referrer"/>
+        <field name="domain_force">[('partner_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Salesman (all documents): unrestricted access -->
+    <record id="shoes_stock_referrer_all_rule" model="ir.rule">
+        <field name="name">Shoes Stock Referrer: All Records</field>
+        <field name="model_id" ref="model_shoes_stock_referrer"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

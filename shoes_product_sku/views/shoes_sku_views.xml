@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="shoes_sku_list_view" model="ir.ui.view">
+        <field name="name">shoes.sku.list</field>
+        <field name="model">shoes.sku</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="image" widget="image" string=" " options="{'size': [50, 50]}"/>
+                <field name="name"/>
+                <field name="shoes_task_id"/>
+                <field name="color_value_id"/>
+                <field name="shoes_campaign_id" optional="hide"/>
+                <field name="product_tmpl_set_id" optional="hide"/>
+                <field name="product_tmpl_single_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="shoes_sku_form_view" model="ir.ui.view">
+        <field name="name">shoes.sku.form</field>
+        <field name="model">shoes.sku</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_import_images" type="object"
+                            string="Import Images / Videos"
+                            class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_products"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-cubes"
+                                invisible="product_count == 0">
+                            <field name="product_count" widget="statinfo" string="Variants"/>
+                        </button>
+                        <button name="action_view_referrers"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-users">
+                            <field name="shoes_referrer_count" widget="statinfo" string="Shoes demo"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="SKU">
+                            <field name="shoes_task_id" readonly="shoes_task_id"/>
+                            <field name="shoes_campaign_id" readonly="1"/>
+                            <field name="color_value_id"/>
+                        </group>
+                        <group string="Products">
+                            <field name="product_tmpl_set_id" readonly="1"/>
+                            <field name="product_tmpl_single_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Images" name="images">
+                            <field name="product_image_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="image_1920" widget="image"
+                                           options="{'size': [90, 90]}"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="shoes_sku_search_view" model="ir.ui.view">
+        <field name="name">shoes.sku.search</field>
+        <field name="model">shoes.sku</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="shoes_task_id"/>
+                <field name="shoes_campaign_id"/>
+                <field name="color_value_id"/>
+                <separator/>
+                <filter string="Campaign" name="group_campaign"
+                        context="{'group_by': 'shoes_campaign_id'}"/>
+                <filter string="Model" name="group_task"
+                        context="{'group_by': 'shoes_task_id'}"/>
+                <filter string="Color" name="group_color"
+                        context="{'group_by': 'color_value_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="shoes_sku_action" model="ir.actions.act_window">
+        <field name="name">SKU</field>
+        <field name="res_model">shoes.sku</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="shoes_sku_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No SKU found. Create one!
+            </p>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem
+        name="SKU"
+        id="shoes_sku_menu"
+        parent="shoes_dealer.shoes_dealer_design_menu"
+        sequence="20"
+        action="shoes_sku_action"
+        groups="project.group_project_user"
+    />
+
+</odoo>

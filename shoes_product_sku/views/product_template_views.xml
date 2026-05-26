@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- SKU smart button on product.template form (only-form view) -->
+    <record id="shoes_sku_product_template_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sku.product.template.inh.form</field>
+        <field name="model">product.template</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="priority">91</field>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_shoes_sku"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-barcode"
+                        invisible="not shoes_task_id or shoes_sku_count == 0">
+                    <field name="shoes_sku_count" widget="statinfo" string="SKU"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- shoes_sku_id readonly field on product.template form below shoes_model_material -->
+    <record id="shoes_sku_pt_campaign_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sku.pt.campaign.inh.form</field>
+        <field name="model">product.template</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_product_inh_form"/>
+        <field name="priority">91</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='shoes_model_material']" position="after">
+                <field name="shoes_sku_id" readonly="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- shoes_sku_id field in product.product_variant_easy_edit_view, inside codes group -->
+    <record id="shoes_sku_variant_easy_edit_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sku.variant.easy.edit.inh.form</field>
+        <field name="model">product.product</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="priority">91</field>
+        <field name="arch" type="xml">
+            <field name="default_code" position="after">
+                <field name="shoes_sku_id" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- shoes_sku_image_ids kanban group inside shoes_dealer tab on product.product normal form -->
+    <record id="shoes_sku_product_normal_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sku.product.normal.inh.form</field>
+        <field name="model">product.product</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="priority">91</field>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='shoes_dealer']" position="inside">
+                <group colspan="2" name="shoes_sku_images" string="SKU Media"
+                      invisible="not shoes_sku_image_ids">
+                    <field colspan="2"
+                           name="shoes_sku_image_ids"
+                           nolabel="1"
+                           readonly="1"
+                           mode="kanban"
+                    >
+                        <kanban>
+                            <field name="image_1920"/>
+                            <field name="name"/>
+                            <templates>
+                                <t t-name="card" class="p-0 border-0">
+                                    <div class="card">
+                                        <div class="o_squared_image">
+                                            <field name="image_1920" widget="image"/>
+                                        </div>
+                                        <div class="p-2 m-0 bg-200">
+                                            <field name="name" class="small fs-5 text-truncate d-block"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- shoes_sku_id field in product.product tree view after name -->
+    <record id="shoes_sku_product_product_inh_tree" model="ir.ui.view">
+        <field name="name">shoes.sku.product.product.inh.tree</field>
+        <field name="model">product.product</field>
+        <field name="type">list</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="priority">91</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="shoes_sku_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

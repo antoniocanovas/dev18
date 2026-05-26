@@ -49,9 +49,16 @@
                             </group>
                         </group>
 
+                        <group name="model_exwork" string="Exwork">
+                            <group name="model_exwork_left"/>
+                            <group name="model_exwork_right">
+                                <field name="exwork" widget="monetary" options="{'currency_field':'exwork_currency_id'}"/>
+                            </group>
+                            <field name="exwork_currency_id" invisible="1"/>
+                        </group>
+
                         <group name="model_addtional_info" string="Additional info">
                             <group>
-                                <field name="exwork" widget="monetary" options="{'currency_field':'exwork_currency_id'}"/>
                                 <field name="intrastat_duty_id"/>
                                 <field name="shoes_pair_weight_id"/>
                             </group>
@@ -88,7 +95,6 @@
                             </group>
                         </group>
                         <field name="is_shoes_campaign" invisible="1"/>
-                        <field name="exwork_currency_id" invisible="1"/>
                     </page>
                 </xpath>
                 <xpath expr="//label[@for='date_deadline']" position="before">
@@ -162,6 +168,16 @@
 
             </xpath>
         </field>
+    </record>
+
+    <!-- Override standard task actions to also show tasks whose product
+         is sold in the current campaign (via sale_campaign_ids). -->
+    <record id="project.act_project_project_2_project_task_all" model="ir.actions.act_window">
+        <field name="domain">[('sale_campaign_ids', 'in', [active_id])]</field>
+    </record>
+
+    <record id="project.dblc_proj" model="ir.actions.act_window">
+        <field name="domain">[('sale_campaign_ids', 'in', [active_id])]</field>
     </record>
 
 </odoo>

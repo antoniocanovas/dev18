@@ -17,8 +17,6 @@ class ProductProduct(models.Model):
     @api.depends("standard_price", "product_tmpl_id.intrastat_duty_id.duty")
     def _compute_estimated_landed_cost(self):
         for product in self:
-            raise UserError('hola')
-            """
             duty_percent = (
                 product.product_tmpl_id.intrastat_duty_id.duty
                 if product.product_tmpl_id.intrastat_duty_id
@@ -27,4 +25,3 @@ class ProductProduct(models.Model):
             product.estimated_landed_cost = product.standard_price * (
                 1 + duty_percent / 100
             )
-            """

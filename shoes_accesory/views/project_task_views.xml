@@ -9,6 +9,16 @@
         <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_form"/>
         <field name="arch" type="xml">
             <data>
+                <xpath expr="//group[@name='model_exwork_left']" position="inside">
+                    <field name="exwork_factory" widget="monetary" options="{'currency_field':'exwork_currency_id'}"/>
+                    <field name="exwork_accesory" widget="monetary" options="{'currency_field':'exwork_currency_id'}" readonly="1"/>
+                </xpath>
+                <xpath expr="//group[@name='model_exwork_right']/field[@name='exwork']" position="before">
+                    <field name="exwork_accesory_tax_percent"/>
+                </xpath>
+                <xpath expr="//group[@name='model_exwork_right']/field[@name='exwork']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
                 <xpath expr="//group[@name='model_addtional_info']" position="after">
                     <group name="shoes_accesories" invisible="not is_shoes_campaign" string="Accesories">
                         <field name="shoes_accesory_ids" nolabel="1">
@@ -17,6 +27,9 @@
                                     domain="[('type','=','consu'),('is_pair','=',False),('is_assortment','=',False)]"
                                 />
                                 <field name="qty"/>
+                                <field name="uom_po_id" readonly="1"/>
+                                <field name="cost_price"/>
+                                <field name="subtotal" readonly="1"/>
                                 <field name="task_id" column_invisible="1"/>
                             </list>
                         </field>

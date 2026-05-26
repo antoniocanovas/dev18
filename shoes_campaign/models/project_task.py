@@ -133,6 +133,20 @@ class ProjectTask(models.Model):
         help="Nombre comercial utilizado para exportación de datos",
     )
     shoes_product_tmpl_id = fields.Many2one("product.template", string="Product")
+
+    sale_campaign_ids = fields.Many2many(
+        "project.project",
+        compute="_compute_sale_campaign_ids",
+        store=True,
+        string="Sale Campaigns",
+    )
+
+    @api.depends("project_id", "shoes_product_tmpl_id.shoes_campaign_ids")
+    def _compute_sale_campaign_ids(self):
+        for task in self:
+            task.sale_campaign_ids = (
+                task.shoes_product_tmpl_id.shoes_campaign_ids | task.project_id
+            )
     # Para añadir QR en tarifas:
     shoes_url = fields.Char("URL")
 

@@ -114,7 +114,7 @@
         </xpath>
 
         <!-- Sustituir cantidad por entero si la cantidad no es float -->
-        <xpath expr="//span[@t-field='line.quantity']" position="inside">
+        <xpath expr="//td[@name='td_quantity']/span[@t-field='line.quantity']" position="inside" optional="skip">
             <t t-if="not line.product_id.product_tmpl_id.is_assortment">
                 <span t-out="int(line.quantity) if line.quantity == int(line.quantity) else line.quantity"
                       class="text-nowrap"/>

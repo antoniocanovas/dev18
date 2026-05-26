@@ -63,10 +63,10 @@
             sequence="55"
             web_icon="shoes_dealer,static/description/icon.png"
     >
-        <!-- Marketing -->
+        <!-- Design -->
         <menuitem
-                name="Marketing"
-                id="shoes_dealer_marketing_menu"
+                name="Design"
+                id="shoes_dealer_design_menu"
                 sequence="10"
                 groups="project.group_project_user"
         >

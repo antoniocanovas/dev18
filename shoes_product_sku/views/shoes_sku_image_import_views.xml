@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_sku_image_import_form" model="ir.ui.view">
+        <field name="name">shoes.sku.image.import.form</field>
+        <field name="model">shoes.sku.image.import</field>
+        <field name="arch" type="xml">
+            <form string="Import SKU Images / Videos">
+                <sheet>
+                    <group invisible="not shoes_campaign_id">
+                        <field name="shoes_campaign_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="attachment_ids" widget="many2many_binary" nolabel="1"
+                               colspan="2"/>
+                    </group>
+                    <p class="text-muted">
+                        Los primeros caracteres del nombre del fichero identifican el SKU.
+                        El separador ( _ o - ) inmediatamente tras el SKU se elimina del nombre.
+                    </p>
+                </sheet>
+                <footer>
+                    <button name="action_import" type="object"
+                            string="Importar" class="btn-primary"/>
+                    <button special="cancel" string="Cancelar"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
