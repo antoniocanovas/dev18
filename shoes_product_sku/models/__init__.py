@@ -6,5 +6,5 @@ from . import product_template
 from . import product_product
 from . import project_task
 from . import project_project
-from . import shoes_stock_referrer
+from . import shoes_sample
 from . import res_partner

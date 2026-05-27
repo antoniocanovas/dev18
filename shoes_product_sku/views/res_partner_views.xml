@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="shoes_stock_referrer_partner_inh_form" model="ir.ui.view">
-        <field name="name">shoes.stock.referrer.partner.inh.form</field>
+    <record id="shoes_sample_partner_inh_form" model="ir.ui.view">
+        <field name="name">shoes.sample.partner.inh.form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
@@ -15,7 +15,7 @@
                         type="object"
                         class="oe_stat_button"
                         icon="fa-users">
-                    <field name="shoes_referrer_count" widget="statinfo" string="Shoes demo"/>
+                    <field name="shoes_sample_count" widget="statinfo" string="Shoes demo"/>
                 </button>
             </xpath>
         </field>

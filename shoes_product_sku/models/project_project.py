@@ -25,20 +25,20 @@ class ProjectProject(models.Model):
             'context': {'create': False, 'default_shoes_campaign_id': self.id},
         }
 
-    shoes_referrer_ids = fields.One2many('shoes.stock.referrer', 'shoes_campaign_id', string='Referrers Stock')
-    shoes_referrer_count = fields.Integer('Referrers', compute='_compute_shoes_referrer_count')
+    shoes_sample_ids = fields.One2many('shoes.sample', 'shoes_campaign_id', string='Samples')
+    shoes_sample_count = fields.Integer('Samples', compute='_compute_shoes_sample_count')
 
-    @api.depends('shoes_referrer_ids')
-    def _compute_shoes_referrer_count(self):
+    @api.depends('shoes_sample_ids')
+    def _compute_shoes_sample_count(self):
         for project in self:
-            project.shoes_referrer_count = len(project.shoes_referrer_ids)
+            project.shoes_sample_count = len(project.shoes_sample_ids)
 
     def action_view_referrers(self):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Referrers Stock',
-            'res_model': 'shoes.stock.referrer',
+            'name': 'Samples',
+            'res_model': 'shoes.sample',
             'view_mode': 'list,form',
             'domain': [('shoes_campaign_id', '=', self.id)],
             'context': {'default_shoes_campaign_id': self.id},

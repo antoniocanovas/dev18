@@ -325,6 +325,10 @@ class SaleOrder(models.Model):
 
     def _apply_auto_mode(self, order, assortment_tmpl, color_value,
                          size_qtys, pairs_qty):
+        if not pairs_qty:
+            raise UserError(
+                _("No se puede distribuir automáticamente: el surtido no tiene pares por caja definidos.")
+            )
         assortments_to_apply = []
         remainders = {}
         for size_id, total_qty in size_qtys.items():

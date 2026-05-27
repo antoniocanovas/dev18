@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_sku_task_image_import_form" model="ir.ui.view">
+        <field name="name">shoes.sku.task.image.import.form</field>
+        <field name="model">shoes.sku.task.image.import</field>
+        <field name="arch" type="xml">
+            <form string="Import Images per SKU">
+                <sheet>
+                    <group>
+                        <field name="task_id" readonly="1"/>
+                    </group>
+                    <field name="line_ids" widget="shoes_sku_image_drop" nolabel="1"/>
+                </sheet>
+                <footer>
+                    <button special="cancel" string="Cerrar"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

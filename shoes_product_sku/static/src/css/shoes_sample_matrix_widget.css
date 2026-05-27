@@ -1,0 +1,27 @@
+.o_shoes_sample_matrix_scroll {
+    overflow-x: auto;
+}
+
+.o_shoes_sample_table {
+    min-width: 400px;
+    white-space: nowrap;
+}
+
+.o_shoes_sample_sku_col {
+    min-width: 180px;
+    white-space: nowrap;
+}
+
+.o_shoes_sample_partner_col {
+    min-width: 90px;
+    max-width: 120px;
+    white-space: normal;
+    word-break: break-word;
+    font-size: 0.82em;
+}
+
+.o_shoes_sample_type_input {
+    width: 48px;
+    margin: 0 auto;
+    padding: 2px 4px;
+}

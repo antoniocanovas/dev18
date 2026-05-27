@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="shoes_product_sku.ShoesSkuDropCard">
+    <div class="o_shoes_sku_drop_card"
+         t-att-class="{ 'o_shoes_sku_drop_card_over': state.isDragOver }"
+         t-on-dragover="onDragOver"
+         t-on-dragleave="onDragLeave"
+         t-on-drop="onDrop">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2 py-2">
+                <img t-att-src="'/web/image/shoes.sku/' + props.skuId + '/image_128'"
+                     style="width:48px;height:48px;object-fit:contain;" class="rounded border"/>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-bold text-truncate" t-esc="props.skuName"/>
+                    <div class="text-muted small text-truncate" t-esc="props.colorName"/>
+                </div>
+                <span class="badge rounded-pill"
+                      t-att-class="state.count > 0 ? 'bg-success' : 'bg-secondary'">
+                    <t t-esc="state.count"/>
+                </span>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-3 o_shoes_sku_drop_zone"
+                 t-on-click="openFilePicker">
+                <t t-if="state.uploading">
+                    <i class="fa fa-spinner fa-spin fa-2x text-primary"/>
+                    <div class="text-muted small mt-2">Subiendo...</div>
+                </t>
+                <t t-elif="state.isDragOver">
+                    <i class="fa fa-cloud-upload fa-2x text-primary"/>
+                    <div class="text-primary small mt-2 fw-bold">Suelta aquí</div>
+                </t>
+                <t t-else="">
+                    <i class="fa fa-cloud-upload fa-2x text-muted"/>
+                    <div class="text-muted small mt-2">Arrastra imágenes</div>
+                    <div class="text-muted" style="font-size:0.7em;">o haz clic para elegir</div>
+                </t>
+            </div>
+        </div>
+        <input type="file" accept="image/*" multiple="multiple"
+               t-ref="fileInput" class="d-none"
+               t-on-change="onFileInput"/>
+    </div>
+</t>
+
+<t t-name="shoes_product_sku.ShoesSkuImageDropWidget">
+    <div class="o_shoes_sku_image_drop_widget">
+        <div class="d-flex flex-wrap gap-3 p-2">
+            <t t-foreach="lines" t-as="line" t-key="line.resId">
+                <ShoesSkuDropCard
+                    lineId="line.resId"
+                    skuId="getSkuId(line)"
+                    skuName="getSkuName(line)"
+                    colorName="getColorName(line)"
+                    imageCount="getCount(line)"
+                    onUploaded.bind="onCardUploaded"
+                />
+            </t>
+        </div>
+    </div>
+</t>
+
+</templates>

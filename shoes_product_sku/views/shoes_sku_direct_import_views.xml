@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_sku_direct_import_form" model="ir.ui.view">
+        <field name="name">shoes.sku.direct.import.form</field>
+        <field name="model">shoes.sku.direct.import</field>
+        <field name="arch" type="xml">
+            <form string="Import Images / Videos">
+                <sheet>
+                    <group>
+                        <field name="shoes_sku_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="attachment_ids" widget="many2many_binary" nolabel="1"
+                               colspan="2"/>
+                    </group>
+                    <p class="text-muted">
+                        Los ficheros se asociarán directamente a este SKU.
+                        El nombre del registro será el nombre del fichero sin extensión.
+                    </p>
+                </sheet>
+                <footer>
+                    <button name="action_import" type="object"
+                            string="Importar" class="btn-primary"/>
+                    <button special="cancel" string="Cancelar"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

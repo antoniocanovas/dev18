@@ -3,9 +3,9 @@
 from odoo import api, fields, models
 
 
-class ShoesStockReferrer(models.Model):
-    _name = 'shoes.stock.referrer'
-    _description = 'Shoes Stock Referrer'
+class ShoesSample(models.Model):
+    _name = 'shoes.sample'
+    _description = 'Shoes Sample'
     _order = 'shoes_campaign_id, name'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
@@ -41,16 +41,8 @@ class ShoesStockReferrer(models.Model):
         'product.brand', string='Brand',
         related='shoes_campaign_id.product_brand_id', store=True, index=True,
     )
-    type = fields.Selection(
-        [('I', 'Izquierdo'), ('D', 'Derecho'), ('P', 'Par completo')],
-        string='Type', required=True,
-        help='Izquierdo, derecho o par completo',
-    )
+    type = fields.Char(string='Type', size=2, required=True)
     date = fields.Date(string='Sent date', tracking=True, help='Sent date')
-    state = fields.Selection(
-        [('draft', 'Draft'), ('stock', 'Stock'), ('sent', 'Sent'), ('return', 'Return')],
-        string='State', default='draft', required=True, tracking=True,
-    )
     image = fields.Image(related='shoes_sku_id.image')
     product_image_ids = fields.Many2many(
         'product.image', string='Images',
@@ -64,7 +56,7 @@ class ShoesStockReferrer(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', 'New') == 'New':
-                vals['name'] = self.env['ir.sequence'].next_by_code('shoes.stock.referrer') or 'New'
+                vals['name'] = self.env['ir.sequence'].next_by_code('shoes.sample') or 'New'
         return super().create(vals_list)
 
     @api.depends('shoes_sku_id', 'shoes_sku_id.product_image_ids')
@@ -86,7 +78,7 @@ class ShoesStockReferrer(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'shoes.stock.referrer',
+            'res_model': 'shoes.sample',
             'view_mode': 'form',
             'res_id': self.id,
             'target': 'current',

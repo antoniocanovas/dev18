@@ -30,7 +30,7 @@
                         class="oe_stat_button"
                         icon="fa-users"
                         invisible="not is_shoes_campaign">
-                    <field name="shoes_referrer_count" widget="statinfo" string="Shoes demo"/>
+                    <field name="shoes_sample_count" widget="statinfo" string="Shoes demo"/>
                 </button>
             </xpath>
 

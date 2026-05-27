@@ -24,8 +24,44 @@
                 </button>
             </xpath>
 
+            <!-- Import images button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_open_sku_image_wizard"
+                        type="object"
+                        string="Import SKU Images"
+                        class="btn-secondary"
+                        invisible="shoes_sku_count == 0"/>
+                <button name="action_open_sample_wizard"
+                        type="object"
+                        string="Samples"
+                        class="btn-secondary"
+                        invisible="shoes_sku_count == 0"/>
+            </xpath>
+
         </field>
         <field name="priority">99</field>
+    </record>
+
+    <!-- List view: add Import Images button column -->
+    <record id="shoes_product_sku_task_inh_list" model="ir.ui.view">
+        <field name="name">shoes.product.sku.task.inh.list</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="shoes_campaign.shoes_campaign_task_inh_list_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <field name="shoes_sku_count" column_invisible="1"/>
+                <button name="action_open_sku_image_wizard"
+                        type="object"
+                        icon="fa-images"
+                        title="Import SKU Images"
+                        invisible="shoes_sku_count == 0"/>
+                <button name="action_open_sample_wizard"
+                        type="object"
+                        icon="fa-users"
+                        title="Samples"
+                        invisible="shoes_sku_count == 0"/>
+            </xpath>
+        </field>
     </record>
 
 </odoo>

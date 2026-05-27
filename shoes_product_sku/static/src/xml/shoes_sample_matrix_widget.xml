@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<t t-name="shoes_product_sku.ShoesSampleMatrix">
+    <div class="o_shoes_sample_matrix">
+        <t t-if="!state.skus.length or !state.partners.length">
+            <div class="text-muted p-3">
+                <t t-if="!state.skus.length">No hay SKUs en esta tarea.</t>
+                <t t-elif="!state.partners.length">No hay contactos con Samples habilitado.</t>
+            </div>
+        </t>
+        <t t-else="">
+            <div class="o_shoes_sample_matrix_scroll">
+                <table class="table table-sm table-bordered o_shoes_sample_table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="o_shoes_sample_sku_col">SKU</th>
+                            <t t-foreach="state.partners" t-as="partner" t-key="partner.id">
+                                <th class="text-center o_shoes_sample_partner_col" t-esc="partner.name"/>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.skus" t-as="sku" t-key="sku.id">
+                            <tr>
+                                <td class="o_shoes_sample_sku_col">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img t-att-src="'/web/image/shoes.sku/' + sku.id + '/image_128'"
+                                             style="width:36px;height:36px;object-fit:contain;" class="rounded border"/>
+                                        <div>
+                                            <div class="fw-bold small" t-esc="sku.name"/>
+                                            <div t-if="sku.color" class="text-muted small" t-esc="sku.color"/>
+                                        </div>
+                                    </div>
+                                </td>
+                                <t t-foreach="state.partners" t-as="partner" t-key="partner.id">
+                                    <td class="text-center align-middle">
+                                        <input type="text"
+                                               maxlength="2"
+                                               class="o_shoes_sample_type_input form-control form-control-sm text-center text-uppercase"
+                                               t-att-value="getCell(sku.id, partner.id).type"
+                                               t-on-change="(ev) => this.onTypeChange(ev, sku.id, partner.id)"/>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </div>
+</t>
+
+</templates>

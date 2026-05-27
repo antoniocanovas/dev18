@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="pnt_menu_sequence_group"
+              name="Sequences"
+              parent="stock.menu_stock_config_settings"
+              sequence="100"/>
+    <menuitem id="pnt_menu_ean_sequences_list"
+              name="EAN Sequences"
+              action="pnt_action_ean_sequences"
+              parent="stock.menu_stock_config_settings"
+              sequence="101"/>
+
+</odoo>

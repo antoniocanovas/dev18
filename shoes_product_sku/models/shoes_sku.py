@@ -47,15 +47,15 @@ class ShoesSku(models.Model):
     product_image_ids = fields.One2many(
         'product.image', 'shoes_sku_id', string='Images'
     )
-    shoes_referrer_ids = fields.One2many(
-        'shoes.stock.referrer', 'shoes_sku_id', string='Referrers Stock'
+    shoes_sample_ids = fields.One2many(
+        'shoes.sample', 'shoes_sku_id', string='Samples'
     )
-    shoes_referrer_count = fields.Integer('Referrers', compute='_compute_shoes_referrer_count')
+    shoes_sample_count = fields.Integer('Samples', compute='_compute_shoes_sample_count')
 
-    @api.depends('shoes_referrer_ids')
-    def _compute_shoes_referrer_count(self):
+    @api.depends('shoes_sample_ids')
+    def _compute_shoes_sample_count(self):
         for sku in self:
-            sku.shoes_referrer_count = len(sku.shoes_referrer_ids)
+            sku.shoes_sample_count = len(sku.shoes_sample_ids)
 
     @api.depends('product_ids')
     def _compute_product_count(self):
@@ -100,7 +100,7 @@ class ShoesSku(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': 'Referrers Stock',
-            'res_model': 'shoes.stock.referrer',
+            'res_model': 'shoes.sample',
             'view_mode': 'list,form',
             'domain': [('shoes_sku_id', '=', self.id)],
             'context': {'default_shoes_sku_id': self.id, 'default_shoes_campaign_id': self.shoes_campaign_id.id},
