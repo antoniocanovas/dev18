@@ -13,12 +13,14 @@
     ],
     "data": [
         "security/ir.model.access.csv",
+        "data/server_actions.xml",
         "wizard/packing_list_warning_wizard_views.xml",
         "wizard/container_validate_wizard_views.xml",
         "views/product_product_views.xml",
         "views/stock_lot_views.xml",
         "views/purchase_container_line_views.xml",
         "views/purchase_container_views.xml",
+        "views/account_move_views.xml",
         "reports/packing_list_report.xml",
     ],
 }

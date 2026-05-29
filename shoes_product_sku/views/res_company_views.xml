@@ -36,6 +36,7 @@
                             <field name="shoes_code_campaign" required="1"/>
                         </div>
                         <field name="shoes_sku_update"/>
+                        <field name="shoes_sku_photo_count"/>
                     </group>
 
                     <group name="shoes_sku_sequence" string="Sequence">

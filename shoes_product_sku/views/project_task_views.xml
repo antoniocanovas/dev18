@@ -52,13 +52,15 @@
                 <field name="shoes_sku_count" column_invisible="1"/>
                 <button name="action_open_sku_image_wizard"
                         type="object"
-                        icon="fa-images"
-                        title="Import SKU Images"
+                        icon="fa-camera"
+                        string="Images"
+                        class="btn-sm btn-info"
                         invisible="shoes_sku_count == 0"/>
                 <button name="action_open_sample_wizard"
                         type="object"
                         icon="fa-users"
-                        title="Samples"
+                        string="Samples"
+                        class="btn-sm btn-warning"
                         invisible="shoes_sku_count == 0"/>
             </xpath>
         </field>

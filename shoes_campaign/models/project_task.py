@@ -215,19 +215,6 @@ class ProjectTask(models.Model):
                         "tracking": self.env.company.shoes_assortment_tracking,
                         "service_tracking": "no",
                         "product_add_mode": "matrix",
-                        "intrastat_duty_id": record.intrastat_duty_id.id,
-                        "intrastat_code_id": (
-                            record.intrastat_duty_id.intrastat_id.id
-                        ),
-                        "intrastat_origin_country_id": (
-                            record.intrastat_duty_id.country_id.id
-                        ),
-                        "hs_code": (
-                            record.intrastat_duty_id.intrastat_id.code
-                        ),
-                        "country_of_origin": (
-                            record.intrastat_duty_id.country_id.id
-                        ),
                         "exwork": record.exwork,
                         "sale_ok": False,
                         "sale_margin": record.project_id.default_sale_margin
@@ -238,3 +225,13 @@ class ProjectTask(models.Model):
                 )
             )
             record["shoes_product_tmpl_id"] = newproduct.id
+            # Intrastat fields require at least one variant to exist (constraint);
+            # write them after create so the default variant is already present.
+            if record.intrastat_duty_id:
+                newproduct.write({
+                    "intrastat_duty_id": record.intrastat_duty_id.id,
+                    "intrastat_code_id": record.intrastat_duty_id.intrastat_id.id,
+                    "intrastat_origin_country_id": record.intrastat_duty_id.country_id.id,
+                    "hs_code": record.intrastat_duty_id.intrastat_id.code,
+                    "country_of_origin": record.intrastat_duty_id.country_id.id,
+                })

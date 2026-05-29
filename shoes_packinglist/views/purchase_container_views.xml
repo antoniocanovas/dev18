@@ -26,7 +26,7 @@
                 <field name="currency_exchange" string="Currency Exchange"/>
             </xpath>
 
-            <!-- Packing List stat button in button_box -->
+            <!-- Packing List + Invoices stat buttons in button_box -->
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button
                     name="action_view_packing_list"
@@ -40,9 +40,22 @@
                         string="Packing List"
                     />
                 </button>
+                <button
+                    name="action_view_invoices"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-pencil-square-o"
+                    invisible="not invoice_count"
+                >
+                    <field
+                        name="invoice_count"
+                        widget="statinfo"
+                        string="Invoices"
+                    />
+                </button>
             </xpath>
 
-            <!-- Update + Validate + Print buttons before the Lock button -->
+            <!-- Update + Validate + Print + Invoice buttons before the Lock button -->
             <xpath expr="//header/button[@name='button_lock']" position="before">
                 <button
                     name="action_update_from_packing_list"
@@ -63,6 +76,13 @@
                     type="object"
                     string="Packing List"
                     class="btn-secondary"
+                    invisible="not container_line_count"
+                />
+                <button
+                    name="action_create_invoice"
+                    type="object"
+                    string="Invoice"
+                    class="btn-primary"
                     invisible="not container_line_count"
                 />
             </xpath>

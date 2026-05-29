@@ -7,10 +7,8 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="shoes_dealer.shoes_dealer_inh_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='shoes_dealer']/group" position="after">
-                <group string="SKU code prefix" name="shoes_campaign_prefix">
-                    <field name="shoes_sufix_model_code_prefix"/>
-                </group>
+            <xpath expr="//group[@name='shoes_attributes']" position="inside">
+                <field name="shoes_sufix_model_code_prefix"/>
             </xpath>
         </field>
     </record>

@@ -9,17 +9,17 @@
             <list create="0">
                 <field name="image" widget="image" string=" " options="{'size': [50, 50]}"/>
                 <field name="name"/>
-                <button name="action_import_images" type="object"
-                        icon="fa-upload" string="Import Images"
-                        class="btn-sm btn-secondary"/>
                 <field name="shoes_task_id"/>
                 <field name="color_value_id"/>
                 <field name="shoes_campaign_id" optional="hide"/>
                 <field name="product_tmpl_set_id" optional="hide"/>
                 <field name="product_tmpl_single_id" optional="hide"/>
+                <button name="action_import_images" type="object"
+                        icon="fa-camera" string="Images"
+                        class="btn-sm btn-info"/>
                 <button name="action_view_referrers" type="object"
                         icon="fa-users" string="Samples"
-                        class="btn-sm btn-secondary"/>
+                        class="btn-sm btn-warning"/>
             </list>
         </field>
     </record>

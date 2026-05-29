@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
@@ -33,27 +35,154 @@ class PurchaseContainer(models.Model):
         string="Currency Exchange",
         digits=(16, 6),
     )
+    invoice_ids = fields.Many2many(
+        "account.move",
+        "purchase_container_account_move_rel",
+        "container_id",
+        "move_id",
+        string="Invoices",
+        copy=False,
+    )
+    invoice_count = fields.Integer(compute="_compute_invoice_count")
 
     @api.depends("container_line_ids")
     def _compute_container_line_count(self):
         for rec in self:
             rec.container_line_count = len(rec.container_line_ids)
 
-    @api.depends("code", "shipping_agent_id.ref", "shipping_agent_id.name", "duty_currency_id.name")
+    @api.depends("code")
     def _compute_name(self):
         for rec in self:
-            parts = []
-            agent = rec.shipping_agent_id
-            if agent:
-                parts.append(agent.ref or agent.name or "")
-            if rec.duty_currency_id:
-                parts.append(rec.duty_currency_id.name)
-            rec.name = "{} ({})".format(rec.code, ", ".join(parts)) if parts else (rec.code or "")
+            rec.name = rec.code or ""
 
     @api.depends("shipping_agent_id")
     def _compute_currency_id(self):
         for rec in self:
             rec.currency_id = rec.shipping_agent_id.property_purchase_currency_id or False
+
+    @api.depends("invoice_ids")
+    def _compute_invoice_count(self):
+        for rec in self:
+            rec.invoice_count = len(rec.invoice_ids)
+
+    def action_create_invoice(self):
+        self._check_invoice_constraints()
+        groups = self._build_invoice_groups()
+        if not groups:
+            raise UserError(_("No hay líneas con producto detectado pendientes de facturar."))
+        containers_billed = self.filtered(
+            lambda c: any(g["container_id"] == c.id for g in groups)
+        )
+        move = self._create_vendor_bill(groups, containers_billed or self)
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "res_id": move.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
+    def action_view_invoices(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Invoices"),
+            "res_model": "account.move",
+            "view_mode": "list,form",
+            "domain": [("id", "in", self.invoice_ids.ids)],
+        }
+
+    def _check_invoice_constraints(self):
+        agents = self.filtered("shipping_agent_id").mapped("shipping_agent_id")
+        if len(agents) > 1:
+            raise UserError(
+                _("Todos los contenedores deben tener el mismo agente de transporte. "
+                  "Encontrados: %s") % ", ".join(agents.mapped("name"))
+            )
+        currencies = self.filtered("currency_id").mapped("currency_id")
+        if len(currencies) > 1:
+            raise UserError(
+                _("Todos los contenedores deben tener la misma moneda de compra. "
+                  "Encontradas: %s") % ", ".join(currencies.mapped("name"))
+            )
+
+    def _build_invoice_groups(self):
+        """
+        Returns a list of dicts, each representing one invoice line:
+          {product, shippingmark, lines, container_id, qty, price_unit}
+        Only pending lines (no invoice_line_id) with a matched move/product are included.
+        """
+        bucket = defaultdict(lambda: {"lines": [], "container_id": None})
+        for container in self:
+            for line in container.container_line_ids:
+                if line.invoice_line_id:
+                    continue
+                product = line.move_id.product_id if line.move_id else False
+                if not product:
+                    continue
+                key = (product.id, line.shippingmark or "")
+                bucket[key]["lines"].append(line)
+                bucket[key].setdefault("product", product)
+                bucket[key].setdefault("shippingmark", line.shippingmark or "")
+                bucket[key]["container_id"] = container.id
+
+        groups = []
+        for (product_id, shippingmark), data in bucket.items():
+            lines = data["lines"]
+            qty = float(len(lines))
+            price_unit = sum(l.price for l in lines) / qty
+            groups.append({
+                "product": data["product"],
+                "shippingmark": shippingmark,
+                "lines": lines,
+                "container_id": data["container_id"],
+                "qty": qty,
+                "price_unit": price_unit,
+            })
+        return groups
+
+    def _create_vendor_bill(self, groups, containers):
+        partner = self[0].shipping_agent_id
+        currency = self[0].currency_id
+
+        inv_line_vals = []
+        for g in groups:
+            product = g["product"]
+            account = product.product_tmpl_id.get_product_accounts().get("expense")
+            if not account:
+                raise UserError(
+                    _("El producto '%s' no tiene cuenta de gasto configurada.")
+                    % product.display_name
+                )
+            name = product.display_name
+            if g["shippingmark"]:
+                name += " - " + g["shippingmark"]
+            taxes = product.supplier_taxes_id.filtered(
+                lambda t: t.company_id == self.env.company
+            )
+            inv_line_vals.append({
+                "product_id": product.id,
+                "name": name,
+                "quantity": g["qty"],
+                "price_unit": g["price_unit"],
+                "account_id": account.id,
+                "tax_ids": [(6, 0, taxes.ids)],
+            })
+
+        move = self.env["account.move"].create({
+            "move_type": "in_invoice",
+            "partner_id": partner.id,
+            "currency_id": currency.id if currency else False,
+            "container_ids": [(6, 0, containers.ids)],
+            "invoice_line_ids": [(0, 0, v) for v in inv_line_vals],
+        })
+
+        # Link each container line to its invoice line (matched by position)
+        for g, inv_line in zip(groups, move.invoice_line_ids):
+            for container_line in g["lines"]:
+                container_line.invoice_line_id = inv_line.id
+
+        return move
 
     def action_open_validate_wizard(self):
         self.ensure_one()
@@ -75,7 +204,7 @@ class PurchaseContainer(models.Model):
         return self.env.ref("shoes_packinglist.action_report_packing_list").report_action(self)
 
     def _get_packing_list_report_data(self):
-        """Returns grouped lines and grand totals for the packing list QWeb template."""
+        """Returns grouped lines and subtotals per tariff heading for the packing list template."""
         self.ensure_one()
         groups_dict = {}
         group_order = []
@@ -98,14 +227,45 @@ class PurchaseContainer(models.Model):
             g["total_gross_weight"] += line.assortment_gross_weight
             g["total_pairs"] += line.pair_qty
 
-        groups = [groups_dict[h] for h in group_order]
-        grand_total = {
-            "quantity": sum(g["total_quantity"] for g in groups),
-            "net_weight": sum(g["total_net_weight"] for g in groups),
-            "gross_weight": sum(g["total_gross_weight"] for g in groups),
-            "pairs": sum(g["total_pairs"] for g in groups),
+        return [groups_dict[h] for h in group_order]
+
+    def _get_packing_list_summary_data(self):
+        """Returns tariff-heading summary aggregated across all containers in self."""
+        groups = {}
+        order = []
+        for container in self:
+            currency = container.duty_currency_id
+            currency_key = currency.id if currency else False
+            for line in container.container_line_ids:
+                heading = line.tariff_heading or ""
+                key = (heading, currency_key)
+                if key not in groups:
+                    groups[key] = {
+                        "tariff_heading": heading,
+                        "currency": currency,
+                        "quantity": 0.0,
+                        "net_weight": 0.0,
+                        "gross_weight": 0.0,
+                        "pairs": 0.0,
+                        "amount": 0.0,
+                    }
+                    order.append(key)
+                g = groups[key]
+                g["quantity"] += line.quantity
+                g["net_weight"] += line.assortment_net_weight
+                g["gross_weight"] += line.assortment_gross_weight
+                g["pairs"] += line.pair_qty
+                g["amount"] += line.price_duty
+
+        result = [groups[k] for k in order]
+        total = {
+            "quantity": sum(g["quantity"] for g in result),
+            "net_weight": sum(g["net_weight"] for g in result),
+            "gross_weight": sum(g["gross_weight"] for g in result),
+            "pairs": sum(g["pairs"] for g in result),
+            "amount": sum(g["amount"] for g in result),
         }
-        return {"groups": groups, "grand_total": grand_total}
+        return {"groups": result, "total": total}
 
     def action_view_packing_list(self):
         self.ensure_one()

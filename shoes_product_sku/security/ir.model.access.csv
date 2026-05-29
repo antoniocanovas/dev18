@@ -11,3 +11,6 @@ access_shoes_sku_task_import_user,Shoes SKU Task Import,model_shoes_sku_task_ima
 access_shoes_sku_task_import_line_user,Shoes SKU Task Import Line,model_shoes_sku_task_image_import_line,base.group_user,1,1,1,1
 access_shoes_sample_task_wizard_user,Shoes Sample Task Wizard,model_shoes_sample_task_wizard,base.group_user,1,1,1,1
 access_shoes_sample_task_wizard_cell_user,Shoes Sample Task Wizard Cell,model_shoes_sample_task_wizard_cell,base.group_user,1,1,1,1
+access_shoes_sku_numeric_import_user,Shoes SKU Numeric Import,model_shoes_sku_numeric_import,base.group_user,1,1,1,1
+access_shoes_sku_numeric_import_line_user,Shoes SKU Numeric Import Line,model_shoes_sku_numeric_import_line,base.group_user,1,1,1,1
+access_shoes_sku_photo_reduce_wizard_user,Shoes SKU Photo Reduce Wizard,model_shoes_sku_photo_reduce_wizard,base.group_user,1,1,1,1

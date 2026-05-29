@@ -53,17 +53,14 @@ class ProjectTask(models.Model):
 
     def action_open_sku_image_wizard(self):
         self.ensure_one()
-        wizard = self.env['shoes.sku.task.image.import'].create({
+        wizard = self.env['shoes.sku.numeric.import'].create({
             'task_id': self.id,
-            'line_ids': [
-                (0, 0, {'shoes_sku_id': sku.id})
-                for sku in self.shoes_sku_ids
-            ],
+            'line_ids': [(0, 0, {'shoes_sku_id': sku.id}) for sku in self.shoes_sku_ids],
         })
         return {
             'type': 'ir.actions.act_window',
             'name': 'Import SKU Images',
-            'res_model': 'shoes.sku.task.image.import',
+            'res_model': 'shoes.sku.numeric.import',
             'res_id': wizard.id,
             'view_mode': 'form',
             'target': 'new',

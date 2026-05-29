@@ -12,7 +12,7 @@ class ShoesAccesory(models.Model):
     # Required:
     name = fields.Char("Name", translate=True, compute="_compute_name")
     product_id = fields.Many2one("product.product", string="Product", required=True)
-    qty = fields.Integer("Qty", default=2)
+    qty = fields.Float("Qty", digits='Product Unit of Measure', default=2)
     uom_po_id = fields.Many2one(
         "uom.uom", string="Purchase UoM",
         related="product_id.uom_po_id", readonly=True,
@@ -92,7 +92,7 @@ class ShoesAccesory(models.Model):
     def _compute_name(self):
         for record in self:
             if record.product_id:
-                record.name = record.product_id.name + " (" + str(record.qty) + ")"
+                record.name = record.product_id.name + " (" + f"{record.qty:g}" + ")"
             else:
                 record.name = ""
 

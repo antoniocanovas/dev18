@@ -85,6 +85,19 @@ class ShoesSku(models.Model):
                 templates = sku.product_ids.mapped('product_tmpl_id')
                 if templates:
                     templates.with_context(_sku_image_sync=True).write({'image_1920': sku.image})
+        for key, value in vals.items():
+            if key.startswith('x_image') and key[7:].isdigit() and value:
+                index = int(key[7:])
+                for sku in self:
+                    img = self.env['product.image'].browse(value)
+                    if img.exists():
+                        updates = {}
+                        if not img.name:
+                            updates['name'] = f'{sku.name}_{index}'
+                        if not img.shoes_sku_id:
+                            updates['shoes_sku_id'] = sku.id
+                        if updates:
+                            img.write(updates)
         return result
 
     def unlink(self):
@@ -119,11 +132,14 @@ class ShoesSku(models.Model):
 
     def action_import_images(self):
         self.ensure_one()
+        wizard = self.env['shoes.sku.numeric.import'].create({
+            'line_ids': [(0, 0, {'shoes_sku_id': self.id})],
+        })
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Import Images / Videos',
-            'res_model': 'shoes.sku.direct.import',
+            'name': 'Images',
+            'res_model': 'shoes.sku.numeric.import',
+            'res_id': wizard.id,
             'view_mode': 'form',
             'target': 'new',
-            'context': {'default_shoes_sku_id': self.id},
         }

@@ -72,6 +72,13 @@ class PurchaseContainerLine(models.Model):
         compute="_compute_price_duty",
         store=True,
     )
+    invoice_line_id = fields.Many2one(
+        "account.move.line",
+        string="Invoice Line",
+        readonly=True,
+        copy=False,
+        index=True,
+    )
     client_order_ref = fields.Char(string="Client Order Ref")
 
     @api.depends("price", "container_id.currency_exchange", "container_id.duty_currency_id", "container_id.currency_id")

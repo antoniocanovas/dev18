@@ -182,6 +182,33 @@
         </field>
     </record>
 
+    <record id="shoes_campaign_task_kanban_models" model="ir.ui.view">
+        <field name="name">shoes.campaign.task.kanban.models</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_kanban"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="quick_create">0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="shoes_campaign_task_inh_search" model="ir.ui.view">
+        <field name="name">shoes.campaign.task.inh.search</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[last()]" position="after">
+                <field name="product_brand_id" string="Brand"/>
+            </xpath>
+            <xpath expr="//search/group" position="before">
+                <filter name="group_by_brand" string="Brand"
+                        context="{'group_by': 'product_brand_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
     <!-- Override standard task actions to also show tasks whose product
          is sold in the current campaign (via sale_campaign_ids). -->
     <record id="project.act_project_project_2_project_task_all" model="ir.actions.act_window">

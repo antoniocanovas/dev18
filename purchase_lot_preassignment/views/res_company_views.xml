@@ -7,14 +7,12 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='general_info']" position="after">
-                <page string="Lot Preassignment" name="lot_preassignment">
-                    <group>
-                        <group string="Purchase">
-                            <field name="purchase_all_sale"/>
-                        </group>
+            <xpath expr="//page[@name='general_info']" position="inside">
+                <group string="Lot Preassignment" name="lot_preassignment">
+                    <group string="Purchase">
+                        <field name="purchase_all_sale"/>
                     </group>
-                </page>
+                </group>
             </xpath>
         </field>
     </record>

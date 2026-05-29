@@ -17,7 +17,7 @@ class ShoesSkuTaskImageImportLine(models.TransientModel):
     _name = 'shoes.sku.task.image.import.line'
     _description = 'SKU Task Image Import Wizard Line'
 
-    wizard_id = fields.Many2one('shoes.sku.task.image.import', required=True)
+    wizard_id = fields.Many2one('shoes.sku.task.image.import', required=True, ondelete='cascade')
     shoes_sku_id = fields.Many2one('shoes.sku', string='SKU', readonly=True)
     image = fields.Image(related='shoes_sku_id.image_128', readonly=True)
     color_value_id = fields.Many2one(
