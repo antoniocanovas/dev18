@@ -27,6 +27,8 @@
                             <field name="single_prefix"/>
                             <field name="shoes_pair_uom_id"
                                    required="is_shoes_company"/>
+                            <field name="shoes_assortment_uom_id"
+                                   required="is_shoes_company"/>
                         </group>
                         <group name="shoes_commercial" string="Sale and purchases">
                             <field name="single_sale"/>

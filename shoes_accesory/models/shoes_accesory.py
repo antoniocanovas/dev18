@@ -22,6 +22,22 @@ class ShoesAccesory(models.Model):
         "Subtotal", compute="_compute_subtotal", store=True, digits="Product Price"
     )
     task_id = fields.Many2one("project.task", string="Model")
+    color_ids = fields.Many2many(
+        "shoes.color.chart.item",
+        string="Colors",
+    )
+    task_color_chart_item_ids = fields.Many2many(
+        "shoes.color.chart.item",
+        compute="_compute_task_color_chart_item_ids",
+    )
+
+    @api.depends("task_id.shoes_color_chart_item_ids", "task_id.shoes_chart_item_used_ids")
+    def _compute_task_color_chart_item_ids(self):
+        for record in self:
+            record.task_color_chart_item_ids = (
+                record.task_id.shoes_color_chart_item_ids
+                | record.task_id.shoes_chart_item_used_ids
+            )
 
     # Related:
     manufacturer_id = fields.Many2one(

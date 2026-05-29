@@ -113,6 +113,18 @@
         <field name="inherit_id" ref="project.view_task_kanban"/>
         <field name="priority">999</field>
         <field name="arch" type="xml">
+            <xpath expr="//kanban[1]" position="inside">
+                <field name="project_ribbon_label"/>
+            </xpath>
+            <xpath expr="//kanban[1]/templates[1]/t[@t-name='card']/main[1]" position="before">
+                <t t-if="record.project_ribbon_label.raw_value">
+                    <div class="ribbon ribbon-top-right">
+                        <span class="text-bg-warning">
+                            <t t-esc="record.project_ribbon_label.value"/>
+                        </span>
+                    </div>
+                </t>
+            </xpath>
             <xpath expr="//t[@t-name='card']//field[@name='displayed_image_id']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>

@@ -175,6 +175,42 @@ accesibles mediante el botón estadístico, no como pestaña.
 | Lista de variantes (`product.product`) | `shoes_sku_id` después de `name` (visible por defecto) |
 | Formulario de producto (`product.template`) | `shoes_sku_id` (computed, readonly) bajo `shoes_model_material` |
 
+### Botones en vista lista de SKU
+
+La vista lista de `shoes.sku` incluye dos botones de acción por fila:
+
+| Botón | Icono | Acción |
+|-------|-------|--------|
+| Import Images | `fa-upload` | Abre el wizard de importación de imágenes para ese SKU |
+| Samples | `fa-users` | Abre la lista de muestras (`shoes.sample`) asociadas al SKU |
+
+---
+
+## Wizard de muestras (`shoes.sample.task.wizard`)
+
+El wizard se abre desde el botón **Samples** del formulario de tarea y presenta una matriz SKU × contacto para gestionar las muestras de una tarea de campaña.
+
+### Columnas del wizard
+
+Las columnas representan los contactos con el campo **Muestras** activado (`shoes_samples = True`). El encabezado de cada columna muestra:
+
+- El campo **Ref** del contacto (`res.partner.ref`) si está definido.
+- El **nombre** del contacto si no tiene ref.
+
+Esto permite usar referencias cortas para contactos habituales y evitar columnas excesivamente anchas.
+
+### Filas del wizard
+
+Cada fila muestra el SKU con:
+
+- Imagen del modelo (miniatura 36×36 px).
+- Nombre del SKU.
+- Color (si está definido en `color_value_id`), en texto secundario bajo el nombre.
+
+### Celda
+
+Cada celda contiene un campo de texto de 2 caracteres (mayúsculas automáticas) con el tipo de muestra. Si se deja vacío y existía una muestra previa, esta se elimina al guardar.
+
 ---
 
 ## Módulo complementario

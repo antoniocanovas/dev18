@@ -70,26 +70,39 @@ class PurchaseLotViewWizard(models.TransientModel):
     def _compute_available_lot_ids(self):
         """
         Computa los lotes disponibles (asociados al pedido de compra).
-        Los lotes se obtienen buscando aquellos cuyo campo 'ref' coincide
-        con el nombre de los sale orders relacionados con el purchase order.
+        - Lotes de SO vinculados: filtrados por los productos que gestiona este PO
+          (via sale_line_id), evitando mostrar lotes de otros POs del mismo SO
+          cuando el pedido original ha sido dividido.
+        - Lotes directos del PO (sin SO vinculado): todos los de ref = po.name.
         """
         for wizard in self:
-            if wizard.purchase_order_id:
-                po = wizard.purchase_order_id
-                # Lotes de pedidos de venta vinculados al PO
-                sale_orders = po._get_sale_orders()
-                lot_refs = sale_orders.mapped("name")
-                # Lotes creados directamente para este PO (sin SO vinculado)
-                lot_refs.append(po.name)
-                lots = self.env["stock.lot"].search(
-                    [
-                        ("ref", "in", lot_refs),
-                        ("company_id", "=", po.company_id.id),
-                    ]
-                )
-                wizard.available_lot_ids = lots
-            else:
+            if not wizard.purchase_order_id:
                 wizard.available_lot_ids = False
+                continue
+
+            po = wizard.purchase_order_id
+            company_id = po.company_id.id
+
+            # Lotes de pedidos de venta, restringidos a los productos de este PO
+            sale_orders = po._get_sale_orders()
+            so_lots = self.env["stock.lot"]
+            if sale_orders:
+                so_names = sale_orders.mapped("name")
+                po_sale_products = po.order_line.filtered("sale_line_id").mapped("product_id")
+                if so_names and po_sale_products:
+                    so_lots = self.env["stock.lot"].search([
+                        ("ref", "in", so_names),
+                        ("product_id", "in", po_sale_products.ids),
+                        ("company_id", "=", company_id),
+                    ])
+
+            # Lotes creados directamente para este PO (líneas sin sale_line_id)
+            direct_lots = self.env["stock.lot"].search([
+                ("ref", "=", po.name),
+                ("company_id", "=", company_id),
+            ])
+
+            wizard.available_lot_ids = so_lots | direct_lots
 
     @api.onchange("purchase_order_id")
     def _onchange_purchase_order_id(self):

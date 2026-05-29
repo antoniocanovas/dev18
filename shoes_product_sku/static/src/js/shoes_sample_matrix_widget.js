@@ -21,7 +21,7 @@ export class ShoesSampleMatrixWidget extends Component {
             const data = await this.orm.read(
                 "shoes.sample.task.wizard.cell",
                 ids,
-                ["shoes_sku_id", "color_value_id", "partner_id", "type"]
+                ["shoes_sku_id", "color_value_id", "partner_id", "partner_ref", "type"]
             );
 
             const skusSeen = new Map();
@@ -35,12 +35,12 @@ export class ShoesSampleMatrixWidget extends Component {
                     const color = row.color_value_id ? row.color_value_id[1] : "";
                     skusSeen.set(skuId, { name: skuName, color });
                 }
-                if (!partnersSeen.has(partnerId)) partnersSeen.set(partnerId, partnerName);
+                if (!partnersSeen.has(partnerId)) partnersSeen.set(partnerId, { name: partnerName, ref: row.partner_ref || "" });
                 cells[`${skuId}_${partnerId}`] = { cellId: row.id, type: row.type || "" };
             }
 
             this.state.skus = [...skusSeen.entries()].map(([id, { name, color }]) => ({ id, name, color }));
-            this.state.partners = [...partnersSeen.entries()].map(([id, name]) => ({ id, name }));
+            this.state.partners = [...partnersSeen.entries()].map(([id, { name, ref }]) => ({ id, name, ref }));
             this.state.cells = cells;
         });
     }

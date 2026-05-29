@@ -11,7 +11,7 @@
                         type="object"
                         class="oe_stat_button"
                         icon="fa-scissors"
-                        invisible="state != 'draft'"/>
+                        invisible="state not in ('draft', 'sent')"/>
             </xpath>
         </field>
     </record>

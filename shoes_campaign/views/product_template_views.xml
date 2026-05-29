@@ -9,9 +9,17 @@
         <field name="inherit_id" ref="shoes_dealer.shoes_dealer_product_inh_form"/>
         <field name="priority">90</field>
         <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info text-center mb-0" role="alert"
+                     invisible="not shoes_attribute_pending">
+                    <i class="fa fa-info-circle"/> Producto pendiente de establecer atributos de surtido o color
+                </div>
+            </xpath>
+
             <!-- Código Material-Fabricante (nombre de shoes.model.material): -->
             <xpath expr="//field[@name='pairs_sold']" position="after">
                 <field name="shoes_model_material" readonly="1"/>
+                <field name="shoes_attribute_pending" invisible="1"/>
             </xpath>
             <!-- En Pestaña inicial para datos generales: -->
             <xpath expr="//field[@name='product_tmpl_set_id']" position="after">
@@ -25,6 +33,23 @@
             <!-- No editar la horma, si se ha creado desde un boceto: -->
             <xpath expr="//field[@name='shoes_last_id']" position="attributes">
                 <attribute name="readonly">is_pair or product_tmpl_set_id or shoes_task_id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- VISTA DE BÚSQUEDA: -->
+    <record id="product_template_shoes_campaign_inh_search" model="ir.ui.view">
+        <field name="name">product.shoes.campaign.inh.search</field>
+        <field name="model">product.template</field>
+        <field name="type">search</field>
+        <field name="inherit_id" ref="shoes_dealer.product_template_shoes_dealer_inh_search"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='shoes_pair_pending']" position="before">
+                <filter name="shoes_attribute_pending"
+                        string="Pendiente de atributos"
+                        domain="[('shoes_attribute_pending','=',True)]"/>
             </xpath>
         </field>
     </record>

@@ -24,11 +24,31 @@ class PurchaseContainer(models.Model):
         readonly=False,
         copy=False,
     )
+    duty_currency_id = fields.Many2one(
+        "res.currency",
+        string="Duty Currency",
+        copy=False,
+    )
+    currency_exchange = fields.Float(
+        string="Currency Exchange",
+        digits=(16, 6),
+    )
 
     @api.depends("container_line_ids")
     def _compute_container_line_count(self):
         for rec in self:
             rec.container_line_count = len(rec.container_line_ids)
+
+    @api.depends("code", "shipping_agent_id.ref", "shipping_agent_id.name", "duty_currency_id.name")
+    def _compute_name(self):
+        for rec in self:
+            parts = []
+            agent = rec.shipping_agent_id
+            if agent:
+                parts.append(agent.ref or agent.name or "")
+            if rec.duty_currency_id:
+                parts.append(rec.duty_currency_id.name)
+            rec.name = "{} ({})".format(rec.code, ", ".join(parts)) if parts else (rec.code or "")
 
     @api.depends("shipping_agent_id")
     def _compute_currency_id(self):

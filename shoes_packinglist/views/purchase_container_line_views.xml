@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <list editable="bottom" import="1">
                 <field name="currency_id" column_invisible="1"/>
+                <field name="duty_currency_id" column_invisible="1"/>
                 <field name="lot"/>
                 <field name="name" string="Product Ref."/>
                 <field name="color"/>
@@ -14,6 +15,7 @@
                 <field name="quantity" optional="hide"/>
                 <field name="tariff_heading"/>
                 <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="price_duty" widget="monetary" options="{'currency_field': 'duty_currency_id'}" optional="show"/>
                 <field name="purchase_order"/>
                 <field name="client_order_ref"/>
                 <field name="shippingmark"/>
@@ -54,6 +56,8 @@
                             <field name="quantity"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="duty_currency_id" invisible="1"/>
+                            <field name="price_duty" widget="monetary" options="{'currency_field': 'duty_currency_id'}" readonly="1"/>
                             <field name="move_id" readonly="1"/>
                         </group>
                     </group>

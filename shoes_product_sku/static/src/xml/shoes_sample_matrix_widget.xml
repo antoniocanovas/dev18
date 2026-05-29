@@ -16,7 +16,10 @@
                         <tr>
                             <th class="o_shoes_sample_sku_col">SKU</th>
                             <t t-foreach="state.partners" t-as="partner" t-key="partner.id">
-                                <th class="text-center o_shoes_sample_partner_col" t-esc="partner.name"/>
+                                <th class="o_shoes_sample_partner_col">
+                                    <span class="o_shoes_sample_partner_name" t-esc="partner.name"/>
+                                    <span class="o_shoes_sample_partner_ref" t-esc="partner.ref"/>
+                                </th>
                             </t>
                         </tr>
                     </thead>

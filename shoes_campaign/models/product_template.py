@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
@@ -21,6 +21,21 @@ class ProductTemplate(models.Model):
         related="shoes_task_id.shoes_model_material",
         string="Model code",
     )
+
+    shoes_attribute_pending = fields.Boolean(
+        "Producto pendiente de establecer atributos de surtido o color",
+        store=True,
+        compute="_compute_shoes_attribute_pending",
+    )
+
+    @api.depends("shoes_task_id", "is_pair", "is_assortment")
+    def _compute_shoes_attribute_pending(self):
+        for record in self:
+            record.shoes_attribute_pending = (
+                bool(record.shoes_task_id)
+                and not record.is_pair
+                and not record.is_assortment
+            )
 
     def _get_pair_and_variants_sync(self):
         super()._get_pair_and_variants_sync()
@@ -57,7 +72,7 @@ class ProductTemplate(models.Model):
     def create_shoe_pairs(self) -> Any:
         # 1) Ejecutamos el comportamiento original: creación de pares
         res = super().create_shoe_pairs()
-        # 2) Tras crear las plantillas “single”, propagamos shoes_last_id
+        # 2) Tras crear las plantillas "single", propagamos shoes_last_id
         for record in self:
             if record.shoes_last_id and record.product_tmpl_single_id:
                 record.product_tmpl_single_id.write(
@@ -65,5 +80,4 @@ class ProductTemplate(models.Model):
                         "shoes_last_id": record.shoes_last_id.id,
                     }
                 )
-        # 3) Devolvemos lo que devolvía el super (si lo hubiera)
         return res

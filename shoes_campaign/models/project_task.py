@@ -9,6 +9,18 @@ class ProjectTask(models.Model):
     is_shoes_campaign = fields.Boolean(
         "Is shoes campaign", related="project_id.is_shoes_campaign"
     )
+
+    project_ribbon_label = fields.Char(compute='_compute_project_ribbon_label')
+
+    @api.depends('project_id')
+    def _compute_project_ribbon_label(self):
+        active_id = self.env.context.get('active_id')
+        for task in self:
+            if task.project_id and active_id and task.project_id.id != active_id:
+                task.project_ribbon_label = task.project_id.name
+            else:
+                task.project_ribbon_label = False
+
     # Para componer el default_code del producto automáticamente:
     shoes_default_code_prefix = fields.Char("Internal ref. prefix")
 
@@ -198,6 +210,8 @@ class ProjectTask(models.Model):
                         "shoes_task_id": record.id,
                         "type": "consu",
                         "is_storable": True,
+                        "uom_id": self.env.company.shoes_assortment_uom_id.id or False,
+                        "uom_po_id": self.env.company.shoes_assortment_uom_id.id or False,
                         "tracking": self.env.company.shoes_assortment_tracking,
                         "service_tracking": "no",
                         "product_add_mode": "matrix",
@@ -215,6 +229,7 @@ class ProjectTask(models.Model):
                             record.intrastat_duty_id.country_id.id
                         ),
                         "exwork": record.exwork,
+                        "sale_ok": False,
                         "sale_margin": record.project_id.default_sale_margin
                         or 0.0,
                         "image_1920": record.displayed_image_id.datas,

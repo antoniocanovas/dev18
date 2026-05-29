@@ -33,10 +33,21 @@ class ProjectTask(models.Model):
         digits="Product Price",
     )
 
-    @api.depends("shoes_accesory_ids.subtotal")
+    @api.depends(
+        "shoes_accesory_ids.subtotal", "shoes_accesory_ids.color_ids",
+        "shoes_color_chart_item_ids", "shoes_chart_item_used_ids",
+    )
     def _compute_exwork_accesory(self):
         for task in self:
-            task.exwork_accesory = sum(task.shoes_accesory_ids.mapped("subtotal"))
+            common = sum(acc.subtotal for acc in task.shoes_accesory_ids if not acc.color_ids)
+            colored_lines = task.shoes_accesory_ids.filtered(lambda a: a.color_ids)
+            all_color_items = task.shoes_color_chart_item_ids | task.shoes_chart_item_used_ids
+            total_colors = len(all_color_items)
+            if total_colors and colored_lines:
+                colored = sum(acc.subtotal * len(acc.color_ids) for acc in colored_lines)
+                task.exwork_accesory = common + colored / total_colors
+            else:
+                task.exwork_accesory = common + sum(colored_lines.mapped("subtotal"))
 
     @api.depends("exwork_factory", "exwork_accesory", "exwork_accesory_tax_percent")
     def _compute_exwork(self):

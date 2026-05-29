@@ -10,6 +10,15 @@
             <field name="l10n_es_edi_facturae_uom_code">01</field>
             <field name="active" eval="True"/>
         </record>
+        <record id="shoes_assortment_uom" model="uom.uom">
+            <field name="name">Cajas</field>
+            <field name="category_id" ref="uom.product_uom_categ_unit"/>
+            <field name="uom_type">bigger</field>
+            <field name="factor">1.0</field>
+            <field name="rounding">1</field>
+            <field name="l10n_es_edi_facturae_uom_code">01</field>
+            <field name="active" eval="True"/>
+        </record>
     </data>
 
 </odoo>

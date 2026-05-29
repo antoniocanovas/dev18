@@ -18,6 +18,12 @@
                     string="Purchase Currency"
                     options="{'no_open': True, 'no_create': True}"
                 />
+                <field
+                    name="duty_currency_id"
+                    string="Duty Currency"
+                    options="{'no_open': True, 'no_create': True}"
+                />
+                <field name="currency_exchange" string="Currency Exchange"/>
             </xpath>
 
             <!-- Packing List stat button in button_box -->

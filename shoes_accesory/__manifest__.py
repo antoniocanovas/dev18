@@ -28,6 +28,7 @@
         "product_brand",
         "shoes_dealer",
         "shoes_campaign",
+        "shoes_color_chart",
     ],
     "author": "Punt Sistemes",
     "category": "Project",

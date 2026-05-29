@@ -23,6 +23,7 @@
         "product",
         "sale",
         "sale_purchase",
+        "base_automation",
     ],
     "data": [
         "security/ir.model.access.csv",

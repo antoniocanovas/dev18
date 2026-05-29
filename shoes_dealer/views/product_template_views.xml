@@ -9,6 +9,27 @@
         <field name="priority">90</field>
         <field name="arch" type="xml">
 
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info text-center mb-0" role="alert"
+                     invisible="sale_ok or not product_tmpl_single_id">
+                    <i class="fa fa-info-circle"/> Surtidos y pares creados no habilitados para venta
+                </div>
+            </xpath>
+
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info text-center mb-0" role="alert"
+                     invisible="not shoes_pair_pending">
+                    <i class="fa fa-info-circle"/> Producto pendiente de crear pares
+                </div>
+            </xpath>
+
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info text-center mb-0" role="alert"
+                     invisible="not shoes_pairprice_pending">
+                    <i class="fa fa-info-circle"/> Precio de venta del par es cero, revisalo
+                </div>
+            </xpath>
+
             <!-- Pestaña inicial para datos generales de productos y variantes, de shoes_dealer: -->
             <xpath expr="//page[@name='general_information']" position="before">
                 <page name="shoes_dealer" string="Shoes dealer">
@@ -37,6 +58,8 @@
                             <field name="exwork_currency_id" invisible="1"/>
                             <field name="is_pair" invisible="1"/>
                             <field name="is_assortment" invisible="1"/>
+                            <field name="shoes_pair_pending" invisible="1"/>
+                            <field name="shoes_pairprice_pending" invisible="1"/>
                             <field name="pairs_sold"/>
                         </group>
 
@@ -180,6 +203,11 @@
                     <separator/>
                     <filter name="is_pair" string="Pairs" domain="[('is_pair','=',True)]"/>
                     <filter name="is_assortment" string="Assortments" domain="[('is_assortment','=',True)]"/>
+                    <separator/>
+                    <filter name="shoes_pair_pending" string="Pendiente crear pares"
+                            domain="[('shoes_pair_pending','=',True)]"/>
+                    <filter name="shoes_pairprice_pending" string="Precio de venta nulo"
+                            domain="[('shoes_pairprice_pending','=',True)]"/>
                     <separator/>
                 </field>
                 <xpath expr="//group/filter[@name='type']" position="after">

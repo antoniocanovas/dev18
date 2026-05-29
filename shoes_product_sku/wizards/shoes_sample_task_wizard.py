@@ -35,9 +35,10 @@ class ShoesSampleTaskWizardCell(models.TransientModel):
     _name = 'shoes.sample.task.wizard.cell'
     _description = 'Shoes Sample Task Wizard Cell'
 
-    wizard_id = fields.Many2one('shoes.sample.task.wizard', required=True)
+    wizard_id = fields.Many2one('shoes.sample.task.wizard', required=True, ondelete='cascade')
     shoes_sku_id = fields.Many2one('shoes.sku', required=True)
     color_value_id = fields.Many2one(related='shoes_sku_id.color_value_id')
     partner_id = fields.Many2one('res.partner', required=True)
+    partner_ref = fields.Char(related='partner_id.ref')
     type = fields.Char('Type', size=2)
     shoes_sample_id = fields.Many2one('shoes.sample')

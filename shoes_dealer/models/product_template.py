@@ -89,6 +89,17 @@ class ProductTemplate(models.Model):
     )
     is_pair = fields.Boolean("Is Pair", store=True, compute="_get_is_pair")
 
+    shoes_pair_pending = fields.Boolean(
+        "Producto pendiente de crear pares",
+        store=True,
+        compute="_compute_shoes_pair_pending",
+    )
+    shoes_pairprice_pending = fields.Boolean(
+        "Precio de venta del par es cero, revisalo",
+        store=True,
+        compute="_compute_shoes_pairprice_pending",
+    )
+
     # Llevar a aml y shoes_report como related
     shoes_model_id = fields.Many2one(
         "product.template",
@@ -224,6 +235,20 @@ class ProductTemplate(models.Model):
             margin_percent = product.sale_margin or 0.0
             margin_amount = base * margin_percent / 100
             product.recommended_sale_price = base + margin_amount
+
+    @api.depends("is_assortment", "product_tmpl_single_id")
+    def _compute_shoes_pair_pending(self):
+        for record in self:
+            record.shoes_pair_pending = record.is_assortment and not record.product_tmpl_single_id
+
+    @api.depends("is_assortment", "product_tmpl_single_id", "product_tmpl_single_list_price")
+    def _compute_shoes_pairprice_pending(self):
+        for record in self:
+            record.shoes_pairprice_pending = (
+                record.is_assortment
+                and bool(record.product_tmpl_single_id)
+                and record.product_tmpl_single_list_price == 0
+            )
 
     # Determina si el producto es un surtido basado en sus atributos
     @api.depends("attribute_line_ids")
@@ -372,6 +397,10 @@ class ProductTemplate(models.Model):
                 if record.product_tmpl_single_id:
                     for pp in record.product_variant_ids:
                         pp.write({"lst_price": record.list_price * pp.pairs_count})
+        if "sale_ok" in vals and self.env.company.single_sale:
+            for record in self:
+                if record.product_tmpl_single_id:
+                    record.product_tmpl_single_id.sale_ok = vals["sale_ok"]
         return result
 
     # Mantener el margen sincronizado con el surtido correspondiente y actualizar

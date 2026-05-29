@@ -59,8 +59,29 @@ class PurchaseContainerLine(models.Model):
         string="Currency",
         store=False,
     )
+    duty_currency_id = fields.Many2one(
+        "res.currency",
+        related="container_id.duty_currency_id",
+        string="Duty Currency",
+        store=False,
+    )
     price = fields.Float(string="Price", digits="Product Price")
+    price_duty = fields.Monetary(
+        string="Duty Price",
+        currency_field="duty_currency_id",
+        compute="_compute_price_duty",
+        store=True,
+    )
     client_order_ref = fields.Char(string="Client Order Ref")
+
+    @api.depends("price", "container_id.currency_exchange", "container_id.duty_currency_id", "container_id.currency_id")
+    def _compute_price_duty(self):
+        for line in self:
+            container = line.container_id
+            if not container.duty_currency_id or container.duty_currency_id == container.currency_id:
+                line.price_duty = line.price
+            else:
+                line.price_duty = line.price * (container.currency_exchange or 1.0)
 
     @api.model_create_multi
     def create(self, vals_list):

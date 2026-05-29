@@ -303,12 +303,20 @@ class SaleOrder(models.Model):
         ], limit=1)
 
     def _create_assortment_sol(self, order, assortment_variant, qty):
-        self.env["sale.order.line"].create({
+        # sale.order usa discount1/2/3; sale.order.line usa discount (no discount1)
+        sol_fields = self.env["sale.order.line"]._fields
+        vals = {
             "order_id": order.id,
             "product_id": assortment_variant.id,
             "product_uom_qty": qty,
             "price_unit": assortment_variant.lst_price,
-        })
+            "discount": getattr(order, "discount1", 0.0),
+        }
+        if "discount2" in sol_fields:
+            vals["discount2"] = getattr(order, "discount2", 0.0)
+        if "discount3" in sol_fields:
+            vals["discount3"] = getattr(order, "discount3", 0.0)
+        self.env["sale.order.line"].create(vals)
 
     def _apply_specific_mode(self, order, assortment_tmpl, color_value,
                              size_qtys, assortment_qty_boxes):

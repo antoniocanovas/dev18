@@ -7,13 +7,6 @@ from odoo.exceptions import UserError
 class ProjectTask(models.Model):
     _inherit = "project.task"
 
-    # Para componer el default_code del producto automáticamente:
-    shoes_default_code_prefix = fields.Char('Internal ref. prefix')
-    shoes_default_code_sufix = fields.Char(
-        'Internal ref. sufix',
-        default=lambda self: (self.env.company.shoes_sufix_model_code_prefix or "") + (self.project_id.name or "")
-    )
-
     shoes_sku_ids = fields.One2many('shoes.sku', 'shoes_task_id', string='SKU')
     shoes_sku_count = fields.Integer('SKU', compute='_compute_shoes_sku_count')
 
