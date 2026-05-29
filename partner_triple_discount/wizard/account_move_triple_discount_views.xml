@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_move_triple_discount_form_view" model="ir.ui.view">
+        <field name="name">account.move.triple.discount.form</field>
+        <field name="model">account.move.triple.discount</field>
+        <field name="arch" type="xml">
+            <form string="Apply Discounts to All Lines">
+                <sheet>
+                    <field name="move_id" invisible="1" />
+                    <group>
+                        <field name="discount1" />
+                        <field name="discount2" />
+                        <field name="discount3" />
+                    </group>
+                </sheet>
+                <footer>
+                    <button
+                        type="object"
+                        string="Apply"
+                        name="action_apply_discount"
+                        class="btn btn-primary"
+                        data-hotkey="q"
+                    />
+                    <button
+                        special="cancel"
+                        string="Discard"
+                        class="btn btn-secondary"
+                        data-hotkey="x"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

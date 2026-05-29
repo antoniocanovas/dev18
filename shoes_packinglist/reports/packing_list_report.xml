@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_packing_list_landscape" model="report.paperformat">
+        <field name="name">A4 Landscape (Packing List)</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_packing_list" model="ir.actions.report">
+        <field name="name">Packing List</field>
+        <field name="model">purchase.container</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">shoes_packinglist.packing_list_report</field>
+        <field name="report_file">shoes_packinglist.packing_list_report</field>
+        <field name="paperformat_id" ref="paperformat_packing_list_landscape"/>
+    </record>
+
+    <template id="packing_list_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h4 style="margin-bottom:6px;">
+                            Packing List — <t t-out="doc.name"/>
+                            <t t-if="doc.shipping_agent_id">
+                                &amp;nbsp;·&amp;nbsp;<t t-out="doc.shipping_agent_id.display_name"/>
+                            </t>
+                        </h4>
+                        <t t-set="rdata" t-value="doc._get_packing_list_report_data()"/>
+                        <table class="table table-sm table-bordered" style="font-size:8pt;width:100%;">
+                            <thead style="background-color:#f0f0f0;">
+                                <tr>
+                                    <th>Lote</th>
+                                    <th>Marca</th>
+                                    <th>Referencia</th>
+                                    <th>Color</th>
+                                    <th class="text-end">Bultos</th>
+                                    <th class="text-end">Peso Neto</th>
+                                    <th class="text-end">Peso Bruto</th>
+                                    <th class="text-end">Pares</th>
+                                    <th>Tallas y Cantidad</th>
+                                    <th>Campaña</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="rdata['groups']" t-as="group">
+                                    <tr style="background-color:#e8e8e8;">
+                                        <td colspan="10">
+                                            <strong>Partida Arancelaria: <t t-out="group['tariff_heading'] or 'Sin partida'"/></strong>
+                                        </td>
+                                    </tr>
+                                    <t t-foreach="group['lines']" t-as="line">
+                                        <t t-set="extra" t-value="line._get_report_extra()"/>
+                                        <tr>
+                                            <td><t t-out="line.lot or ''"/></td>
+                                            <td><t t-out="extra['brand']"/></td>
+                                            <td><t t-out="line.name or ''"/></td>
+                                            <td><t t-out="extra['color']"/></td>
+                                            <td class="text-end"><t t-out="int(line.quantity)"/></td>
+                                            <td class="text-end"><t t-out="'%.3f' % line.assortment_net_weight"/></td>
+                                            <td class="text-end"><t t-out="'%.3f' % line.assortment_gross_weight"/></td>
+                                            <td class="text-end"><t t-out="int(line.pair_qty)"/></td>
+                                            <td style="font-size:7pt;"><t t-out="extra['sizes']"/></td>
+                                            <td><t t-out="extra['campaign']"/></td>
+                                        </tr>
+                                    </t>
+                                    <tr style="background-color:#f5f5f5;">
+                                        <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td class="text-end"><strong><t t-out="int(group['total_quantity'])"/></strong></td>
+                                        <td class="text-end"><strong><t t-out="'%.3f' % group['total_net_weight']"/></strong></td>
+                                        <td class="text-end"><strong><t t-out="'%.3f' % group['total_gross_weight']"/></strong></td>
+                                        <td class="text-end"><strong><t t-out="int(group['total_pairs'])"/></strong></td>
+                                        <td colspan="2"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background-color:#d0d0d0;">
+                                    <td colspan="4" class="text-end"><strong>TOTAL</strong></td>
+                                    <td class="text-end"><strong><t t-out="int(rdata['grand_total']['quantity'])"/></strong></td>
+                                    <td class="text-end"><strong><t t-out="'%.3f' % rdata['grand_total']['net_weight']"/></strong></td>
+                                    <td class="text-end"><strong><t t-out="'%.3f' % rdata['grand_total']['gross_weight']"/></strong></td>
+                                    <td class="text-end"><strong><t t-out="int(rdata['grand_total']['pairs'])"/></strong></td>
+                                    <td colspan="2"/>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

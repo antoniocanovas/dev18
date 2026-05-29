@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-inherit="product_matrix.dialog" t-inherit-mode="extension">
+        <xpath expr="//t[@t-call='product_matrix.matrix']" position="before">
+            <div t-if="assortmentPairsState.isPair || assortmentPairsState.isAssortment"
+                 class="d-flex align-items-center gap-4 px-3 py-2 border-bottom">
+                <div t-if="assortmentPairsState.isPair" class="d-flex align-items-center gap-2">
+                    <label class="o_form_label mb-0">Modo</label>
+                    <select class="o_input"
+                            t-on-change="_onComputeModeChange">
+                        <option value="auto" selected="selected">Distribuir automáticamente en surtidos</option>
+                        <option value="specific">Surtido específico de cliente</option>
+                        <option value="loose">Pares sueltos</option>
+                    </select>
+                </div>
+                <div t-if="assortmentPairsState.isPair &amp;&amp; assortmentPairsState.computeMode !== 'loose'"
+                     class="d-flex align-items-center gap-2">
+                    <label class="o_form_label mb-0">Pares por surtido</label>
+                    <input type="number"
+                           class="o_input"
+                           style="width: 90px;"
+                           t-att-value="assortmentPairsState.initQty"
+                           t-on-input="_onPairsQtyInput"/>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="o_form_label mb-0">Total pares:</span>
+                    <strong class="sd_matrix_grand_total">0</strong>
+                </div>
+                <img t-att-src="'/web/image/product.template/' + props.product_template_id + '/image_128'"
+                     class="ms-auto rounded"
+                     style="width:128px;height:128px;object-fit:contain;"/>
+            </div>
+        </xpath>
+    </t>
+</templates>

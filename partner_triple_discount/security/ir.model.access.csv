@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_move_triple_discount_invoice,account.move.triple.discount invoice,model_account_move_triple_discount,account.group_account_invoice,1,1,1,1
+access_account_move_triple_discount_user,account.move.triple.discount user,model_account_move_triple_discount,account.group_account_user,1,1,1,1

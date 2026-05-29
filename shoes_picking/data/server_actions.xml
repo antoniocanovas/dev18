@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Acciones de servidor vinculadas a stock.picking para operar sobre
+            selecciones múltiples desde la vista lista (menú Acción ⚙).
+            Solo visibles para usuarios con rol comercial (group_sale_salesman
+            cubre tanto "mis pedidos" como "todos los pedidos" y manager).
+        -->
+
+        <record id="action_picking_commercial_approve" model="ir.actions.server">
+            <field name="name">Aprobar comercialmente</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">records.action_commercial_approve()</field>
+            <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        </record>
+
+        <record id="action_picking_commercial_reject" model="ir.actions.server">
+            <field name="name">Rechazar comercialmente</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">records.action_commercial_reject()</field>
+            <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        </record>
+
+        <record id="action_picking_commercial_set_pending" model="ir.actions.server">
+            <field name="name">Marcar como pendiente de aprobación</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">records.action_commercial_set_pending()</field>
+            <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        </record>
+
+    </data>
+</odoo>
