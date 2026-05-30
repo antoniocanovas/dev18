@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shoes_campaign_models_action" model="ir.actions.act_window">
+        <field name="name">Models</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="shoes_campaign_task_kanban_models"/>
+        <field name="domain">[('project_id.is_shoes_campaign', '=', True)]</field>
+        <field name="context">{'search_default_my_tasks': 1}</field>
+        <field name="search_view_id" ref="project.view_task_search_form"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No models found.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="shoes_campaign_models_menu"
+        name="Models"
+        parent="shoes_dealer.shoes_dealer_design_menu"
+        action="shoes_campaign_models_action"
+        sequence="20"
+        groups="project.group_project_user"
+    />
+
+</odoo>

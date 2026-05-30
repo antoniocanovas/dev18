@@ -1,0 +1,102 @@
+.o_sku_numeric_drop_widget {
+    overflow-x: auto;
+}
+
+.o_sku_numeric_table {
+    min-width: 100%;
+}
+
+.o_sku_numeric_th_slot {
+    min-width: 96px;
+}
+
+.o_sku_numeric_thumb {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 3px;
+    border: 1px solid #dee2e6;
+    flex-shrink: 0;
+}
+
+/* ── Slot zone ── */
+.o_sku_slot_zone {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto;
+    border: 2px dashed #adb5bd;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.o_sku_slot_zone:hover {
+    border-color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+.o_sku_slot_zone_over {
+    border-color: #0d6efd !important;
+    border-style: solid !important;
+    background-color: #e7f3ff !important;
+}
+
+.o_sku_slot_zone_filled {
+    border-color: #198754;
+    border-style: solid;
+}
+
+/* Label chip in top-left corner */
+.o_sku_slot_label {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    font-size: 0.6em;
+    line-height: 1.2;
+    color: #6c757d;
+    background: rgba(255,255,255,0.8);
+    border-radius: 2px;
+    padding: 0 2px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Image fills the zone */
+.o_sku_slot_img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Edit overlay: appears on hover over a filled zone */
+.o_sku_slot_overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    z-index: 2;
+}
+
+.o_sku_slot_zone_filled:hover .o_sku_slot_overlay {
+    background: rgba(0,0,0,0.35);
+}
+
+.o_sku_slot_overlay .fa {
+    color: transparent;
+    font-size: 1.4em;
+    transition: color 0.15s;
+}
+
+.o_sku_slot_zone_filled:hover .o_sku_slot_overlay .fa {
+    color: white;
+}

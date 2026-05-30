@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="action_container_print_packing_list" model="ir.actions.server">
+            <field name="name">Packing List</field>
+            <field name="model_id" ref="purchase_container.model_purchase_container"/>
+            <field name="binding_model_id" ref="purchase_container.model_purchase_container"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">action = env.ref("shoes_packinglist.action_report_packing_list").report_action(records)</field>
+            <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+        </record>
+
+        <record id="action_container_create_invoice" model="ir.actions.server">
+            <field name="name">Invoice</field>
+            <field name="model_id" ref="purchase_container.model_purchase_container"/>
+            <field name="binding_model_id" ref="purchase_container.model_purchase_container"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">action = records.action_create_invoice()</field>
+            <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+        </record>
+
+    </data>
+</odoo>

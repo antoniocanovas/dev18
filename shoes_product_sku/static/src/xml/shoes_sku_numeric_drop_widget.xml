@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+<!-- ─── Single slot drop zone ──────────────────────────────────────────────── -->
+<t t-name="shoes_product_sku.ShoesSkuSlotZone">
+    <div class="o_sku_slot_zone"
+         t-att-class="{
+             'o_sku_slot_zone_over': state.isDragOver,
+             'o_sku_slot_zone_filled': state.hasImage
+         }"
+         t-on-dragover="onDragOver"
+         t-on-dragleave="onDragLeave"
+         t-on-drop="onDrop"
+         t-on-click="openFilePicker">
+
+        <span class="o_sku_slot_label" t-esc="props.label"/>
+
+        <t t-if="state.uploading">
+            <i class="fa fa-spinner fa-spin fa-lg text-primary"/>
+        </t>
+        <t t-elif="state.isDragOver">
+            <i class="fa fa-cloud-upload fa-lg text-primary"/>
+        </t>
+        <t t-elif="state.hasImage and state.imgUrl">
+            <img t-att-src="state.imgUrl" class="o_sku_slot_img" alt=""/>
+            <div class="o_sku_slot_overlay">
+                <i class="fa fa-pencil"/>
+            </div>
+        </t>
+        <t t-else="">
+            <i class="fa fa-plus fa-lg text-muted"/>
+        </t>
+
+        <input type="file" accept="image/*" t-ref="fileInput"
+               class="d-none" t-on-change="onFileInput"/>
+    </div>
+</t>
+
+<!-- ─── Main widget ────────────────────────────────────────────────────────── -->
+<t t-name="shoes_product_sku.ShoesSkuNumericDropWidget">
+    <div class="o_sku_numeric_drop_widget">
+        <table class="table table-sm table-bordered o_sku_numeric_table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Color</th>
+                    <t t-foreach="slotIndices" t-as="idx" t-key="idx">
+                        <th class="text-center o_sku_numeric_th_slot">
+                            <t t-esc="idx === 1 ? 'Main' : 'Photo ' + idx"/>
+                        </th>
+                    </t>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="lines" t-as="line" t-key="line.resId">
+                    <t t-set="info" t-value="getLineInfo(line)"/>
+                    <tr>
+                        <td class="align-middle">
+                            <div class="d-flex align-items-center gap-2">
+                                <img t-att-src="'/web/image/shoes.sku/' + (info.shoes_sku_id ? info.shoes_sku_id[0] : 0) + '/image_128'"
+                                     class="o_sku_numeric_thumb" alt=""/>
+                                <span class="fw-bold small"
+                                      t-esc="info.shoes_sku_id ? info.shoes_sku_id[1] : ''"/>
+                            </div>
+                        </td>
+                        <td class="align-middle text-muted small">
+                            <t t-esc="info.color_value_id ? info.color_value_id[1] : ''"/>
+                        </td>
+                        <t t-foreach="slotIndices" t-as="slotIdx" t-key="slotIdx">
+                            <td class="p-1 text-center align-middle">
+                                <ShoesSkuSlotZone
+                                    lineId="line.resId"
+                                    slotIndex="slotIdx"
+                                    slotData="getSlotData(line.resId, slotIdx)"
+                                    label="slotLabel(slotIdx)"
+                                    onUploaded.bind="onSlotUploaded"
+                                />
+                            </td>
+                        </t>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+    </div>
+</t>
+
+</templates>
