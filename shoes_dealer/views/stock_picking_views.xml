@@ -16,6 +16,42 @@
         <field name="priority">99</field>
     </record>
 
+    <record id="shoes_dealer_stock_picking_internal_user_form" model="ir.ui.view">
+        <field name="name">shoes.dealer.stock.picking.internal.user.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <field name="location_id" position="after">
+                <field name="partner_country_id"/>
+                <field name="salesperson_id" invisible="not sale_id"/>
+            </field>
+            <field name="origin" position="after">
+                <field name="internal_user_id" invisible="not sale_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="shoes_dealer_stock_picking_search" model="ir.ui.view">
+        <field name="name">shoes.dealer.stock.picking.search</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="internal_user_id" string="Backoffice user"/>
+                <field name="partner_country_id" string="Destination country"/>
+                <field name="salesperson_id" string="Salesperson"/>
+            </field>
+            <filter name="picking_type" position="after">
+                <filter name="group_by_internal_user_id" string="Backoffice user"
+                        context="{'group_by': 'internal_user_id'}"/>
+                <filter name="group_by_partner_country_id" string="Destination country"
+                        context="{'group_by': 'partner_country_id'}"/>
+                <filter name="group_by_salesperson_id" string="Salesperson"
+                        context="{'group_by': 'salesperson_id'}"/>
+            </filter>
+        </field>
+    </record>
+
     <record id="shoes_dealer_stock_picking_delivery_date_form" model="ir.ui.view">
         <field name="name">shoes.dealer.stock.picking.delivery.date.form</field>
         <field name="model">stock.picking</field>

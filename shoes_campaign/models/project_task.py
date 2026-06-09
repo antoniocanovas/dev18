@@ -1,6 +1,7 @@
 # Copyright 2023 Serincloud SL - Ingenieriacloud.com
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class ProjectTask(models.Model):
@@ -178,6 +179,12 @@ class ProjectTask(models.Model):
 
     # Creación de producto desde tarea:
     def shoes_create_product(self):
+        if not self.env.company.shoes_pair_uom_id or not self.env.company.shoes_assortment_uom_id:
+            raise UserError(_(
+                "Pide a tu administrador que parametrice las unidades "
+                "para pares sueltos y surtidos en la configuración de "
+                "la compañía."
+            ))
         for record in self:
             # Asignar nombre con códigos de fabricante y producto al final.
             name = record.name

@@ -43,8 +43,20 @@ class ResCompany(models.Model):
     )
     shoes_pair_weight_std = fields.Boolean("Pair standard price", default=True)
     shoes_hs_code_std = fields.Boolean("Standard HS code", default=True)
-    shoes_pair_uom_id = fields.Many2one("uom.uom", string="Pair UOM")
-    shoes_assortment_uom_id = fields.Many2one("uom.uom", string="Assortment UOM")
+    shoes_pair_uom_id = fields.Many2one(
+        "uom.uom",
+        string="Pair UOM",
+        default=lambda self: self.env.ref(
+            "shoes_dealer.shoes_pair_uom", raise_if_not_found=False
+        ),
+    )
+    shoes_assortment_uom_id = fields.Many2one(
+        "uom.uom",
+        string="Assortment UOM",
+        default=lambda self: self.env.ref(
+            "shoes_dealer.shoes_assortment_uom", raise_if_not_found=False
+        ),
+    )
 
     # Shoes tracking:
     shoes_assortment_tracking = fields.Selection(

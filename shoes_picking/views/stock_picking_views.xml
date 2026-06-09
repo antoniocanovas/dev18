@@ -31,7 +31,8 @@
                         groups="sales_team.group_sale_salesman"
                         invisible="picking_type_code != 'outgoing'
                                    or commercial_validation == 'approved'
-                                   or state in ['done', 'cancel']"/>
+                                   or state in ['done', 'cancel']"
+                        help="Autoriza al almacén a validar y despachar este albarán.&#10;&#10;El almacén NO puede confirmar ninguna salida de mercancía mientras el albarán no esté en estado Aprobado.&#10;&#10;Acción reservada a usuarios del equipo comercial (Ventas)."/>
                 <button name="action_commercial_reject"
                         string="Rechazar"
                         type="object"
@@ -39,7 +40,8 @@
                         groups="sales_team.group_sale_salesman"
                         invisible="picking_type_code != 'outgoing'
                                    or commercial_validation == 'rejected'
-                                   or state in ['done', 'cancel']"/>
+                                   or state in ['done', 'cancel']"
+                        help="Bloquea la salida: el almacén no podrá validar este albarán mientras permanezca Rechazado.&#10;&#10;Úsalo cuando existan incidencias en la venta (riesgo de crédito, cambios en el pedido, impago, etc.).&#10;&#10;Para desbloquear, un usuario del equipo comercial deberá Aprobar o devolver a Pendiente.&#10;&#10;Acción reservada a usuarios del equipo comercial (Ventas)."/>
                 <button name="action_commercial_set_pending"
                         string="Pendiente"
                         type="object"
@@ -47,7 +49,8 @@
                         groups="sales_team.group_sale_salesman"
                         invisible="picking_type_code != 'outgoing'
                                    or commercial_validation == 'pending'
-                                   or state in ['done', 'cancel']"/>
+                                   or state in ['done', 'cancel']"
+                        help="Devuelve el albarán a estado Pendiente de aprobación.&#10;&#10;El almacén no podrá validar la salida hasta que un usuario del equipo comercial lo apruebe de nuevo.&#10;&#10;Úsalo para corregir una aprobación o un rechazo realizados por error.&#10;&#10;Acción reservada a usuarios del equipo comercial (Ventas)."/>
             </xpath>
 
             <!-- Badge sin etiqueta en la esquina superior derecha del sheet -->

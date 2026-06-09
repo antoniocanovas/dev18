@@ -63,7 +63,7 @@ campaña pero aparecen por estar vinculados a ella a través de `sale_campaign_i
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
-| `shoes_sufix_model_code_prefix` | Char (max 2) | Prefijo que se antepone al nombre del proyecto al calcular `shoes_default_code_sufix` |
+| `shoes_sufix_model_code_prefix` | Char (max 2) | Prefijo que se antepone al nombre del proyecto al calcular `shoes_default_code_sufix`. Visible en **Información General → Attributes** |
 
 ---
 
@@ -96,6 +96,33 @@ horma, exwork, arancel, peso, URL, modelo+material, prefijo y sufijo de referenc
 - Formulario principal: añade `is_shoes_campaign`, `product_brand_id`, `task_code_prefix` y
   botón para actualizar márgenes de venta de todos los productos de la campaña.
 - Formulario simplificado (creación rápida): mismos campos en grupo adicional.
+
+---
+
+### Vista búsqueda de `project.task`
+
+Añade sobre la vista estándar:
+- **Campo de búsqueda por marca** (`product_brand_id`): permite filtrar bocetos mientras se escribe el nombre de la marca.
+- **Agrupación por marca**: opción en el desplegable de agrupaciones.
+
+---
+
+## Menú Models
+
+Accesible desde **Shoes Dealer → Design → Models**.
+
+Muestra todas las tareas cuyo proyecto tiene `is_shoes_campaign = True`, con:
+
+- **Vista principal**: kanban (con imagen, ribbon y sin formulario rápido — al pulsar *New* abre el formulario completo).
+- **Vistas adicionales**: lista y formulario.
+- **Filtro por defecto**: *My Tasks*.
+- **Búsqueda**: hereda la vista de búsqueda extendida de `shoes_campaign` (incluye filtro y agrupación por marca).
+
+---
+
+## Creación de producto desde boceto (`shoes_create_product`)
+
+Los campos intrastat (`intrastat_code_id`, `intrastat_origin_country_id`, `hs_code`, `country_of_origin`) se escriben en una llamada `write()` separada tras el `create()`, una vez que la variante por defecto del producto ya existe. Esto evita el error de constraint del módulo `intrastat` que requiere al menos una variante antes de guardar estos campos.
 
 ---
 

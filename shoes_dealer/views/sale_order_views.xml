@@ -15,12 +15,44 @@
         <field name="type">list</field>
     </record>
 
+    <record id="shoes_dealer_sale_order_inh_tree_internal_user" model="ir.ui.view">
+        <field name="name">shoes.dealer.sale.order.tree.internal.user</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="internal_user_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="shoes_dealer_sale_order_search" model="ir.ui.view">
+        <field name="name">shoes.dealer.sale.order.search</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="internal_user_id" string="Backoffice user"/>
+                <field name="partner_country_id" string="Destination country"/>
+            </field>
+            <filter name="salesperson" position="after">
+                <filter name="group_by_internal_user_id" string="Backoffice user"
+                        context="{'group_by': 'internal_user_id'}"/>
+                <filter name="group_by_partner_country_id" string="Destination country"
+                        context="{'group_by': 'partner_country_id'}"/>
+            </filter>
+        </field>
+    </record>
+
     <record id="shoes_dealer_sale_order_inh_form" model="ir.ui.view">
         <field name="name">shoes.dealer.saleorder.inh.form</field>
         <field name="model">sale.order</field>
         <field name="type">form</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+            <field name="team_id" position="after">
+                <field name="internal_user_id"/>
+            </field>
             <xpath expr="//header" position="inside">
                 <button name="show_hide_top_sales"
                         icon="fa-delicious" class="oe_stat_button"

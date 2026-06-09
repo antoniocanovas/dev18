@@ -12,6 +12,32 @@ class StockPicking(models.Model):
         copy=True,
     )
 
+    internal_user_id = fields.Many2one(
+        "res.users",
+        related="sale_id.internal_user_id",
+        string="Backoffice user",
+        store=True,
+        readonly=False,
+        tracking=True,
+        help="Gestor interno de pedidos y envíos",
+    )
+
+    partner_country_id = fields.Many2one(
+        "res.country",
+        related="partner_id.country_id",
+        string="Destination country",
+        store=True,
+        tracking=True,
+    )
+
+    salesperson_id = fields.Many2one(
+        "res.users",
+        related="sale_id.user_id",
+        string="Salesperson",
+        store=True,
+        tracking=True,
+    )
+
     # Comercialmente en cada Albaran quieren saber cuántos pares se han vendido:
     def _get_shoes_pair_count(self):
         for record in self:

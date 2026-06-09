@@ -113,6 +113,14 @@ purchase_lot_preassignment/
     └── ir.model.access.csv
 ```
 
+## Configuración de empresa
+
+Los parámetros del módulo se encuentran en **Ajustes → Compañía**, pestaña **General Information**, grupo **Lot Preassignment**:
+
+| Campo | Descripción |
+|-------|-------------|
+| `purchase_all_sale` | Si está activo, los lotes generados coinciden con la cantidad vendida; si no, con la cantidad comprada |
+
 ## Dependencias
 
 ```python

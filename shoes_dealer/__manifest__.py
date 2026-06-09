@@ -17,6 +17,7 @@
         "account",
         "purchase",
         "stock",
+        "sale_stock",
         "mrp",
         "sale_mrp",
         "project",
@@ -56,6 +57,7 @@
         "views/product_material_views.xml",
         "views/mrp_bom_views.xml",
         "views/stock_lot_views.xml",
+        "views/stock_picking_views.xml",
         "views/res_users_views.xml",
         "views/purchase_order_views.xml",
         "views/account_move_line_views.xml",
@@ -73,4 +75,5 @@
         ],
     },
     "installable": True,
+    "post_init_hook": "post_init_hook",
 }

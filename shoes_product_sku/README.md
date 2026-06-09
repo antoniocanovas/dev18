@@ -136,15 +136,32 @@ No se puede eliminar un SKU si tiene variantes de producto asociadas.
 
 ## Configuración de empresa
 
-En **Ajustes → Compañía**, pestaña **Shoes SKU** (grupo *Sequence*):
+En **Ajustes → Compañía**, pestaña **Shoes dealer**, grupo **SKU Code → Codes**:
 
 | Campo | Descripción |
 |-------|-------------|
-| `shoes_sku_sequence_id` | Secuencia usada para generar el nombre de los registros `shoes.sku`. Por defecto: secuencia "Shoes SKU" (longitud 5, sin prefijo ni sufijo, sin huecos). |
-| `shoes_sku_update` | Activa la actualización automática del `default_code` al crear variantes |
-| `shoes_sku_item_ids` | Orden de los 5 componentes del `default_code` (deben estar todos presentes) |
-| `shoes_code_<componente>` | Selección entre `code`, `name` o `none` para cada componente |
-| `shoes_code_<componente>_prefix` | Prefijo de 2 caracteres para cada componente |
+| `shoes_sku_sequence_id` | Secuencia usada para generar el nombre de los registros `shoes.sku`. |
+| `shoes_sku_update` | Activa la actualización automática del `default_code` al crear variantes. |
+| `shoes_sku_item_ids` | Orden de los 5 componentes del `default_code` (deben estar todos presentes). |
+| `shoes_code_<componente>` | Selección entre `code`, `name` o `none` para cada componente. |
+| `shoes_code_<componente>_prefix` | Prefijo de 2 caracteres para cada componente. |
+| `shoes_sku_photo_count` | Número de fotos por SKU (mínimo 1). La primera foto usa el campo `image` existente. Para N > 1 se crean dinámicamente los campos `x_image2`…`x_imageN` (Many2one a `product.image`) sobre el modelo `shoes.sku`. |
+
+### Gestión dinámica de campos de foto
+
+Al guardar `shoes_sku_photo_count`:
+
+- **Aumentar**: crea los campos `x_image{N}` que falten mediante `ir.model.fields` y actualiza la vista heredada dinámica del formulario de SKU.
+- **Reducir**: antes de guardar se bloquea con un `RedirectWarning` que abre un **wizard de confirmación** (botones *Confirm deletion* / *Cancel*). Al confirmar, la vista dinámica se actualiza primero (eliminando las referencias a los campos que van a desaparecer) y después se borran los campos.
+- **Vista dinámica**: `shoes.sku.form.extra.images.dynamic` — vista heredada creada/actualizada programáticamente que inyecta los campos `x_image2`…`x_imageN` antes de `product_image_ids` en la página *Images* del formulario de SKU.
+
+### Nombres automáticos de imágenes
+
+Cuando se asigna un valor a `x_image{N}` sobre un SKU, el sistema comprueba el registro `product.image` vinculado y, si no tiene nombre ni `shoes_sku_id`, los rellena automáticamente:
+- `name` = `{sku.name}_{N}`
+- `shoes_sku_id` = `sku.id`
+
+Esto garantiza que la imagen aparezca también en `product_image_ids`.
 
 ---
 

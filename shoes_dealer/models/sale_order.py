@@ -19,6 +19,29 @@ class SaleOrder(models.Model):
         "project.project", string="Campaign", store=True, copy=True, tracking=10
     )
 
+    internal_user_id = fields.Many2one(
+        "res.users",
+        string="Backoffice user",
+        compute="_compute_internal_user_id",
+        store=True,
+        readonly=False,
+        tracking=True,
+        help="Gestor interno de pedidos y envíos",
+    )
+
+    partner_country_id = fields.Many2one(
+        "res.country",
+        related="partner_shipping_id.country_id",
+        string="Destination country",
+        store=True,
+        tracking=True,
+    )
+
+    @api.depends("team_id", "team_id.user_id")
+    def _compute_internal_user_id(self):
+        for order in self:
+            order.internal_user_id = order.team_id.user_id if order.team_id else False
+
     date_cancellation_limit = fields.Date("Cancellation limit")
 
     shoes_delivery_date_from = fields.Datetime(

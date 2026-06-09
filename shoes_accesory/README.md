@@ -10,6 +10,8 @@ Este módulo extiende la funcionalidad de `shoes_dealer` para proporcionar una v
 
 Este es el modelo central del módulo. Cada registro representa un tipo de accesorio específico vinculado a un modelo de zapato (a través de una Tarea de Proyecto).
 
+El campo `qty` (cantidad de accesorio por par) es de tipo **Float** con precisión `Product Unit of Measure`, lo que permite fracciones adaptadas a la UoM configurada en la empresa.
+
 ### Campos Calculados
 
 La potencia de este módulo reside en sus campos calculados, que ofrecen una visión completa del estado de cada accesorio:
@@ -24,7 +26,7 @@ La potencia de este módulo reside en sus campos calculados, que ofrecen una vis
 
 #### `accesory_campaign_sold_qty` (Cantidad de Accesorios Vendidos)
 - **¿Qué calcula?**: La cantidad total de este accesorio que se necesita para los pares ya vendidos.
-- **¿Cómo lo calcula?**: `pairs_campaign_sold * qty` (donde `qty` es la cantidad de este accesorio por par).
+- **¿Cómo lo calcula?**: `pairs_campaign_sold * qty` (donde `qty` es la cantidad de este accesorio por par, campo `Float` con precisión `Product Unit of Measure`).
 
 #### `accesory_campaign_pending_qty` (Cantidad de Accesorios Pendientes)
 - **¿Qué calcula?**: La cantidad total de este accesorio necesaria para fabricar los pares que están pendientes de entregar a los clientes.

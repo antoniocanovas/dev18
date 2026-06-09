@@ -26,17 +26,7 @@ Campos añadidos sobre el modelo base de `purchase_container`:
 
 **Campo calculado `name`** (override de `purchase_container`):
 
-El nombre del contenedor se calcula como:
-
-```
-code (ref_agente_o_nombre, duty_currency)
-```
-
-- Si el `shipping_agent_id` tiene `ref` se usa ese valor; si no, el `name`.
-- Si hay `duty_currency_id`, se añade el nombre de la moneda.
-- Si no hay ni agente ni moneda arancelaria, el nombre es simplemente el `code`.
-
-Ejemplos: `CONT-001 (PROV-REF, EUR)`, `CONT-001 (Proveedor SL)`, `CONT-001`.
+El nombre del contenedor es directamente el valor del campo `code`.
 
 ---
 
