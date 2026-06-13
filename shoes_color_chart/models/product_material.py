@@ -22,8 +22,19 @@ class ProductMaterial(models.Model):
         compute="_get_material_manufacturer_code",
     )
     shoes_campaign_ids = fields.Many2many(
-        "project.project", string="Campaigns", domain="[('is_shoes_campaign','=',True)]"
+        "project.project",
+        string="Campaigns",
+        domain="['|', ('is_shoes_campaign','=',True), ('id','=',company_project_auxiliar_material_id)]",
     )
+    company_project_auxiliar_material_id = fields.Many2one(
+        "project.project",
+        compute="_compute_company_project_auxiliar_material_id",
+    )
+
+    def _compute_company_project_auxiliar_material_id(self):
+        project = self.env.company.project_auxiliar_material_id
+        for rec in self:
+            rec.company_project_auxiliar_material_id = project
 
     @api.depends("name", "code", "manufacturer_code")
     def _compute_display_name(self):

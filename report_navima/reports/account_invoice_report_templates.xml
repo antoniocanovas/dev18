@@ -113,12 +113,13 @@
             </td>
         </xpath>
 
-        <!-- Sustituir cantidad por entero si la cantidad no es float -->
-        <xpath expr="//td[@name='td_quantity']/span[@t-field='line.quantity']" position="inside" optional="skip">
-            <t t-if="not line.product_id.product_tmpl_id.is_assortment">
-                <span t-out="int(line.quantity) if line.quantity == int(line.quantity) else line.quantity"
-                      class="text-nowrap"/>
-            </t>
+        <!-- Mostrar cantidad como entero cuando es número entero y no es surtido.
+             El módulo OCA transformó el span a t-esc="lines_group['quantity']",
+             así que se targetea por ese atributo en lugar de por t-field. -->
+        <xpath expr="//td[@name='td_quantity']/span[@t-esc=&quot;lines_group['quantity']&quot;]" position="attributes">
+            <attribute name="t-out">int(lines_group['quantity']) if not line.product_id.product_tmpl_id.is_assortment and lines_group['quantity'] == int(lines_group['quantity']) else lines_group['quantity']</attribute>
+            <attribute name="t-esc"/>
+            <attribute name="t-options"/>
         </xpath>
 
         <!-- Añadir columna "Tallas" después de Quantity en el tbody -->

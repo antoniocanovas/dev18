@@ -8,5 +8,5 @@ class ResCompany(models.Model):
 
     project_auxiliar_material_id = fields.Many2one(
         'project.project', string='Auxiliar material', store=True,
-        help='Project (simulated campaign) to set in general materials not used in campaigns; only for marketing proposal.'
+        help='Project (simulated campaign) to set in general materials not used in campaigns.'
     )
