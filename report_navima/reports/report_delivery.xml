@@ -1,11 +1,65 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
-    <!-- Add Sizes column header in the delivery document table -->
+    <!-- Add Sizes column header and weight/volume totals in the delivery document table -->
     <template id="report_delivery_document_inh_navima" inherit_id="stock.report_delivery_document" priority="999">
+        <!-- Shipping Mark en cabecera del albarán de salida -->
+        <xpath expr="//div[@id='informations']" position="before">
+            <div t-if="(o.partner_id.commercial_partner_id.sale_type or o.partner_id.commercial_partner_id.shoes_shippingmark_ids) and o.shippingmark_id"
+                 class="row mb-2" name="shippingmark_section">
+                <div class="col-12">
+                    <span style="font-weight: 600; margin-right: 6px;">Shipping Mark:</span>
+                    <span class="text-white"
+                          style="background-color: #41a9a2;
+                                 border: 1px solid #41a9a2;
+                                 padding: 4px 12px;
+                                 margin: 2px 4px 2px 0;
+                                 border-radius: 15px;
+                                 font-size: 11px;
+                                 font-weight: 500;
+                                 display: inline-block;
+                                 line-height: 1.2;">
+                        <t t-out="o.shippingmark_id.name"/>
+                    </span>
+                </div>
+            </div>
+        </xpath>
         <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[@name='th_sml_product']" position="after">
             <th name="th_sizes" class="text-center">
                 <strong>Sizes</strong>
             </th>
+        </xpath>
+        <xpath expr="//div[@name='div_origin']" position="replace">
+            <div t-if="o.origin" class="col col-2 mw-100 mb-2" name="div_origin">
+                <strong>Pedido</strong>
+                <div t-field="o.origin" class="m-0"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[@name='div_sched_date']" position="replace">
+            <div t-if="o.state" class="col col-2 mw-100 mb-2" name="div_sched_date">
+                <strong>Fecha de envío</strong>
+                <div t-if="o.state == 'done'" t-field="o.date_done" class="m-0" t-options='{"widget": "date"}'/>
+                <div t-else="" t-field="o.scheduled_date" class="m-0" t-options='{"widget": "date"}'/>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="report_delivery_volume_inh_navima" inherit_id="stock_delivery.report_delivery_document2" priority="999">
+        <xpath expr="//div[contains(@t-if, 'carrier_id')]" position="attributes">
+            <attribute name="class">col col-2 mw-100 mb-2</attribute>
+        </xpath>
+        <xpath expr="//div[@t-if='o.shipping_weight']" position="attributes">
+            <attribute name="class">col col-2 mw-100 mb-2</attribute>
+        </xpath>
+        <xpath expr="//div[@t-if='o.shipping_weight']" position="after">
+            <div t-if="o.shipping_volume" class="col col-2 mw-100 mb-2">
+                <strong>Volumen</strong>
+                <div>
+                    <span t-field="o.shipping_volume"/> m³
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[@t-if='o.carrier_tracking_ref']" position="attributes">
+            <attribute name="class">col col-2 mw-100 mb-2</attribute>
         </xpath>
     </template>
 
@@ -31,7 +85,7 @@
                             <tr class="text-center">
                                 <!-- Row with quantities -->
                                 <t t-if="len(lot_assortment) >= 2">
-                                    <t t-set="cantidades" t-value="lot_assortment[1].split(',')"/>
+                                    <t t-set="cantidades" t-value="[c for c in lot_assortment[1].split(',') if c.strip()]"/>
                                     <t t-foreach="cantidades" t-as="cantidad">
                                         <td t-esc="cantidad.strip()" class="border text-center" style="padding: 1px 3px;"/>
                                     </t>
@@ -90,7 +144,7 @@
                                 <tbody>
                                     <tr class="text-center">
                                         <t t-if="len(lot_assortment) >= 2">
-                                            <t t-set="cantidades" t-value="lot_assortment[1].split(',')"/>
+                                            <t t-set="cantidades" t-value="[c for c in lot_assortment[1].split(',') if c.strip()]"/>
                                             <!-- Multiply quantities by the total quantity -->
                                             <t t-set="multiplier" t-value="int(pattern_data['quantity'])"/>
                                             <t t-foreach="cantidades" t-as="cantidad">

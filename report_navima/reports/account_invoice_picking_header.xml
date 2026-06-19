@@ -7,14 +7,8 @@
         <!-- Add delivery address (name + city/province) after picking name -->
         <xpath expr="//span[@t-field='picking.name']" position="after">
             <t t-if="picking and picking.partner_id">
-                <span t-translation="off"> — </span>
-                <span t-out="picking.partner_id.name"/>
                 <t t-set="_loc" t-value="[p for p in [picking.partner_id.city, picking.partner_id.state_id.name] if p]"/>
-                <t t-if="_loc">
-                    <span t-translation="off"> (</span>
-                    <span t-out="' / '.join(_loc)"/>
-                    <span t-translation="off">)</span>
-                </t>
+                <span t-translation="off" t-out="' — ' + picking.partner_id.name + (' (' + ' / '.join(_loc) + ')' if _loc else '')"/>
             </t>
         </xpath>
     </template>

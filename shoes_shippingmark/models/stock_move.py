@@ -1,10 +1,23 @@
 # Copyright 2024 Punt Sistemes SL
 
-from odoo import models
+from odoo import api, fields, models
 
 
 class StockMove(models.Model):
     _inherit = "stock.move"
+
+    shippingmark_id = fields.Many2one(
+        comodel_name="sale.order.type",
+        string="Shipping Mark",
+        compute="_compute_shippingmark_id",
+        store=True,
+        readonly=True,
+    )
+
+    @api.depends("sale_line_id.order_id.type_id")
+    def _compute_shippingmark_id(self):
+        for move in self:
+            move.shippingmark_id = move.sale_line_id.order_id.type_id
 
     def _action_assign(self):
         # Fast path: already running inside a SM-filtered context, skip re-processing

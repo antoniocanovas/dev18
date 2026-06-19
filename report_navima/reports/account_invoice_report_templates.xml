@@ -2,6 +2,28 @@
 <odoo>
     <!-- Herencia para añadir etiquetas imprimibles en informes de factura -->
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <!-- Shipping Mark en cabecera de la factura de venta -->
+        <xpath expr="//div[@id='informations']" position="before">
+            <div t-if="(o.partner_id.commercial_partner_id.sale_type or o.partner_id.commercial_partner_id.shoes_shippingmark_ids) and o.sale_type_id and o.move_type in ['out_invoice', 'out_refund']"
+                 class="row mb-2" name="shippingmark_section">
+                <div class="col-12">
+                    <span style="font-weight: 600; margin-right: 6px;">Shipping Mark:</span>
+                    <span class="text-white"
+                          style="background-color: #41a9a2;
+                                 border: 1px solid #41a9a2;
+                                 padding: 4px 12px;
+                                 margin: 2px 4px 2px 0;
+                                 border-radius: 15px;
+                                 font-size: 11px;
+                                 font-weight: 500;
+                                 display: inline-block;
+                                 line-height: 1.2;">
+                        <t t-out="o.sale_type_id.name"/>
+                    </span>
+                </div>
+            </div>
+        </xpath>
+
         <!-- Añadir etiquetas imprimibles antes del div informations -->
         <xpath expr="//div[@id='informations']" position="before">
             <!-- Mostrar etiquetas imprimibles si existen -->
@@ -282,6 +304,16 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Totales de peso bruto y volumen -->
+            <t t-set="_total_weight" t-value="sum(l.quantity * l.product_id.weight for l in o.invoice_line_ids if l.display_type == 'product')"/>
+            <t t-set="_total_volume" t-value="sum(l.quantity * l.product_id.volume for l in o.invoice_line_ids if l.display_type == 'product')"/>
+            <t t-if="_total_weight or _total_volume">
+                <t t-set="_dp" t-value="env['res.lang']._lang_get(env.context.get('lang') or env.user.lang).decimal_point or '.'"/>
+                <t t-set="_w" t-value="'Peso bruto: ' + ('%.2f' % _total_weight).replace('.', _dp) + ' kg' if _total_weight else ''"/>
+                <t t-set="_v" t-value="'Volumen: ' + ('%.2f' % _total_volume).replace('.', _dp) + ' m³' if _total_volume else ''"/>
+                <p class="text-end mt-2 mb-0 small" t-out="_w + (' | ' if _w and _v else '') + _v"/>
+            </t>
         </xpath>
 
     </template>

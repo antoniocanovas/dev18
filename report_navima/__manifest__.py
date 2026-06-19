@@ -45,6 +45,7 @@
         "views/purchase_order_views.xml",
         #"views/report_invoice_view.xml",
         "reports/sale_order.xml",
+        "reports/portal_templates.xml",
     "reports/account_invoice_report_templates.xml",
         "reports/purchase_order.xml",
         "reports/report_delivery.xml",

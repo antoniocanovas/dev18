@@ -71,6 +71,29 @@
     </record>
 
     <!-- ══════════════════════════════════════════════════════════════════════
+         FORM VIEW — peso bruto y volumen en líneas de movimiento
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_picking_form_weight_volume" model="ir.ui.view">
+        <field name="name">stock.picking.form.weight.volume</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_uom'][1]" position="after">
+                <field name="move_gross_weight"
+                       optional="hide"
+                       string="Peso bruto (kg)"
+                       sum="Peso bruto total"
+                       readonly="1"/>
+                <field name="move_volume"
+                       optional="hide"
+                       string="Volumen (m³)"
+                       sum="Volumen total"
+                       readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
          LIST VIEW — columna de validación comercial con badge de color
          ══════════════════════════════════════════════════════════════════════ -->
     <record id="view_picking_tree_commercial_validation" model="ir.ui.view">

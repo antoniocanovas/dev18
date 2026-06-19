@@ -28,7 +28,7 @@ class ShoesColorChartItem(models.Model):
             if exist.ids:
                 raise UserError('This combination already exists: ' + record.name + " - " + record.color_value_id.name)
 
-    @api.depends('shoes_campaign_id','material_id','manufacturer_id','color_value_id')
+    @api.depends('shoes_campaign_id.name','material_id.code','manufacturer_id.ref','color_value_id.name')
     def _get_name(self):
         for record in self:
             name = ""

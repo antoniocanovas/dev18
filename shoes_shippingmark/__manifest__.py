@@ -24,6 +24,8 @@
     "version": "18.0.1.0.0",
     "depends": [
         "sale_order_type",
+        "sale_stock",
+        "account",
         "stock",
         "purchase",
     ],
@@ -40,6 +42,8 @@
         "views/sale_order_views.xml",
         "views/stock_lot_views.xml",
         "views/purchase_order_views.xml",
+        "views/stock_picking_views.xml",
+        "views/account_move_views.xml",
     ],
     "demo": [],
     "installable": True,

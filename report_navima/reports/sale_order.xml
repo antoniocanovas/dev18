@@ -216,6 +216,28 @@
             </div>
         </xpath>
 
+        <!-- Shipping Mark en cabecera del pedido de venta -->
+        <xpath expr="//div[@id='informations']" position="before">
+            <div t-if="(doc.partner_id.commercial_partner_id.sale_type or doc.partner_id.commercial_partner_id.shoes_shippingmark_ids) and doc.type_id"
+                 class="row mb-2" name="shippingmark_section">
+                <div class="col-12">
+                    <span style="font-weight: 600; margin-right: 6px;">Shipping Mark:</span>
+                    <span class="text-white"
+                          style="background-color: #41a9a2;
+                                 border: 1px solid #41a9a2;
+                                 padding: 4px 12px;
+                                 margin: 2px 4px 2px 0;
+                                 border-radius: 15px;
+                                 font-size: 11px;
+                                 font-weight: 500;
+                                 display: inline-block;
+                                 line-height: 1.2;">
+                        <t t-out="doc.type_id.name"/>
+                    </span>
+                </div>
+            </div>
+        </xpath>
+
         <xpath expr="//div[@id='informations']" position="before">
             <!-- Mostrar etiquetas imprimibles si existen -->
             <div t-if="doc.partner_invoice_id.printed_label_ids" class="row mb-3" name="printed_labels_section">
@@ -252,19 +274,19 @@
         </xpath>
     </template>
 
-    <!-- Cambiar la forma de mostrar la imagen del producto en sale_product_image -->
+    <!-- Mover la imagen del producto de sale_product_image a antes de la descripción -->
     <template id="change_product_image_display" inherit_id="sale_product_image.report_saleorder_inherit" priority="1000">
-        <!-- Ocultar el th original de la imagen que añade sale_product_image (está después de th_description) -->
-        <xpath expr="//th[@name='th_description']/following-sibling::th[1]" position="attributes">
-            <attribute name="class">d-none</attribute>
+        <!-- Ocultar el th original (está dentro de un <t t-if> hermano de th_description) -->
+        <xpath expr="//th[@name='th_description']/following-sibling::t[1]" position="attributes">
+            <attribute name="t-if">False</attribute>
         </xpath>
 
-        <!-- Ocultar el td original de la imagen -->
-        <xpath expr="//t[@t-foreach='lines_to_report']//td[@name='td_name']/following-sibling::td[1]" position="attributes">
-            <attribute name="class">d-none</attribute>
+        <!-- Ocultar el td original (está dentro de un <t t-if> hermano de td_name) -->
+        <xpath expr="//t[@t-foreach='lines_to_report']//td[@name='td_name']/following-sibling::t[1]" position="attributes">
+            <attribute name="t-if">False</attribute>
         </xpath>
 
-        <!-- Añadir columna de imagen ANTES de td_name en thead -->
+        <!-- Añadir columna de imagen ANTES de la descripción en thead -->
         <xpath expr="//th[@name='th_description']" position="before">
             <t t-if="request.env['ir.config_parameter'].sudo().get_param('sale_product_image.is_show_product_image_in_sale_report')">
                 <th name="th_image">
@@ -273,11 +295,11 @@
             </t>
         </xpath>
 
-        <!-- Añadir columna de imagen ANTES de td_name en tbody -->
+        <!-- Añadir columna de imagen ANTES de la descripción en tbody -->
         <xpath expr="//td[@name='td_name']" position="before">
             <t t-if="request.env['ir.config_parameter'].sudo().get_param('sale_product_image.is_show_product_image_in_sale_report')">
                 <td name="td_image" style="height:100px !important;width:100px !important;">
-                    <img t-if="line.order_line_image" t-att-src="image_data_uri(line.order_line_image)" style="max-width: 100px; max-height: 100px;"/>
+                    <img t-if="line.order_line_image" t-att-src="image_data_uri(line.order_line_image)" class="img-fluid"/>
                 </td>
             </t>
         </xpath>
